@@ -1,0 +1,15 @@
+# Swift Package Manager
+.build/
+*.xcodeproj
+*.xcworkspace
+.swiftpm/
+
+# macOS
+.DS_Store
+*.swp
+
+# buddy folder - do not commit
+buddy/
+
+# docs (optional - commit specs if desired)
+# docs/
