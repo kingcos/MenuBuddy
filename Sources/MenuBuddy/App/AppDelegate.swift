@@ -1,11 +1,13 @@
 import AppKit
 import SwiftUI
+import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var store: CompanionStore!
     private var eventMonitor: Any?
+    private var storeObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         store = CompanionStore.shared
@@ -13,6 +15,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         setupPopover()
         setupEventMonitor()
+
+        // Keep status bar button in sync when companion name changes
+        storeObserver = store.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async { self?.updateStatusButton() }
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -26,39 +33,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        if let button = statusItem.button {
-            updateStatusButton()
-            button.action = #selector(statusButtonClicked(_:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.target = self
-        }
-
-        // Update the face whenever store changes
-        // (simple approach: update on each popover open)
+        guard let button = statusItem.button else { return }
+        updateStatusButton()
+        button.action = #selector(statusButtonClicked(_:))
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.target = self
     }
 
     private func updateStatusButton() {
         guard let button = statusItem.button else { return }
         let face = renderFace(bones: store.companion.bones)
-        button.title = face
+        let shinyPrefix = store.companion.shiny ? "✨" : ""
+        button.title = "\(shinyPrefix)\(face)"
         button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
-        button.toolTip = store.companion.name
+        button.toolTip = "\(store.companion.name) the \(store.companion.species.rawValue)"
     }
 
     // MARK: - Popover
 
     private func setupPopover() {
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 280, height: 320)
         popover.behavior = .transient
         popover.animates = true
 
         let contentView = PopoverView(store: store)
-        popover.contentViewController = NSHostingController(rootView: contentView)
+        let hostingController = NSHostingController(rootView: contentView)
+        hostingController.sizingOptions = .preferredContentSize
+        popover.contentViewController = hostingController
     }
 
     @objc private func statusButtonClicked(_ sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent!
+        guard let event = NSApp.currentEvent else { return }
 
         if event.type == .rightMouseUp {
             showContextMenu()
@@ -72,7 +77,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(nil)
         } else {
             guard let button = statusItem.button else { return }
-            updateStatusButton()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
         }
@@ -81,27 +85,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Context Menu
 
     private func showContextMenu() {
+        // Close popover first if open
+        if popover.isShown { popover.performClose(nil) }
+
         let menu = NSMenu()
 
-        // Pet action
+        let name = store.companion.name
+        let species = store.companion.species.rawValue.capitalized
+
+        // Companion identity header
+        let headerItem = NSMenuItem(
+            title: "\(store.companion.rarity.stars) \(name) the \(species)",
+            action: nil,
+            keyEquivalent: ""
+        )
+        headerItem.isEnabled = false
+        menu.addItem(headerItem)
+
+        menu.addItem(.separator())
+
+        // Pet
         let petItem = NSMenuItem(
-            title: "Pet \(store.companion.name)",
-            action: #selector(petCompanion),
-            keyEquivalent: "p"
+            title: "Pet \(name)",
+            action: #selector(openAndPet),
+            keyEquivalent: ""
         )
         petItem.target = self
         menu.addItem(petItem)
 
-        menu.addItem(.separator())
-
-        // Companion info
-        let infoItem = NSMenuItem(
-            title: "\(store.companion.rarity.stars) \(store.companion.species.rawValue.capitalized)",
-            action: nil,
+        // Rename
+        let renameItem = NSMenuItem(
+            title: "Rename \(name)…",
+            action: #selector(renameCompanion),
             keyEquivalent: ""
         )
-        infoItem.isEnabled = false
-        menu.addItem(infoItem)
+        renameItem.target = self
+        menu.addItem(renameItem)
 
         menu.addItem(.separator())
 
@@ -109,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let muteItem = NSMenuItem(
             title: store.muted ? "Unmute Buddy" : "Mute Buddy",
             action: #selector(toggleMute),
-            keyEquivalent: "m"
+            keyEquivalent: ""
         )
         muteItem.target = self
         menu.addItem(muteItem)
@@ -138,9 +157,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.menu = nil
     }
 
-    @objc private func petCompanion() {
-        // Open popover and show pet animation — handled by CompanionView
+    @objc private func openAndPet() {
         togglePopover()
+        // Small delay so the view has time to appear before pet fires
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            NotificationCenter.default.post(name: .triggerPet, object: nil)
+        }
+    }
+
+    @objc private func renameCompanion() {
+        togglePopover()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(name: .openRename, object: nil)
+        }
     }
 
     @objc private func toggleMute() {
@@ -148,20 +177,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func showAbout() {
+        let hatchDate: String = {
+            let date = Date(timeIntervalSince1970: store.companion.soul.hatchedAt)
+            let f = DateFormatter()
+            f.dateStyle = .medium
+            return f.string(from: date)
+        }()
+
         let alert = NSAlert()
         alert.messageText = "MenuBuddy"
-        alert.informativeText = "A tiny companion for your menu bar.\n\nYour buddy: \(store.companion.name) the \(store.companion.species.rawValue)\nRarity: \(store.companion.rarity.rawValue) \(store.companion.rarity.stars)"
+        alert.informativeText = """
+        Your companion: \(store.companion.name)
+        Species: \(store.companion.species.rawValue.capitalized)
+        Rarity: \(store.companion.rarity.rawValue.capitalized) \(store.companion.rarity.stars)\(store.companion.shiny ? " ✨" : "")
+        Hatched: \(hatchDate)
+        """
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
 
-    // MARK: - Event Monitor (close popover on outside click)
+    // MARK: - Event Monitor
 
     private func setupEventMonitor() {
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            if self?.popover.isShown == true {
-                self?.popover.performClose(nil)
-            }
+            guard self?.popover.isShown == true else { return }
+            self?.popover.performClose(nil)
         }
     }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let triggerPet = Notification.Name("MenuBuddy.triggerPet")
+    static let openRename = Notification.Name("MenuBuddy.openRename")
 }

@@ -1,16 +1,14 @@
 import SwiftUI
 
 // MARK: - Animation Constants (matching buddy source)
-private let tickMs: TimeInterval = 0.5          // 500ms tick
-private let bubbleShowTicks = 20                 // ~10s
-private let fadeWindowTicks = 6                  // last ~3s
-private let petBurstMs: TimeInterval = 2.5       // 2.5s hearts
+let tickInterval: TimeInterval = 0.5     // 500ms tick
+let bubbleShowTicks = 20                  // ~10s
+let fadeWindowTicks = 6                   // last ~3s
 
-// Idle sequence: frame index or -1 for blink
-private let idleSequence = [0, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 2, 0, 0, 0]
+// Idle sequence: frame index, -1 = blink on frame 0
+let idleSequence = [0, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 2, 0, 0, 0]
 
-// Heart burst frames (5 ticks)
-private let petHearts = [
+let petHearts = [
     "   ♥    ♥   ",
     "  ♥  ♥   ♥  ",
     " ♥   ♥  ♥   ",
@@ -18,176 +16,101 @@ private let petHearts = [
     "·    ·   ·  ",
 ]
 
-// Random companion quips
 private let companionQuips = [
-    "…",
-    "*yawns*",
-    "*stares at you*",
-    "meep.",
-    "*wiggles*",
-    "did you pet me yet",
-    "i am watching.",
-    "*does a little spin*",
-    "working hard?",
-    "proud of u :)",
-    "*blinks slowly*",
-    "almost done?",
-    "you got this!",
-    "*investigates cursor*",
-    "bzzt.",
+    "…", "*yawns*", "*stares at you*", "meep.", "*wiggles*",
+    "did you pet me yet", "i am watching.", "*does a little spin*",
+    "working hard?", "proud of u :)", "*blinks slowly*",
+    "almost done?", "you got this!", "*investigates cursor*", "bzzt.",
+    "hi.", "sup.", "*stretches*", "still here.", "…ok.",
 ]
 
-// MARK: - Companion View
+private let petResponses = ["♥", "hehe", "*purrs*", "yay!", "uwu", "eee!"]
 
-struct CompanionView: View {
-    @ObservedObject var store: CompanionStore
-    var onPet: (() -> Void)?
+// MARK: - Animation Engine
 
-    // Animation state
-    @State private var tickIndex = 0
-    @State private var timer: Timer?
+/// Owns the 500ms tick timer. Lives as @StateObject so it's created once
+/// per popover show and released on disappear.
+@MainActor
+final class AnimationEngine: ObservableObject {
+    @Published var tickIndex = 0
+    @Published var petHeartFrame: Int? = nil
+    @Published var speechText: String? = nil
+    @Published var speechTick = 0
 
-    // Pet state
-    @State private var petFrameIndex: Int? = nil
-    @State private var petTimer: Timer?
+    private var mainTimer: Timer?
+    private var nextQuipTask: Task<Void, Never>?
+    private var isMuted: Bool = false
 
-    // Speech bubble
-    @State private var speechText: String? = nil
-    @State private var speechTick = 0
-    @State private var speechTimer: Timer?
-
-    var companion: Companion { store.companion }
-
-    // Current sprite frame from idle sequence (-1 means blink on frame 0)
-    private var currentSequenceIndex: Int { tickIndex % idleSequence.count }
-    private var currentFrame: Int {
+    var currentSequenceIndex: Int { tickIndex % idleSequence.count }
+    var currentFrame: Int {
         let f = idleSequence[currentSequenceIndex]
         return f < 0 ? 0 : f
     }
-    private var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
+    var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
+    var speechFading: Bool { (bubbleShowTicks - speechTick) <= fadeWindowTicks }
 
-    var body: some View {
-        VStack(spacing: 8) {
-            // Header: name + rarity
-            HStack {
-                Text(companion.name)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                Spacer()
-                Text(companion.rarity.stars)
-                    .font(.system(size: 12))
-                    .foregroundColor(Color(hex: companion.rarity.color))
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-
-            // Sprite area
-            VStack(spacing: 2) {
-                // Pet hearts (shown above sprite during pet burst)
-                if let petFrame = petFrameIndex, petFrame < petHearts.count {
-                    Text(petHearts[petFrame])
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundColor(.pink)
-                        .transition(.opacity)
-                }
-
-                // ASCII sprite
-                let lines = renderSprite(bones: companion.bones, frame: currentFrame, blink: isBlink)
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
-                        Text(line)
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : .primary)
-                    }
-                }
-                .onTapGesture {
-                    triggerPet()
-                }
-                .help("Tap to pet \(companion.name)!")
-            }
-            .padding(.vertical, 4)
-
-            // Speech bubble
-            if let text = speechText {
-                let ticksLeft = bubbleShowTicks - speechTick
-                let fading = ticksLeft <= fadeWindowTicks
-                SpeechBubbleView(text: text, color: companion.rarity.color, fading: fading)
-                    .padding(.horizontal, 12)
-                    .transition(.opacity)
-            }
-
-            Divider()
-
-            // Stats
-            StatsView(stats: companion.stats)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 12)
+    func start(muted: Bool) {
+        isMuted = muted
+        mainTimer = Timer.scheduledTimer(withTimeInterval: tickInterval, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.tick() }
         }
-        .frame(width: 280)
-        .onAppear {
-            startIdleTimer()
-            scheduleSpeech()
-        }
-        .onDisappear {
-            timer?.invalidate()
-            timer = nil
-        }
+        scheduleNextQuip(delay: Double.random(in: 5...15))
     }
 
-    // MARK: - Timers
+    func stop() {
+        mainTimer?.invalidate()
+        mainTimer = nil
+        nextQuipTask?.cancel()
+        nextQuipTask = nil
+    }
 
-    private func startIdleTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: tickMs, repeats: true) { _ in
-            tickIndex += 1
+    func updateMuted(_ muted: Bool) {
+        isMuted = muted
+        if muted { withAnimation { speechText = nil } }
+    }
 
-            // Advance speech bubble
-            if speechText != nil {
-                speechTick += 1
-                if speechTick >= bubbleShowTicks {
-                    withAnimation { speechText = nil }
-                    speechTick = 0
-                    // Schedule next quip
-                    DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 15...45)) {
-                        showRandomQuip()
-                    }
-                }
+    func triggerPet() {
+        petHeartFrame = 0
+        showSpeech(petResponses.randomElement() ?? "♥")
+    }
+
+    private func tick() {
+        tickIndex += 1
+
+        // Advance pet hearts
+        if let frame = petHeartFrame {
+            let next = frame + 1
+            petHeartFrame = next < petHearts.count ? next : nil
+        }
+
+        // Advance speech bubble
+        if speechText != nil {
+            speechTick += 1
+            if speechTick >= bubbleShowTicks {
+                withAnimation { speechText = nil }
+                speechTick = 0
+                scheduleNextQuip(delay: Double.random(in: 15...45))
             }
         }
     }
 
-    private func scheduleSpeech() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 5...15)) {
-            showRandomQuip()
+    private func scheduleNextQuip(delay: TimeInterval) {
+        nextQuipTask?.cancel()
+        nextQuipTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            self?.showRandomQuip()
         }
     }
 
     private func showRandomQuip() {
-        guard !store.muted else { return }
-        withAnimation {
-            speechText = companionQuips.randomElement()
-            speechTick = 0
-        }
+        guard !isMuted else { return }
+        showSpeech(companionQuips.randomElement() ?? "…")
     }
 
-    private func triggerPet() {
-        onPet?()
-        petTimer?.invalidate()
-        petFrameIndex = 0
-
-        var frame = 0
-        petTimer = Timer.scheduledTimer(withTimeInterval: petBurstMs / Double(petHearts.count), repeats: true) { t in
-            frame += 1
-            if frame < petHearts.count {
-                withAnimation { petFrameIndex = frame }
-            } else {
-                t.invalidate()
-                withAnimation { petFrameIndex = nil }
-            }
-        }
-
-        // Show a pet response quip
+    func showSpeech(_ text: String) {
         withAnimation {
-            speechText = ["♥", "hehe", "*purrs*", "yay!", "uwu"].randomElement()
+            speechText = text
             speechTick = 0
         }
     }
@@ -202,34 +125,33 @@ struct SpeechBubbleView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(text)
-                    .font(.system(size: 11, design: .monospaced))
-                    .italic()
-                    .foregroundColor(fading ? .secondary : .primary)
-                    .opacity(fading ? 0.5 : 1.0)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color(hex: color).opacity(fading ? 0.3 : 0.8), lineWidth: 1)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(hex: color).opacity(0.05))
-                    )
-            )
-
-            // Tail pointing down-left toward sprite
+            Text(text)
+                .font(.system(size: 11, design: .monospaced))
+                .italic()
+                .foregroundColor(fading ? .secondary : .primary)
+                .opacity(fading ? 0.5 : 1.0)
+                .multilineTextAlignment(.leading)
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(hex: color).opacity(fading ? 0.3 : 0.7), lineWidth: 1)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(hex: color).opacity(0.06))
+                        )
+                )
             VStack {
                 Spacer()
                 Text("╲")
                     .font(.system(size: 10, design: .monospaced))
-                    .foregroundColor(Color(hex: color).opacity(fading ? 0.3 : 0.8))
+                    .foregroundColor(Color(hex: color).opacity(fading ? 0.3 : 0.7))
+                    .padding(.bottom, 2)
             }
+            .frame(height: 36)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -239,14 +161,13 @@ struct StatsView: View {
     let stats: [StatName: Int]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 5) {
             ForEach(StatName.allCases, id: \.self) { stat in
                 HStack(spacing: 6) {
                     Text(stat.rawValue)
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                         .frame(width: 72, alignment: .leading)
-
                     let value = stats[stat] ?? 0
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
@@ -259,7 +180,6 @@ struct StatsView: View {
                         }
                     }
                     .frame(height: 4)
-
                     Text("\(stats[stat] ?? 0)")
                         .font(.system(size: 9, design: .monospaced))
                         .foregroundColor(.secondary)
@@ -269,8 +189,8 @@ struct StatsView: View {
         }
     }
 
-    private func statColor(_ value: Int) -> Color {
-        switch value {
+    private func statColor(_ v: Int) -> Color {
+        switch v {
         case 75...: return .green
         case 50...: return .blue
         case 25...: return .orange

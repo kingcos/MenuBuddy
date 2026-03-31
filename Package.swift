@@ -9,10 +9,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "MenuBuddy",
-            path: "Sources/MenuBuddy",
-            resources: [
-                .copy("../../Resources/Info.plist")
-            ]
+            path: "Sources/MenuBuddy"
         )
     ]
 )
