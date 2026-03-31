@@ -113,6 +113,10 @@ struct PopoverView: View {
                         .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : .primary)
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(companion.name) the \(companion.species.rawValue)")
+            .accessibilityHint("Tap to pet")
+            .accessibilityAddTraits(.isButton)
             .onTapGesture { engine.triggerPet() }
             .help("Tap to pet \(companion.name)!")
         }

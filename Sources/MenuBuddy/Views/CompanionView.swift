@@ -218,6 +218,7 @@ struct SpeechBubbleView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel("Companion says: \(text)")
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
@@ -248,12 +249,12 @@ struct StatsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(StatName.allCases, id: \.self) { stat in
+                let value = stats[stat] ?? 0
                 HStack(spacing: 6) {
                     Text(stat.rawValue)
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                         .frame(width: 72, alignment: .leading)
-                    let value = stats[stat] ?? 0
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 2)
@@ -265,11 +266,13 @@ struct StatsView: View {
                         }
                     }
                     .frame(height: 4)
-                    Text("\(stats[stat] ?? 0)")
+                    Text("\(value)")
                         .font(.system(size: 9, design: .monospaced))
                         .foregroundColor(.secondary)
                         .frame(width: 24, alignment: .trailing)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(stat.rawValue): \(value) out of 100")
             }
         }
     }

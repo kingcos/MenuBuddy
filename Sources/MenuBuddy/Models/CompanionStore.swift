@@ -18,11 +18,8 @@ class CompanionStore: ObservableObject {
         }
     }
 
-    /// Total lifetime pet count — persisted across launches.
-    private(set) var petCount: Int {
-        get { UserDefaults.standard.integer(forKey: petCountKey) }
-        set { UserDefaults.standard.set(newValue, forKey: petCountKey) }
-    }
+    /// Total lifetime pet count — @Published so the footer updates live.
+    @Published private(set) var petCount: Int
 
     /// True if this is the very first launch (soul was just created now).
     let isFirstLaunch: Bool
@@ -30,6 +27,7 @@ class CompanionStore: ObservableObject {
     private init() {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
+        petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
 
         let bones = rollCompanion(userId: userId)
         let (soul, isNew) = CompanionStore.loadOrCreateSoul()
@@ -38,10 +36,11 @@ class CompanionStore: ObservableObject {
         companion = Companion(bones: bones, soul: soul)
     }
 
-    /// Returns the pet count after incrementing and whether a milestone was hit.
+    /// Increments pet count, persists it, and returns any milestone message.
     @discardableResult
     func recordPet() -> String? {
         petCount += 1
+        UserDefaults.standard.set(petCount, forKey: petCountKey)
         return milestoneMessage(for: petCount)
     }
 
