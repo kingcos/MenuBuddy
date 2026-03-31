@@ -54,6 +54,37 @@ func quipsFor(species: Species) -> [String] {
     return specific + genericQuips
 }
 
+// MARK: - Shuffled Quip Deck
+
+/// Cycles through all quips in shuffled order before repeating.
+/// Never shows the same quip twice in a row across shuffles.
+private struct QuipDeck {
+    private var deck: [String] = []
+    private var index = 0
+    private let source: () -> [String]
+
+    init(source: @escaping () -> [String]) {
+        self.source = source
+        refill()
+    }
+
+    mutating func next() -> String {
+        if index >= deck.count { refill() }
+        let quip = deck[index]
+        index += 1
+        return quip
+    }
+
+    private mutating func refill() {
+        let current = deck.last // avoid same quip at boundary
+        deck = source().shuffled()
+        if deck.first == current, deck.count > 1 {
+            deck.swapAt(0, 1) // move the repeated quip away from front
+        }
+        index = 0
+    }
+}
+
 // MARK: - Animation Engine
 
 /// Owns the 500ms tick timer. Lives as @StateObject so it's created once
@@ -69,6 +100,10 @@ final class AnimationEngine: ObservableObject {
     private var nextQuipTask: Task<Void, Never>?
     private var isMuted: Bool = false
     private var species: Species = .duck
+    private var quipDeck: QuipDeck = QuipDeck(source: { genericQuips })
+
+    /// Called when a pet is triggered; returns optional milestone message.
+    var onPet: (() -> String?)? = nil
 
     var currentSequenceIndex: Int { tickIndex % idleSequence.count }
     var currentFrame: Int {
@@ -78,14 +113,20 @@ final class AnimationEngine: ObservableObject {
     var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
     var speechFading: Bool { (bubbleShowTicks - speechTick) <= fadeWindowTicks }
 
-    func start(muted: Bool, species: Species) {
+    func start(muted: Bool, species: Species, isFirstLaunch: Bool, companionName: String) {
         isMuted = muted
         self.species = species
+        quipDeck = QuipDeck(source: { quipsFor(species: species) })
         guard mainTimer == nil else { return } // already running
         mainTimer = Timer.scheduledTimer(withTimeInterval: tickInterval, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.tick() }
         }
-        scheduleNextQuip(delay: Double.random(in: 5...15))
+        if isFirstLaunch {
+            // Welcome message on very first launch
+            scheduleWelcome(name: companionName, delay: 2.0)
+        } else {
+            scheduleNextQuip(delay: Double.random(in: 5...15))
+        }
     }
 
     func stop() {
@@ -102,7 +143,9 @@ final class AnimationEngine: ObservableObject {
 
     func triggerPet() {
         petHeartFrame = 0
-        showSpeech(petResponses.randomElement() ?? "♥")
+        // Check for milestone first, otherwise use pet response
+        let message = onPet?() ?? petResponses.randomElement() ?? "♥"
+        showSpeech(message)
     }
 
     private func tick() {
@@ -125,6 +168,17 @@ final class AnimationEngine: ObservableObject {
         }
     }
 
+    private func scheduleWelcome(name: String, delay: TimeInterval) {
+        nextQuipTask?.cancel()
+        nextQuipTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            self?.showSpeech("hi! i'm \(name)!")
+            // Schedule regular quips after welcome
+            self?.scheduleNextQuip(delay: Double.random(in: 12...20))
+        }
+    }
+
     private func scheduleNextQuip(delay: TimeInterval) {
         nextQuipTask?.cancel()
         nextQuipTask = Task { @MainActor [weak self] in
@@ -136,7 +190,7 @@ final class AnimationEngine: ObservableObject {
 
     private func showRandomQuip() {
         guard !isMuted else { return }
-        showSpeech(quipsFor(species: species).randomElement() ?? "…")
+        showSpeech(quipDeck.next())
     }
 
     func showSpeech(_ text: String) {

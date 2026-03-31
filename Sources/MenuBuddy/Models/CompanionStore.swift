@@ -9,6 +9,7 @@ class CompanionStore: ObservableObject {
 
     private let soulKey = "companion.soul"
     private let mutedKey = "companion.muted"
+    private let petCountKey = "companion.petCount"
     private let userId: String
 
     @Published var muted: Bool {
@@ -17,22 +18,50 @@ class CompanionStore: ObservableObject {
         }
     }
 
+    /// Total lifetime pet count — persisted across launches.
+    private(set) var petCount: Int {
+        get { UserDefaults.standard.integer(forKey: petCountKey) }
+        set { UserDefaults.standard.set(newValue, forKey: petCountKey) }
+    }
+
+    /// True if this is the very first launch (soul was just created now).
+    let isFirstLaunch: Bool
+
     private init() {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
 
         let bones = rollCompanion(userId: userId)
-        let soul = CompanionStore.loadOrCreateSoul()
+        let (soul, isNew) = CompanionStore.loadOrCreateSoul()
+        isFirstLaunch = isNew
 
         companion = Companion(bones: bones, soul: soul)
     }
 
-    private static func loadOrCreateSoul() -> CompanionSoul {
+    /// Returns the pet count after incrementing and whether a milestone was hit.
+    @discardableResult
+    func recordPet() -> String? {
+        petCount += 1
+        return milestoneMessage(for: petCount)
+    }
+
+    private func milestoneMessage(for count: Int) -> String? {
+        switch count {
+        case 1:   return "first pet ever! ♥"
+        case 5:   return "5 pets! you care!"
+        case 10:  return "10 pets. we're bonded."
+        case 25:  return "25 pets. best friends."
+        case 50:  return "50 pets. legendary friendship."
+        case 100: return "100 pets. i am eternal."
+        default:  return nil
+        }
+    }
+
+    private static func loadOrCreateSoul() -> (CompanionSoul, isNew: Bool) {
         if let data = UserDefaults.standard.data(forKey: "companion.soul"),
            let soul = try? JSONDecoder().decode(CompanionSoul.self, from: data) {
-            return soul
+            return (soul, false)
         }
-        // Generate a new soul with a default name
         let soul = CompanionSoul(
             name: defaultNames.randomElement() ?? "Buddy",
             personality: "curious and cheerful",
@@ -41,7 +70,7 @@ class CompanionStore: ObservableObject {
         if let data = try? JSONEncoder().encode(soul) {
             UserDefaults.standard.set(data, forKey: "companion.soul")
         }
-        return soul
+        return (soul, true)
     }
 
     func rename(to newName: String) {
