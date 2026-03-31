@@ -17,10 +17,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         setupEventMonitor()
 
-        // Keep status bar button in sync when companion name changes
-        storeObserver = store.objectWillChange.sink { [weak self] _ in
-            DispatchQueue.main.async { self?.updateStatusButton() }
-        }
+        // Keep status bar button in sync when companion changes (name, etc.)
+        storeObserver = store.$companion
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateStatusButton() }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -8,7 +8,8 @@ func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false) ->
     guard let frames = spriteFrames[bones.species] else { return [] }
 
     let frameIndex = frame % frames.count
-    let eyeChar = blink ? "--" : bones.eye.character
+    // Blink uses "-" (single dash, same width as eye char) to keep ASCII art aligned.
+    let eyeChar = blink ? "-" : bones.eye.character
 
     var lines = frames[frameIndex].map { line in
         line.replacingOccurrences(of: "{E}", with: eyeChar)

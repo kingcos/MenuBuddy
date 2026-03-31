@@ -25,7 +25,11 @@ struct PopoverView: View {
             Divider()
             StatsView(stats: companion.stats)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+            hatchFooter
+                .padding(.horizontal, 16)
+                .padding(.bottom, 10)
         }
         .frame(width: 280)
         .background(Color(NSColor.windowBackgroundColor))
@@ -113,6 +117,21 @@ struct PopoverView: View {
             .help("Tap to pet \(companion.name)!")
         }
         .padding(.vertical, 8)
+    }
+
+    // MARK: - Hatch Footer
+
+    private var hatchFooter: some View {
+        HStack {
+            let date = Date(timeIntervalSince1970: companion.soul.hatchedAt)
+            Text("Hatched \(date, style: .date)")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+            Spacer()
+            Text("pets: \(store.petCount)")
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundColor(.secondary)
+        }
     }
 
     // MARK: - Rename Sheet

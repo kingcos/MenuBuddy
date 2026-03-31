@@ -11,11 +11,13 @@ struct Mulberry32 {
     }
 
     mutating func next() -> Double {
+        // Exact port of TypeScript Mulberry32 — all operations are 32-bit wrapping.
+        // Original bug: used UInt64 multiplication and dropped the (t1 &+ imul2) ^ t1 step.
         state &+= 0x6d2b79f5
-        var t = UInt64(state ^ (state >> 15)) &* UInt64(1 | state)
-        t = UInt64(UInt32(truncatingIfNeeded: t) ^ (UInt32(truncatingIfNeeded: t) >> 7)) &* UInt64(61 | UInt32(truncatingIfNeeded: t))
-        let result = UInt32(truncatingIfNeeded: t ^ (t >> 14))
-        return Double(result) / 4294967296.0
+        let t1: UInt32 = (state ^ (state >> 15)) &* (1 | state)
+        let imul2: UInt32 = (t1 ^ (t1 >> 7)) &* (61 | t1)
+        let t2: UInt32 = (t1 &+ imul2) ^ t1
+        return Double(t2 ^ (t2 >> 14)) / 4294967296.0
     }
 }
 
