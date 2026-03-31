@@ -16,15 +16,43 @@ let petHearts = [
     "·    ·   ·  ",
 ]
 
-private let companionQuips = [
+// Generic quips (fallback)
+private let genericQuips = [
     "…", "*yawns*", "*stares at you*", "meep.", "*wiggles*",
     "did you pet me yet", "i am watching.", "*does a little spin*",
     "working hard?", "proud of u :)", "*blinks slowly*",
-    "almost done?", "you got this!", "*investigates cursor*", "bzzt.",
+    "almost done?", "you got this!", "*investigates cursor*",
     "hi.", "sup.", "*stretches*", "still here.", "…ok.",
 ]
 
-private let petResponses = ["♥", "hehe", "*purrs*", "yay!", "uwu", "eee!"]
+// Species-specific quips — personality flavoring
+private let speciesQuips: [Species: [String]] = [
+    .duck:     ["quack.", "*quacks softly*", "bread?", "QUACK.", "*shakes tail feathers*"],
+    .goose:    ["HONK.", "mine.", "*stares menacingly*", "honk honk.", "i want that."],
+    .blob:     ["blop.", "*jiggles*", "bloop?", "*merges with shadow*", "i am formless."],
+    .cat:      ["*knocks something off the desk*", "feed me.", "*loafs*", "purrr.", "no."],
+    .dragon:   ["*smoke from nostrils*", "scales: perfect.", "fire later.", "*hoards things*"],
+    .octopus:  ["*eight-armed hug?*", "i have plans.", "*changes color*", "ink. soon."],
+    .owl:      ["*rotates head*", "wise. very wise.", "hoot.", "*judges quietly*", "observed."],
+    .penguin:  ["*waddles*", "cold please.", "*slides on belly*", "fish time?", "tuxedo ready."],
+    .turtle:   ["*retreats into shell*", "slowly.", "patience.", "*peeks out*", "no rush."],
+    .snail:    ["still getting there.", "*leaves trail*", "…", "*slides imperceptibly*"],
+    .ghost:    ["boo.", "*fades slightly*", "spooky?", "*floats through wall*", "haunting vibes."],
+    .axolotl:  ["*regenerates*", "neotenic.", "*wiggles gills*", "axolotl rights.", "yep."],
+    .capybara: ["chill.", "*lets other animals sit on me*", "content.", "*closes eyes*", "ok."],
+    .cactus:   ["*grows slowly*", "prickly today.", "*photosynthesizes*", "don't touch.", "…"],
+    .robot:    ["processing…", "beep boop.", "01101000 01101001", "*whirrs*", "calculating."],
+    .rabbit:   ["*nose twitch*", "hop.", "*binkies*", "lettuce?", "*digs determinedly*"],
+    .mushroom: ["*sporulates*", "decomposing things.", "fungi vibes.", "*grows quietly*"],
+    .chonk:    ["*sits heavily*", "big.", "chonky and content.", "*belly flop*", "dense."],
+]
+
+private let petResponses = ["♥", "hehe", "*purrs*", "yay!", "uwu", "eee!", "*happy wiggle*"]
+
+func quipsFor(species: Species) -> [String] {
+    let specific = speciesQuips[species] ?? []
+    return specific + genericQuips
+}
 
 // MARK: - Animation Engine
 
@@ -40,6 +68,7 @@ final class AnimationEngine: ObservableObject {
     private var mainTimer: Timer?
     private var nextQuipTask: Task<Void, Never>?
     private var isMuted: Bool = false
+    private var species: Species = .duck
 
     var currentSequenceIndex: Int { tickIndex % idleSequence.count }
     var currentFrame: Int {
@@ -49,8 +78,10 @@ final class AnimationEngine: ObservableObject {
     var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
     var speechFading: Bool { (bubbleShowTicks - speechTick) <= fadeWindowTicks }
 
-    func start(muted: Bool) {
+    func start(muted: Bool, species: Species) {
         isMuted = muted
+        self.species = species
+        guard mainTimer == nil else { return } // already running
         mainTimer = Timer.scheduledTimer(withTimeInterval: tickInterval, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.tick() }
         }
@@ -105,7 +136,7 @@ final class AnimationEngine: ObservableObject {
 
     private func showRandomQuip() {
         guard !isMuted else { return }
-        showSpeech(companionQuips.randomElement() ?? "…")
+        showSpeech(quipsFor(species: species).randomElement() ?? "…")
     }
 
     func showSpeech(_ text: String) {

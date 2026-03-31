@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import Combine
+import ServiceManagement
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
@@ -133,6 +134,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         muteItem.target = self
         menu.addItem(muteItem)
 
+        // Launch at Login toggle
+        let launchAtLogin = SMAppService.mainApp.status == .enabled
+        let loginItem = NSMenuItem(
+            title: launchAtLogin ? "✓ Launch at Login" : "Launch at Login",
+            action: #selector(toggleLaunchAtLogin),
+            keyEquivalent: ""
+        )
+        loginItem.target = self
+        menu.addItem(loginItem)
+
         // About
         let aboutItem = NSMenuItem(
             title: "About MenuBuddy",
@@ -174,6 +185,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func toggleMute() {
         store.muted.toggle()
+    }
+
+    @objc private func toggleLaunchAtLogin() {
+        let service = SMAppService.mainApp
+        do {
+            if service.status == .enabled {
+                try service.unregister()
+            } else {
+                try service.register()
+            }
+        } catch {
+            // Show error if registration fails (e.g. sandboxing restrictions)
+            let alert = NSAlert()
+            alert.messageText = "Launch at Login"
+            alert.informativeText = "Could not change login item: \(error.localizedDescription)"
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
     }
 
     @objc private func showAbout() {

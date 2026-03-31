@@ -11,5 +11,5 @@
 # buddy folder - do not commit
 buddy/
 
-# docs (optional - commit specs if desired)
-# docs/
+# Claude Code / tooling
+.claude/

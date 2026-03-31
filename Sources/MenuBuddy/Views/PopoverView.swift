@@ -29,7 +29,7 @@ struct PopoverView: View {
         }
         .frame(width: 280)
         .background(Color(NSColor.windowBackgroundColor))
-        .onAppear { engine.start(muted: store.muted) }
+        .onAppear { engine.start(muted: store.muted, species: companion.species) }
         .onDisappear { engine.stop() }
         .onChange(of: store.muted) { _, newValue in engine.updateMuted(newValue) }
         .onReceive(NotificationCenter.default.publisher(for: .triggerPet)) { _ in
