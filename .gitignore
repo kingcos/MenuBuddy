@@ -13,3 +13,6 @@ buddy/
 
 # Claude Code / tooling
 .claude/
+
+# Generated icon files (reproducible from script)
+Resources/AppIcon.iconset/
