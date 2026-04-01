@@ -29,7 +29,7 @@ struct PopoverView: View {
                 .padding(.bottom, 6)
             if let snap = store.systemSnapshot {
                 Divider()
-                SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
+                SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot, cpuHistory: store.cpuHistory)
             }
             hatchFooter
                 .padding(.horizontal, 16)
@@ -50,6 +50,12 @@ struct PopoverView: View {
             if let quip = store.consumeWakeQuip() {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     engine.showSpeech(quip)
+                }
+            }
+            // Show welcome quip after companion reset
+            else if store.consumeResetWelcome() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    engine.showSpeech(Strings.welcome(companion.name))
                 }
             }
             // Show daily time-of-day greeting (once per day, not on first launch)

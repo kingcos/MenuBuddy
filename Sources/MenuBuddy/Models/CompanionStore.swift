@@ -58,6 +58,17 @@ class CompanionStore: ObservableObject {
     /// The snapshot before the current one — used to compute trends.
     private(set) var prevSystemSnapshot: SystemSnapshot?
 
+    /// Rolling CPU usage history (up to 8 values); used to render a sparkline.
+    @Published private(set) var cpuHistory: [Double] = []
+
+    /// Set to true by resetCompanion() so the next popover open shows a welcome quip.
+    private(set) var pendingResetWelcome = false
+
+    func consumeResetWelcome() -> Bool {
+        defer { pendingResetWelcome = false }
+        return pendingResetWelcome
+    }
+
     /// Emoji reflecting the companion's current mood based on system state.
     var mood: String {
         guard let s = systemSnapshot else { return "😊" }
@@ -90,8 +101,11 @@ class CompanionStore: ObservableObject {
         }
         systemMonitor.onSnapshot = { [weak self] snapshot in
             DispatchQueue.main.async {
-                self?.prevSystemSnapshot = self?.systemSnapshot
-                self?.systemSnapshot = snapshot
+                guard let self else { return }
+                self.prevSystemSnapshot = self.systemSnapshot
+                self.systemSnapshot = snapshot
+                if self.cpuHistory.count >= 8 { self.cpuHistory.removeFirst() }
+                self.cpuHistory.append(snapshot.cpuUsage)
             }
         }
         systemMonitor.start()
@@ -160,6 +174,7 @@ class CompanionStore: ObservableObject {
         petCount = 0
         let (soul, _) = CompanionStore.loadOrCreateSoul()
         companion = Companion(bones: companion.bones, soul: soul)
+        pendingResetWelcome = true
     }
 
     private func saveSoul(_ soul: CompanionSoul) {
