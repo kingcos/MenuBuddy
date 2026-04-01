@@ -4,14 +4,22 @@ APP_BUNDLE = $(BUILD_DIR)/$(APP_NAME).app
 BINARY = $(BUILD_DIR)/$(APP_NAME)
 INSTALL_DIR = /Applications
 
-.PHONY: build run install clean dmg
+.PHONY: build build-universal run install clean dmg
 
 build: icon
 	swift build -c release
+	@$(MAKE) _bundle BINARY_SRC="$(BINARY)"
+
+# Universal binary (arm64 + x86_64) for distribution
+build-universal: icon
+	swift build -c release --arch arm64 --arch x86_64
+	@$(MAKE) _bundle BINARY_SRC=".build/apple/Products/Release/$(APP_NAME)"
+
+_bundle:
 	@echo "Creating .app bundle..."
 	@mkdir -p "$(APP_BUNDLE)/Contents/MacOS"
 	@mkdir -p "$(APP_BUNDLE)/Contents/Resources"
-	@cp "$(BINARY)" "$(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)"
+	@cp "$(BINARY_SRC)" "$(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)"
 	@cp "Resources/Info.plist" "$(APP_BUNDLE)/Contents/Info.plist"
 	@[ -f Resources/AppIcon.icns ] && cp "Resources/AppIcon.icns" "$(APP_BUNDLE)/Contents/Resources/AppIcon.icns" || true
 	@for lproj in Resources/*.lproj; do cp -r "$$lproj" "$(APP_BUNDLE)/Contents/Resources/"; done
@@ -32,7 +40,7 @@ install: build
 	@cp -r "$(APP_BUNDLE)" "$(INSTALL_DIR)/"
 	@echo "Installed to $(INSTALL_DIR)/$(APP_NAME).app"
 
-dmg: build
+dmg: build-universal
 	@echo "Creating DMG..."
 	@rm -f "$(BUILD_DIR)/$(APP_NAME).dmg"
 	@mkdir -p "$(BUILD_DIR)/dmg-staging"
