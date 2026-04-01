@@ -8,35 +8,52 @@
 
 ### 桌宠
 
-- **18 个物种**：鸭子、大鹅、史莱姆、猫咪、龙、章鱼、猫头鹰、企鹅、乌龟、蜗牛、小鬼、六角恐龙、水豚、仙人掌、机器人、兔子、蘑菇、肥肥
-- **5 个稀有度**：普通 (60%) → 优秀 (25%) → 稀有 (10%) → 史诗 (4%) → 传说 (1%)
+- **18 个物种**（可在图鉴中浏览）：鸭子、大鹅、史莱姆、猫咪、龙、章鱼、猫头鹰、企鹅、乌龟、蜗牛、小鬼、六角恐龙、水豚、仙人掌、机器人、兔子、蘑菇、肥肥
+- **5 个稀有度**：普通 (60%) → 优秀 (25%) → 稀有 (10%) → 史诗 (4%) → 传说 (1%) —— 各有独特颜色和帽子
 - **1% 闪光**变体，金色光芒
-- **确定性生成**：伙伴由你的电脑 UUID 派生——同一台电脑，永远同一只
+- **确定性生成**：由电脑 UUID 派生——同一台电脑，永远同一只
 - **待机动画**：3 帧循环动作 + 眨眼，500ms 节拍
 - **对话气泡**：每 15-45 秒显示种类专属或通用台词，渐隐效果
-- **抚摸互动**：点击精灵触发爱心特效；在第 1、5、10、25、50、100 次有里程碑消息
-- **属性面板**：调试力 / 耐心值 / 混乱度 / 智慧值 / 嘴贱度——由种类和稀有度决定的性格特征（悬停可查看说明）
-- **重命名**：通过表头铅笔图标、右键菜单或设置
-- **重置**：换一个新名字的伙伴（外观不变——由电脑硬件决定）
+- **抚摸互动**：点击精灵触发爱心特效；1、5、10、25、50、100 次有里程碑消息
+- **属性面板**：调试力 / 耐心值 / 混乱度 / 智慧值 / 嘴贱度——影响 AI 反应的性格特征
+- **物种图鉴**：18 种物种网格展示，点击可预览各稀有度下的外观
+- **稀有度着色**：精灵以稀有度颜色渲染（灰/绿/蓝/紫/金）
 
-### 可插拔的触发源系统
+### AI 反应（大模型驱动）
 
-MenuBuddy 使用**插件架构**来驱动桌宠的反应。任何数据源都可以成为触发源——系统状态、股票价格、天气、CI/CD 状态等。每个触发源独立监控数据，并产生标准化的事件来驱动桌宠的表情、话语、心情和菜单栏指示器。
+配置 LLM API 后，伙伴会根据自身属性生成上下文相关的反应：
+
+- **嘴贱度 ≥50** → 毒舌吐槽
+- **混乱度 ≥50** → 不可预测、随机
+- **智慧值 ≥50** → 深沉、哲理
+- **耐心值 <25** → 急躁不耐烦
+- **调试力 ≥50** → 技术梗、编程引用
+
+在 设置 → AI 反应 中配置：
+- 支持任何 OpenAI 兼容 API（默认 DeepSeek，也支持 OpenAI、Ollama 等）
+- Token 用量追踪，可重置
+- 测试按钮验证连接
+- 未配置时回退到预设台词
+
+### 可插拔触发源系统
+
+任何数据源都可以通过标准化的插件架构驱动桌宠反应：
 
 ```
 ┌───────────────┐  ┌──────────────┐  ┌───────────────┐
-│ 系统监控       │  │ 股票价格      │  │ 你的插件       │
-│ (内置)         │  │ (示例)        │  │               │
+│ 系统监控       │  │ 股票价格      │  │ 你的脚本       │
+│ (内置)         │  │ (脚本)        │  │               │
 └──────┬────────┘  └──────┬───────┘  └───────┬───────┘
        │ TriggerEvent     │                   │
        ▼                  ▼                   ▼
   ┌──────────────────────────────────────────────────┐
   │              TriggerManager                      │
   │  路由事件 → 心情、话语、指示器、表情               │
+  │  可选 → LLM 生成上下文相关的 AI 反应              │
   └──────────────────────────────────────────────────┘
 ```
 
-**内置：系统监控** ——对 Mac 的实时状态做出反应：
+**内置：系统监控** —— 对 Mac 实时状态做出反应：
 
 | 指标 | 阈值 | 指示器 | 表情 |
 |------|------|--------|------|
@@ -51,32 +68,22 @@ MenuBuddy 使用**插件架构**来驱动桌宠的反应。任何数据源都可
 
 **脚本触发源（无需编码）：**
 
-将可执行脚本放入 `~/.menubuddy/triggers/`，MenuBuddy 会定期运行并读取 stdout 的 JSON：
+将可执行脚本放入 `~/.menubuddy/triggers/`，应用会定期运行并读取 stdout 的 JSON。在设置中点"重新扫描脚本"即可加载新脚本，无需重启。
 
 ```bash
 #!/bin/bash
 # ~/.menubuddy/triggers/stock.sh
-curl -s "https://api.example.com/stock/AAPL" | jq '{
-  name: "股票监控",
-  interval: 60,
-  trigger: {
-    indicator: "📈",
-    quips: ["苹果在涨！", "起飞！"],
-    mood: "🤑",
-    eyeOverride: "$",
-    duration: 30
-  },
-  metrics: [
-    { label: "AAPL", value: ("$" + (.price | tostring)), alert: (.change > 5), trend: (if .change > 0 then "↑" else "↓" end) }
-  ]
-}'
+echo '{"interval":60,"trigger":{"indicator":"📈","quips":["涨了!"],"mood":"🤑"},"metrics":[{"label":"AAPL","value":"$254","trend":"↑"}]}'
 ```
 
-JSON 格式：
+参见 `Examples/triggers/` 中的完整示例（股票价格、网速、CPU/内存）。
+
+使用 `Examples/TRIGGER_PROMPT.md` 可以让任何 AI 助手为你生成自定义触发脚本。
+
+**JSON 格式：**
 
 | 字段 | 必填 | 说明 |
 |------|------|------|
-| `name` | 否 | 在设置中显示的名称（默认：文件名） |
 | `interval` | 否 | 轮询间隔（秒，默认 60，最小 5） |
 | `trigger.indicator` | 是* | 菜单栏 emoji（如 "📈"） |
 | `trigger.quips` | 否 | 对话气泡文字（随机选一条） |
@@ -90,43 +97,29 @@ JSON 格式：
 
 \* 在各自对象内必填；`trigger` 和 `metrics` 本身都是可选的顶层字段。
 
-脚本可以用 bash、python、node 或任何语言编写。参见 `Examples/triggers/` 中的示例。
-
-**Swift API（编译型插件）：**
-
-实现 `TriggerSource` 协议并通过 `store.triggerManager.register(source)` 注册。
-
-每个注册的触发源都会出现在 设置 → 触发源 中，可独立开关。
-
 ### 菜单栏
 
-- **动画脸**：伙伴的脸在菜单栏中以眨眼和待机帧动画显示
-- **触发指示器**：事件激活时在脸旁显示 emoji（持续时间后自动消失）
-- **菜单栏话语**：伙伴偶尔在菜单栏表情旁说两句（每 2-5 分钟，6 秒后消失）
-- **勿扰模式**：在设置中配置勿扰时段，抑制菜单栏话语（支持跨午夜，如 22:00→08:00）
-
-### 感知能力
-
-- **睡眠/唤醒**：Mac 唤醒时伙伴会问候你，根据睡眠时长显示不同消息
-- **工作空间**：切换到编程、终端、浏览器、聊天、设计或音乐应用时，25% 概率评论
-- **时段问候**：每天第一次打开面板时，根据当前时段问候（早上好/下午好/晚上好/这么晚还没睡？）
+- **动画脸**：伙伴的脸以稀有度颜色在菜单栏中动画显示
+- **触发指示器**：事件触发时在脸旁显示 emoji
+- **菜单栏话语**：伙伴定期在菜单栏说两句（可配置）
+- **勿扰模式**：设置勿扰时段（支持跨午夜，如 22:00→08:00）
+- **启动问候**：每次启动随机问候
 
 ### 界面与交互
 
 - **左键点击**：打开/关闭面板
-- **右键点击**：上下文菜单，包含摸摸、重命名、静音、开机自启、设置、关于、退出
-- **面板工具栏**：底部有设置齿轮、信息和退出按钮——无需右键即可访问
-- **设置窗口**：通用、语言、菜单栏、勿扰模式、触发源、使用说明、重置等分区
-- **应用内语言切换**：跟随系统 / English / 简体中文
-- **开机自启动**：通过 SMAppService 实现
-- **静音**：关闭所有对话气泡和菜单栏话语
+- **右键点击**：上下文菜单（摸摸、重命名、静音、开机自启、设置、退出）
+- **面板工具栏**：设置、物种图鉴、退出
+- **设置**：通用、语言、菜单栏、触发源、AI 反应、日志、重置
+- **物种图鉴**：浏览全部 18 种物种，可预览各稀有度外观
+- **日志**：可选的文件日志，写入 `~/.menubuddy/logs/`（保留 7 天）
 - **LSUIElement**：无 Dock 图标，仅存在于菜单栏
 
 ### 国际化
 
 - 完整支持**英文**和**简体中文**（zh-Hans）
-- 270+ 个本地化字符串，覆盖所有界面、台词、属性、系统消息和无障碍标签
-- 支持应用内语言切换或跟随系统语言设置
+- 300+ 个本地化字符串
+- 应用内语言切换（跟随系统 / EN / 中文）
 
 ## 系统要求
 
@@ -152,39 +145,49 @@ Sources/MenuBuddy/
 ├── Models/
 │   ├── CompanionTypes.swift       # Species、Rarity、Eye、Hat、StatName 枚举
 │   ├── CompanionModel.swift       # Mulberry32 PRNG + FNV-1a，确定性生成
-│   └── CompanionStore.swift       # 状态管理、触发路由、菜单栏话语、勿扰模式
+│   └── CompanionStore.swift       # 状态管理、触发路由、LLM 集成
 ├── Triggers/
 │   ├── TriggerPlugin.swift        # TriggerSource 协议、TriggerEvent、TriggerMetric
-│   ├── TriggerManager.swift       # 中心枢纽：注册源、路由事件、持久化状态
-│   └── SystemTriggerSource.swift  # 内置系统监控触发源（CPU/内存/网速/电量）
+│   ├── TriggerManager.swift       # 中心枢纽：注册源、路由事件
+│   ├── SystemTriggerSource.swift  # 内置系统监控触发源
+│   └── ScriptTriggerSource.swift  # 脚本触发源（~/.menubuddy/triggers/）
 ├── System/
-│   └── SystemMonitor.swift        # 底层 CPU、内存、网速、磁盘 I/O、电池轮询
+│   ├── SystemMonitor.swift        # CPU、内存、网速、磁盘 I/O、电池轮询
+│   ├── LLMService.swift           # OpenAI 兼容 API 客户端，用于 AI 反应
+│   └── Logger.swift               # 文件日志，按天轮转
 ├── Sprites/
 │   ├── SpriteData.swift           # 18 种物种的 ASCII 艺术帧
 │   └── SpriteRenderer.swift       # renderSprite()、renderFace()
 └── Views/
-    ├── CompanionView.swift        # AnimationEngine、对话气泡、属性面板、指标条
+    ├── CompanionView.swift        # AnimationEngine、对话气泡、属性、指标条
     ├── PopoverView.swift          # 主面板 UI + 工具栏
-    └── SettingsView.swift         # 设置窗口 + 触发源开关
+    ├── SettingsView.swift         # 设置窗口
+    └── SpeciesAtlasView.swift     # 物种图鉴 + 稀有度预览
 
 Resources/
-├── en.lproj/Localizable.strings       # 英文字符串
-├── zh-Hans.lproj/Localizable.strings  # 简体中文字符串
-└── Info.plist                         # Bundle 配置 + 本地化声明
+├── en.lproj/Localizable.strings
+├── zh-Hans.lproj/Localizable.strings
+└── Info.plist
 
-Examples/triggers/                         # 示例触发脚本
+Examples/
+├── triggers/                      # 示例触发脚本
+│   ├── stock-aapl.sh              # AAPL 股票（东方财富 API）
+│   ├── network-speed.sh           # 网速监控
+│   ├── cpu-memory.sh              # CPU 和内存监控
+│   └── random-mood.sh             # 最简示例
+└── TRIGGER_PROMPT.md              # 用 AI 生成自定义触发脚本的提示词
 ```
 
 ## 伙伴生成原理
 
 你的伙伴由电脑的 IOPlatformUUID 确定性生成：先经过加盐 + FNV-1a 32 位哈希，再送入 Mulberry32 伪随机数生成器。生成序列依次决定稀有度、物种、眼睛样式、帽子、闪光概率和属性——相同输入永远产生相同输出。
 
-只有伙伴的**名字**保存在 UserDefaults 中。其他一切都在运行时从电脑 UUID 派生，所以修改偏好设置无法伪造传说级伙伴。
+只有伙伴的**名字**保存在 UserDefaults 中。其他一切都在运行时从电脑 UUID 派生。
 
 ## 作者
 
-**kingcos** — [github.com/kingcos](https://github.com/kingcos)
+**kingcos** — [github.com/kingcos/MenuBuddy](https://github.com/kingcos/MenuBuddy)
 
 ## 致谢
 
-伙伴设计灵感来自 Claude Code buddy 系统（`buddy/` 文件夹）。
+伙伴设计灵感来自 Claude Code buddy 系统。
