@@ -198,11 +198,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 try service.register()
             }
         } catch {
-            // Show error if registration fails (e.g. sandboxing restrictions)
             let alert = NSAlert()
-            alert.messageText = "Launch at Login"
-            alert.informativeText = "Could not change login item: \(error.localizedDescription)"
-            alert.addButton(withTitle: "OK")
+            alert.messageText = Strings.errorLaunchAtLoginTitle
+            alert.informativeText = Strings.errorLaunchAtLoginBody(error.localizedDescription)
+            alert.addButton(withTitle: Strings.errorOK)
             alert.runModal()
         }
     }

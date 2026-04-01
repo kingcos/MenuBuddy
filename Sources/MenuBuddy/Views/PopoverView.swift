@@ -52,6 +52,12 @@ struct PopoverView: View {
                     engine.showSpeech(quip)
                 }
             }
+            // Show daily time-of-day greeting (once per day, not on first launch)
+            else if !store.isFirstLaunch, let greeting = store.consumeDailyGreeting() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    engine.showSpeech(greeting)
+                }
+            }
         }
         .onDisappear {
             store.onSystemEvent = nil

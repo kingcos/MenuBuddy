@@ -95,6 +95,27 @@ enum Strings {
         return (1...n).map { L("quip.species.\(species.rawValue).\($0)") }
     }
 
+    // Time-of-day greeting (call once per day on first open)
+    static var timeOfDayQuip: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 6..<12:  return L("quip.tod.morning")
+        case 12..<18: return L("quip.tod.afternoon")
+        case 18..<22: return L("quip.tod.evening")
+        default:      return L("quip.tod.night")
+        }
+    }
+
+    // Error strings
+    static var errorLaunchAtLoginTitle: String         { L("error.launchAtLogin.title") }
+    static func errorLaunchAtLoginBody(_ e: String) -> String { L("error.launchAtLogin.body", e) }
+    static var errorOK: String                         { L("error.ok") }
+
+    // Default companion names
+    static var defaultNames: [String] {
+        L("default.names").components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+    }
+
     // Sleep/wake quips
     static func wakeQuip(sleepSeconds: TimeInterval) -> String {
         switch sleepSeconds {

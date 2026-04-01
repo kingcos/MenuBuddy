@@ -33,6 +33,16 @@ class CompanionStore: ObservableObject {
     /// A wake quip to show next time the popover opens (cleared after use).
     private(set) var pendingWakeQuip: String?
 
+    /// Returns a time-of-day greeting if the popover hasn't been opened today yet, nil otherwise.
+    func consumeDailyGreeting() -> String? {
+        let today = Calendar.current.startOfDay(for: Date())
+        let key = "companion.lastGreetedDay"
+        let lastDay = UserDefaults.standard.object(forKey: key) as? Date
+        guard lastDay == nil || lastDay! < today else { return nil }
+        UserDefaults.standard.set(today, forKey: key)
+        return Strings.timeOfDayQuip
+    }
+
     func setWakeQuip(_ quip: String) {
         pendingWakeQuip = quip
         NotificationCenter.default.post(name: .companionWoke, object: quip)
@@ -117,7 +127,7 @@ class CompanionStore: ObservableObject {
             return (soul, false)
         }
         let soul = CompanionSoul(
-            name: defaultNames.randomElement() ?? "Buddy",
+            name: Strings.defaultNames.randomElement() ?? "Buddy",
             personality: "curious and cheerful",
             hatchedAt: Date().timeIntervalSince1970
         )
@@ -146,8 +156,3 @@ class CompanionStore: ObservableObject {
     }
 }
 
-private let defaultNames = [
-    "Pip", "Mochi", "Biscuit", "Noodle", "Dumpling",
-    "Pebble", "Sprout", "Twig", "Acorn", "Button",
-    "Wobble", "Fudge", "Nugget", "Pretzel", "Waffle"
-]

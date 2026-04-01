@@ -199,6 +199,20 @@
 "quip.species.chonk.4" = "*belly flop*";
 "quip.species.chonk.5" = "dense.";
 
+/* Time-of-day greetings (shown once per day on first popover open) */
+"quip.tod.morning" = "good morning!";
+"quip.tod.afternoon" = "good afternoon!";
+"quip.tod.evening" = "good evening!";
+"quip.tod.night" = "burning the midnight oil?";
+
+/* Launch at login error */
+"error.launchAtLogin.title" = "Launch at Login";
+"error.launchAtLogin.body" = "Could not change login item: %@";
+"error.ok" = "OK";
+
+/* Default companion names (used on very first launch) */
+"default.names" = "Pip,Mochi,Biscuit,Noodle,Dumpling,Pebble,Sprout,Twig,Acorn,Button,Wobble,Fudge,Nugget,Pretzel,Waffle";
+
 /* Sleep / wake quips */
 "quip.wake.short" = "oh you're back!";
 "quip.wake.medium" = "missed you.";

@@ -199,6 +199,20 @@
 "quip.species.chonk.4" = "*肚皮着地*";
 "quip.species.chonk.5" = "结实。";
 
+/* 时段问候（每天第一次打开面板时显示）*/
+"quip.tod.morning" = "早上好！";
+"quip.tod.afternoon" = "下午好！";
+"quip.tod.evening" = "晚上好！";
+"quip.tod.night" = "这么晚还没睡？";
+
+/* 开机自启动错误 */
+"error.launchAtLogin.title" = "开机自启动";
+"error.launchAtLogin.body" = "无法修改登录项：%@";
+"error.ok" = "好";
+
+/* 默认桌宠名字 */
+"default.names" = "小皮,麻薯,小饼,粉条,小笼包,小石头,小芽,小枝,橡果,小扣,小摇,软糖,金块,蝴蝶饼,华夫";
+
 /* 睡眠 / 唤醒台词 */
 "quip.wake.short" = "你回来啦！";
 "quip.wake.medium" = "想你了。";
