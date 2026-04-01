@@ -230,6 +230,14 @@
 /* 默认桌宠名字 */
 "default.names" = "小皮,麻薯,小饼,粉条,小笼包,小石头,小芽,小枝,橡果,小扣,小摇,软糖,金块,蝴蝶饼,华夫";
 
+/* 启动问候（每次启动随机显示）*/
+"quip.startup.1" = "准备好了！";
+"quip.startup.2" = "开始吧！";
+"quip.startup.3" = "报到！";
+"quip.startup.4" = "我来啦！";
+"quip.startup.5" = "又见面了！";
+"quip.startup.6" = "*伸懒腰* 好，就绪。";
+
 /* 睡眠 / 唤醒台词 */
 "quip.wake.short" = "你回来啦！";
 "quip.wake.medium" = "想你了。";

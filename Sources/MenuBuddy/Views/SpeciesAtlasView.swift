@@ -2,10 +2,13 @@ import SwiftUI
 
 // MARK: - Species Atlas View
 
-/// Shows all 18 species in a grid. Highlights the user's current companion.
+/// Shows all 18 species in a grid across all 5 rarities.
+/// Highlights the user's current companion. Tap a card to see it in each rarity.
 struct SpeciesAtlasView: View {
     let currentSpecies: Species
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedSpecies: Species?
+    @State private var previewRarity: Rarity = .common
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
@@ -23,20 +26,84 @@ struct SpeciesAtlasView: View {
 
             Divider()
 
+            // Rarity preview bar
+            if let species = selectedSpecies {
+                rarityPreview(species)
+                Divider()
+            }
+
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(Species.allCases, id: \.self) { species in
                         speciesCard(species)
+                            .onTapGesture {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    selectedSpecies = selectedSpecies == species ? nil : species
+                                    previewRarity = .common
+                                }
+                            }
                     }
                 }
                 .padding(12)
             }
         }
-        .frame(width: 320, height: 420)
+        .frame(width: 340, height: 480)
     }
+
+    // MARK: - Rarity Preview
+
+    private func rarityPreview(_ species: Species) -> some View {
+        VStack(spacing: 8) {
+            // Sprite in selected rarity
+            let hat: Hat = previewRarity == .common ? .none : .crown
+            let bones = CompanionBones(
+                rarity: previewRarity, species: species, eye: .dot,
+                hat: hat, shiny: false, stats: [:]
+            )
+            let lines = renderSprite(bones: bones, frame: 0, blink: false)
+            VStack(alignment: .center, spacing: 0) {
+                ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                    Text(line)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(Color(hex: previewRarity.color))
+                }
+            }
+            .frame(height: 50)
+
+            // Rarity picker
+            HStack(spacing: 4) {
+                ForEach(Rarity.allCases, id: \.self) { rarity in
+                    Button(action: { previewRarity = rarity }) {
+                        Text(rarity.stars)
+                            .font(.system(size: 9))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(previewRarity == rarity
+                                          ? Color(hex: rarity.color).opacity(0.2)
+                                          : Color.clear)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .help(rarity.localizedName)
+                }
+            }
+
+            Text("\(species.localizedName) · \(previewRarity.localizedName)")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(Color(hex: previewRarity.color))
+        }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(Color(hex: previewRarity.color).opacity(0.04))
+    }
+
+    // MARK: - Species Card
 
     private func speciesCard(_ species: Species) -> some View {
         let isCurrent = species == currentSpecies
+        let isSelected = species == selectedSpecies
         let bones = CompanionBones(
             rarity: .common, species: species, eye: .dot,
             hat: .none, shiny: false, stats: [:]
@@ -68,11 +135,13 @@ struct SpeciesAtlasView: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isCurrent ? Color.accentColor.opacity(0.1) : Color.clear)
+                .fill(isSelected ? Color.accentColor.opacity(0.1) :
+                      isCurrent ? Color.accentColor.opacity(0.05) : Color.clear)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 6)
-                .stroke(isCurrent ? Color.accentColor.opacity(0.4) : Color.clear, lineWidth: 1)
+                .stroke(isSelected ? Color.accentColor.opacity(0.6) :
+                        isCurrent ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
         )
     }
 }

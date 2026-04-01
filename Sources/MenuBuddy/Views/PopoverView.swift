@@ -65,6 +65,12 @@ struct PopoverView: View {
                     engine.showSpeech(Strings.welcome(companion.name))
                 }
             }
+            // Show startup greeting (random, once per launch)
+            else if let startup = store.consumeStartupGreeting() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    engine.showSpeech(startup)
+                }
+            }
             // Show daily time-of-day greeting (once per day, not on first launch)
             else if !store.isFirstLaunch, let greeting = store.consumeDailyGreeting() {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
@@ -203,14 +209,6 @@ struct PopoverView: View {
             }
             .buttonStyle(.plain)
             .help(Strings.atlasTitle)
-
-            Button(action: { NotificationCenter.default.post(name: .openAbout, object: nil) }) {
-                Image(systemName: "info.circle")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-            }
-            .buttonStyle(.plain)
-            .help(Strings.menuAbout)
 
             Spacer()
 

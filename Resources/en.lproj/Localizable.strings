@@ -230,6 +230,14 @@
 /* Default companion names (used on very first launch) */
 "default.names" = "Pip,Mochi,Biscuit,Noodle,Dumpling,Pebble,Sprout,Twig,Acorn,Button,Wobble,Fudge,Nugget,Pretzel,Waffle";
 
+/* Startup greetings (random, shown each launch) */
+"quip.startup.1" = "ready to go!";
+"quip.startup.2" = "let's do this!";
+"quip.startup.3" = "reporting for duty.";
+"quip.startup.4" = "i'm here!";
+"quip.startup.5" = "hello again!";
+"quip.startup.6" = "*stretches* ok, ready.";
+
 /* Sleep / wake quips */
 "quip.wake.short" = "oh you're back!";
 "quip.wake.medium" = "missed you.";

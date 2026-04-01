@@ -118,6 +118,11 @@ enum Strings {
         L("default.names").components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
+    // Startup greetings
+    static var startupQuips: [String] {
+        (1...6).map { L("quip.startup.\($0)") }
+    }
+
     // Sleep/wake quips
     static func wakeQuip(sleepSeconds: TimeInterval) -> String {
         switch sleepSeconds {

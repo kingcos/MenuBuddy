@@ -128,9 +128,17 @@ class CompanionStore: ObservableObject {
     /// Set to true by resetCompanion() so the next popover open shows a welcome quip.
     private(set) var pendingResetWelcome = false
 
+    /// Startup greeting — consumed on first popover open each launch.
+    private(set) var pendingStartupGreeting: String? = Strings.startupQuips.randomElement()
+
     func consumeResetWelcome() -> Bool {
         defer { pendingResetWelcome = false }
         return pendingResetWelcome
+    }
+
+    func consumeStartupGreeting() -> String? {
+        defer { pendingStartupGreeting = nil }
+        return pendingStartupGreeting
     }
 
     /// Emoji reflecting the companion's current mood.
