@@ -12,16 +12,14 @@ struct PopoverView: View {
         VStack(spacing: 0) {
             headerView
             spriteAreaView
-            if let text = engine.speechText {
-                SpeechBubbleView(
-                    text: text,
-                    color: companion.rarity.color,
-                    fading: engine.speechFading
-                )
-                .padding(.horizontal, 14)
-                .padding(.bottom, 6)
-                .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-            }
+            SpeechBubbleView(
+                text: engine.speechText ?? " ",
+                color: companion.rarity.color,
+                fading: engine.speechFading
+            )
+            .padding(.horizontal, 14)
+            .padding(.bottom, 6)
+            .opacity(engine.speechText != nil ? 1 : 0)
             Divider()
             StatsView(stats: companion.stats)
                 .padding(.horizontal, 16)
@@ -29,7 +27,7 @@ struct PopoverView: View {
                 .padding(.bottom, 6)
             if let snap = store.systemSnapshot {
                 Divider()
-                SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot, cpuHistory: store.cpuHistory)
+                SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
             }
             hatchFooter
                 .padding(.horizontal, 16)

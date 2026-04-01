@@ -186,6 +186,15 @@ enum Strings {
     static func sysstatNetKB(_ v: Double) -> String { L("sysstat.net.unit.kb", v) }
     static func sysstatNetMB(_ v: Double) -> String { L("sysstat.net.unit.mb", v) }
 
+    // Language settings
+    static var settingsSectionLanguage: String   { L("settings.section.language") }
+    static var settingsLanguageSystem: String    { L("settings.language.system") }
+    static var settingsLanguageEN: String        { L("settings.language.en") }
+    static var settingsLanguageZHHans: String    { L("settings.language.zhHans") }
+    static var settingsLanguageRestart: String   { L("settings.language.restart") }
+    static var settingsLanguageRestartOK: String { L("settings.language.restart.ok") }
+    static var settingsLanguageRestartLater: String { L("settings.language.restart.later") }
+
     // Stat descriptions
     static func statDesc(_ stat: StatName) -> String {
         switch stat {

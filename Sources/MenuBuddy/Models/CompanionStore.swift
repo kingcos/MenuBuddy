@@ -97,9 +97,6 @@ class CompanionStore: ObservableObject {
     /// The snapshot before the current one — used to compute trends.
     private(set) var prevSystemSnapshot: SystemSnapshot?
 
-    /// Rolling CPU usage history (up to 8 values); used to render a sparkline.
-    @Published private(set) var cpuHistory: [Double] = []
-
     /// Set to true by resetCompanion() so the next popover open shows a welcome quip.
     private(set) var pendingResetWelcome = false
 
@@ -148,17 +145,16 @@ class CompanionStore: ObservableObject {
                 guard let self else { return }
                 self.prevSystemSnapshot = self.systemSnapshot
                 self.systemSnapshot = snapshot
-                if self.cpuHistory.count >= 8 { self.cpuHistory.removeFirst() }
-                self.cpuHistory.append(snapshot.cpuUsage)
             }
         }
         systemMonitor.start()
-        scheduleMenuBarQuip()
+        scheduleMenuBarQuip(delay: Double.random(in: 15...30))
     }
 
-    private func scheduleMenuBarQuip() {
+    private func scheduleMenuBarQuip(delay: TimeInterval? = nil) {
         menuBarQuipTimer?.invalidate()
-        menuBarQuipTimer = Timer.scheduledTimer(withTimeInterval: Double.random(in: 120...300), repeats: false) { [weak self] _ in
+        let interval = delay ?? Double.random(in: 120...300)
+        menuBarQuipTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
             guard let self else { return }
             if !self.muted {
                 let quips = Strings.speciesQuips(for: self.companion.species) + Strings.genericQuips

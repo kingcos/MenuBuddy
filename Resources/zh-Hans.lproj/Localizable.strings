@@ -301,6 +301,15 @@
 "sysstat.net.unit.kb" = "%.0f KB/s";
 "sysstat.net.unit.mb" = "%.1f MB/s";
 
+/* 语言 */
+"settings.section.language" = "语言";
+"settings.language.system" = "跟随系统";
+"settings.language.en" = "English";
+"settings.language.zhHans" = "简体中文";
+"settings.language.restart" = "语言已更改，请重启 MenuBuddy 以使更改生效。";
+"settings.language.restart.ok" = "立即退出";
+"settings.language.restart.later" = "稍后";
+
 /* 属性描述 */
 "stat.debugging.desc" = "伙伴的调试能力——稀有度越高，调试直觉越强。";
 "stat.patience.desc" = "伙伴的耐心值——有些种类天生更佛系。";

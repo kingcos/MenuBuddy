@@ -337,25 +337,11 @@ struct StatsView: View {
     }
 }
 
-// MARK: - Sparkline Helper
-
-func sparkline(_ values: [Double]) -> String {
-    let bars: [Character] = ["▁","▂","▃","▄","▅","▆","▇","█"]
-    guard !values.isEmpty else { return "" }
-    let hi = values.max() ?? 1
-    return String(values.map { v in
-        let norm = hi > 0 ? v / hi : 0
-        let idx = min(Int(norm * Double(bars.count - 1) + 0.5), bars.count - 1)
-        return bars[idx]
-    })
-}
-
 // MARK: - System Status Strip
 
 struct SystemStatusView: View {
     let snapshot: SystemSnapshot
     var prev: SystemSnapshot? = nil
-    var cpuHistory: [Double] = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -369,11 +355,6 @@ struct SystemStatusView: View {
                 metricPill(label: Strings.sysstatNET,
                            value: netLabel(snapshot.netBytesPerSec),
                            alert: false)
-                if snapshot.diskBytesPerSec > 0 {
-                    metricPill(label: Strings.sysstatDisk,
-                               value: netLabel(snapshot.diskBytesPerSec),
-                               alert: snapshot.diskBytesPerSec > 50_000_000)
-                }
                 if let bat = snapshot.batteryPct {
                     metricPill(label: snapshot.isCharging ? Strings.sysstatCharging : Strings.sysstatBAT,
                                value: "\(Int(bat * 100))%",
@@ -381,17 +362,7 @@ struct SystemStatusView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 6)
-            .padding(.bottom, cpuHistory.isEmpty ? 6 : 2)
-
-            if !cpuHistory.isEmpty {
-                Text(sparkline(cpuHistory))
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundColor(snapshot.cpuUsage > 0.70 ? .orange : .secondary)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            .padding(.vertical, 6)
         }
     }
 

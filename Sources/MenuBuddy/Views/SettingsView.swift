@@ -4,6 +4,13 @@ import ServiceManagement
 struct SettingsView: View {
     @ObservedObject var store: CompanionStore
     @State private var launchAtLogin: Bool = false
+    @State private var selectedLanguage: String = {
+        if let langs = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String] {
+            if langs.first?.hasPrefix("zh-Hans") == true { return "zh-Hans" }
+            if langs.first?.hasPrefix("en") == true { return "en" }
+        }
+        return "system"
+    }()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -36,6 +43,25 @@ struct SettingsView: View {
                         Toggle(isOn: $store.muted) {
                             Text(Strings.settingsMute)
                                 .font(.system(size: 12))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    Divider()
+
+                    // MARK: Language
+                    sectionHeader(Strings.settingsSectionLanguage)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Picker("", selection: $selectedLanguage) {
+                            Text(Strings.settingsLanguageSystem).tag("system")
+                            Text(Strings.settingsLanguageEN).tag("en")
+                            Text(Strings.settingsLanguageZHHans).tag("zh-Hans")
+                        }
+                        .pickerStyle(.radioGroup)
+                        .font(.system(size: 12))
+                        .onChange(of: selectedLanguage) { _, lang in
+                            changeLanguage(lang)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -106,7 +132,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 20)
 
                     if let snap = store.systemSnapshot {
-                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot, cpuHistory: store.cpuHistory)
+                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
                             .padding(.horizontal, 4)
                     }
 
@@ -191,5 +217,22 @@ struct SettingsView: View {
     private func toggleLaunchAtLogin(_ enable: Bool) {
         let service = SMAppService.mainApp
         try? enable ? service.register() : service.unregister()
+    }
+
+    private func changeLanguage(_ lang: String) {
+        if lang == "system" {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.set([lang], forKey: "AppleLanguages")
+        }
+        UserDefaults.standard.synchronize()
+
+        let alert = NSAlert()
+        alert.messageText = Strings.settingsLanguageRestart
+        alert.addButton(withTitle: Strings.settingsLanguageRestartOK)
+        alert.addButton(withTitle: Strings.settingsLanguageRestartLater)
+        if alert.runModal() == .alertFirstButtonReturn {
+            NSApp.terminate(nil)
+        }
     }
 }

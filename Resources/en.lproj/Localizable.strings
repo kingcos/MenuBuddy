@@ -301,6 +301,15 @@
 "sysstat.net.unit.kb" = "%.0f KB/s";
 "sysstat.net.unit.mb" = "%.1f MB/s";
 
+/* Language */
+"settings.section.language" = "Language";
+"settings.language.system" = "System Default";
+"settings.language.en" = "English";
+"settings.language.zhHans" = "简体中文";
+"settings.language.restart" = "Language changed. Please restart MenuBuddy for the change to take effect.";
+"settings.language.restart.ok" = "Quit Now";
+"settings.language.restart.later" = "Later";
+
 /* Stat descriptions */
 "stat.debugging.desc" = "How well your buddy debugs — higher rarity means better debugging instincts.";
 "stat.patience.desc" = "Your buddy's patience level — some species are more zen than others.";
