@@ -14,9 +14,9 @@ final class LLMService {
 
         static let `default` = Config(
             enabled: false,
-            apiEndpoint: "https://api.openai.com/v1/chat/completions",
+            apiEndpoint: "https://api.deepseek.com/chat/completions",
             apiKey: "",
-            model: "gpt-4o-mini",
+            model: "deepseek-chat",
             maxTokens: 60
         )
     }
