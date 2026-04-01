@@ -52,7 +52,7 @@ final class ScriptTriggerSource: TriggerSource {
     }
 
     func start() {
-        // Run once immediately, then schedule polling
+        logger.info("Script trigger started: \(displayName) (\(scriptPath))", source: "script.\(id)")
         poll()
         scheduleTimer()
     }
@@ -74,10 +74,16 @@ final class ScriptTriggerSource: TriggerSource {
     private func poll() {
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let self else { return }
-            guard let output = self.runScript() else { return }
+            guard let output = self.runScript() else {
+                logger.warn("Script returned no output: \(self.scriptPath)", source: "script.\(self.id)")
+                return
+            }
             guard let data = output.data(using: .utf8),
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-            else { return }
+            else {
+                logger.error("Script output is not valid JSON: \(self.scriptPath)", source: "script.\(self.id)")
+                return
+            }
 
             DispatchQueue.main.async {
                 self.processOutput(json)
@@ -103,10 +109,14 @@ final class ScriptTriggerSource: TriggerSource {
             try process.run()
             process.waitUntilExit()
         } catch {
+            logger.error("Script failed to run: \(error.localizedDescription)", source: "script.\(id)")
             return nil
         }
 
-        guard process.terminationStatus == 0 else { return nil }
+        guard process.terminationStatus == 0 else {
+            logger.warn("Script exited with code \(process.terminationStatus): \(scriptPath)", source: "script.\(id)")
+            return nil
+        }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         return String(data: data, encoding: .utf8)
     }

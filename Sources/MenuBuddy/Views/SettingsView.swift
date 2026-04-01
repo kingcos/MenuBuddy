@@ -181,6 +181,23 @@ struct SettingsView: View {
                 // MARK: - Danger Zone
                 settingsCard {
                     settingsRow {
+                        Button(action: {
+                            NSWorkspace.shared.open(URL(fileURLWithPath: BuddyLogger.shared.logsDirectory))
+                        }) {
+                            HStack {
+                                Image(systemName: "doc.text.magnifyingglass")
+                                    .foregroundColor(.secondary)
+                                Text(Strings.settingsLogsOpen)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.secondary.opacity(0.5))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    cardDivider
+                    settingsRow {
                         Button(action: confirmReset) {
                             HStack {
                                 Image(systemName: "arrow.counterclockwise")

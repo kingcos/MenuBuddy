@@ -159,6 +159,9 @@ class CompanionStore: ObservableObject {
 
         companion = Companion(bones: bones, soul: soul)
 
+        logger.info("Companion: \(companion.name) (\(companion.species.rawValue), \(companion.rarity.rawValue)\(companion.shiny ? ", shiny" : ""))", source: "store")
+        if isFirstLaunch { logger.info("First launch", source: "store") }
+
         // Sync repeat setting to system monitor
         systemSource.monitor.repeatEvents = repeatTriggers
 
@@ -207,6 +210,8 @@ class CompanionStore: ObservableObject {
 
     /// Handles a standardized trigger event from any source.
     private func handleTriggerEvent(_ event: TriggerEvent) {
+        logger.debug("Trigger event: [\(event.sourceId)] \(event.indicator) quips=\(event.quips.count)", source: "trigger")
+
         // Update menu bar indicator
         systemIndicator = event.indicator
         triggerEyeOverride = event.eyeOverride

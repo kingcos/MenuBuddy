@@ -18,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var sleepStartTime: Date?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        logger.info("MenuBuddy launched", source: "app")
         store = CompanionStore.shared
 
         setupStatusItem()

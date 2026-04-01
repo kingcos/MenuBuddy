@@ -343,6 +343,7 @@
 "trigger.scripts.hint" = "将可执行脚本放入 ~/.menubuddy/triggers/ 即可添加自定义触发源。";
 "trigger.scripts.open" = "打开触发源目录";
 "trigger.scripts.rescan" = "重新扫描脚本";
+"settings.logs.open" = "查看日志";
 
 /* 物种图鉴 */
 "atlas.title" = "物种图鉴";

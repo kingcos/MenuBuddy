@@ -34,6 +34,8 @@ final class TriggerManager: ObservableObject {
         if source.isEnabled {
             source.start()
         }
+
+        logger.info("Registered trigger source: \(source.displayName) (id=\(source.id), enabled=\(source.isEnabled))", source: "trigger")
     }
 
     /// Unregister and stop a source by id.

@@ -343,6 +343,7 @@
 "trigger.scripts.hint" = "Drop executable scripts into ~/.menubuddy/triggers/ to add custom triggers.";
 "trigger.scripts.open" = "Open Triggers Folder";
 "trigger.scripts.rescan" = "Rescan Scripts";
+"settings.logs.open" = "View Logs";
 
 /* Species Atlas */
 "atlas.title" = "Species Atlas";
