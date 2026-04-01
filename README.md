@@ -1,21 +1,72 @@
 # MenuBuddy
 
+[中文说明](README.zh-CN.md)
+
 A tiny companion pet that lives in your macOS menu bar. Click the icon to open the popover and see your buddy — an animated ASCII creature unique to your machine.
 
 ## Features
 
+### Companion
+
 - **18 species**: duck, goose, blob, cat, dragon, octopus, owl, penguin, turtle, snail, ghost, axolotl, capybara, cactus, robot, rabbit, mushroom, chonk
-- **5 rarity tiers**: common → uncommon → rare → epic → legendary (1% chance)
+- **5 rarity tiers**: Common (60%) → Uncommon (25%) → Rare (10%) → Epic (4%) → Legendary (1%)
 - **1% shiny** variant with golden glow
 - **Deterministic generation**: your buddy is derived from your machine UUID — same machine, same buddy, always
 - **Idle animations**: 3-frame fidget loop with blink, at 500ms tick rate
-- **Speech bubbles**: species-specific personality quips every 15–45s, fade out gracefully
-- **Pet interaction**: tap the sprite for a heart burst
-- **Stats panel**: DEBUGGING / PATIENCE / CHAOS / WISDOM / SNARK
-- **Rename**: pencil button in header or "Rename…" in context menu
-- **Mute**: silence the speech bubbles
-- **Launch at Login**: register as a login item via context menu
-- **LSUIElement mode**: no Dock icon, lives only in the menu bar
+- **Speech bubbles**: species-specific and generic quips every 15–45s, fade out gracefully
+- **Pet interaction**: tap the sprite for a heart burst; milestones at 1, 5, 10, 25, 50, 100 pets
+- **Stats**: DEBUGGING / PATIENCE / CHAOS / WISDOM / SNARK — personality traits determined by species and rarity (hover for descriptions)
+- **Rename**: pencil button in header, right-click menu, or Settings
+- **Reset**: get a new companion with a fresh name (bones stay the same — they're machine-tied)
+
+### System Monitoring
+
+Your buddy reacts to your Mac's real-time state:
+
+| Metric | Threshold | Indicator | Mood |
+|--------|-----------|-----------|------|
+| CPU | >70% | 🔥 | 😰 stress eyes (×) |
+| Memory | >85% used | 🧠 | 😵 squiggly eyes (~) |
+| Network | >5 MB/s | ⚡ | 🚀 |
+| Network | idle after active | 🐌 | flat eyes (_) |
+| Disk I/O | >50 MB/s | 💾 | wide eyes (o) |
+| Battery | <20% | 🪫 | tiny dot eyes (.) |
+| Battery | charging | ⚡ | — |
+| Idle | CPU <10%, no net | — | 😴 |
+
+- **System status strip**: live CPU%, MEM%, NET, DSK, BAT pills with trend arrows (↑↓)
+- **CPU sparkline**: rolling 8-sample history rendered as `▁▂▃▄▅▆▇█` block characters
+- **System quips**: buddy reacts with contextual speech bubbles when events fire
+- **Menu bar expression**: the ASCII face in the menu bar changes eyes based on system stress
+
+### Menu Bar
+
+- **Animated face**: your companion's face animates in the menu bar with blink and idle frames
+- **System indicator emoji**: shows next to the face when a system event is active (auto-clears after 30s)
+- **Menu bar quips**: buddy occasionally says something next to its face (every 2–5 min, clears after 6s)
+- **Do Not Disturb**: configure quiet hours in Settings to suppress menu bar quips (supports overnight wrap, e.g. 22:00→08:00)
+
+### Awareness
+
+- **Sleep/wake**: buddy greets you when your Mac wakes up, with different messages based on sleep duration
+- **Workspace**: 25% chance to comment when you switch to coding, terminal, browsing, chatting, design, or music apps
+- **Time of day**: daily greeting (morning/afternoon/evening/night) on first popover open each day
+
+### UI & Interaction
+
+- **Left-click**: open/close popover
+- **Right-click**: context menu with pet, rename, mute, launch at login, settings, about, quit
+- **Popover toolbar**: settings gear, info, and quit buttons at the bottom — no need to right-click
+- **Settings window**: General, Menu Bar, Do Not Disturb, System Monitor, Help, and Reset sections
+- **Launch at Login**: via SMAppService
+- **Mute**: silences all speech bubbles and menu bar quips
+- **LSUIElement**: no Dock icon, lives only in the menu bar
+
+### Internationalization
+
+- **English** and **Simplified Chinese** (zh-Hans) fully supported
+- 256 localized string keys covering all UI, quips, stats, system messages, and accessibility labels
+- Follows system locale — no in-app language switcher needed
 
 ## Requirements
 
@@ -36,24 +87,33 @@ make clean    # swift package clean
 ```
 Sources/MenuBuddy/
 ├── main.swift                     # Entry point
-├── App/AppDelegate.swift          # NSStatusItem, NSPopover, context menu
+├── L10n.swift                     # Localization helper + Strings enum
+├── App/AppDelegate.swift          # NSStatusItem, NSPopover, context menu, sleep/wake
 ├── Models/
 │   ├── CompanionTypes.swift       # Species, Rarity, Eye, Hat, StatName enums
 │   ├── CompanionModel.swift       # Mulberry32 PRNG + FNV-1a, deterministic generation
-│   └── CompanionStore.swift       # UserDefaults persistence for name/personality
+│   └── CompanionStore.swift       # State management, system monitor, menu bar quips, DND
+├── System/
+│   └── SystemMonitor.swift        # CPU, memory, network, disk I/O, battery polling
 ├── Sprites/
 │   ├── SpriteData.swift           # ASCII art frames for all 18 species
 │   └── SpriteRenderer.swift       # renderSprite(), renderFace()
 └── Views/
-    ├── CompanionView.swift        # AnimationEngine, SpeechBubbleView, StatsView
-    └── PopoverView.swift          # Main popover UI
+    ├── CompanionView.swift        # AnimationEngine, SpeechBubbleView, StatsView, SystemStatusView
+    ├── PopoverView.swift          # Main popover UI with toolbar
+    └── SettingsView.swift         # Settings window
+
+Resources/
+├── en.lproj/Localizable.strings       # English strings
+├── zh-Hans.lproj/Localizable.strings  # Simplified Chinese strings
+└── Info.plist                         # Bundle config + localization declarations
 ```
 
-## How companion generation works
+## How Companion Generation Works
 
-Your companion is generated deterministically from your machine's IOPlatformUUID, salted and hashed with FNV-1a 32-bit, then fed into a Mulberry32 PRNG. The resulting sequence picks rarity, species, eye style, hat, shiny chance, and stats in order — same inputs always yield the same output.
+Your companion is generated deterministically from your machine's IOPlatformUUID, salted and hashed with FNV-1a 32-bit, then fed into a Mulberry32 PRNG. The resulting sequence picks rarity, species, eye style, hat, shiny chance, and stats — same inputs always yield the same output.
 
-Only the companion's **name** is stored in UserDefaults and can be edited. Everything else is derived at runtime from your machine UUID, so editing preferences can't fake a legendary.
+Only the companion's **name** is stored in UserDefaults. Everything else is derived at runtime from your machine UUID, so editing preferences can't fake a legendary.
 
 ## Acknowledgements
 
