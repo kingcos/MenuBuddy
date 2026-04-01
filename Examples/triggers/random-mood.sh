@@ -13,7 +13,7 @@ cat <<'EOF'
   "interval": 120,
   "trigger": {
     "indicator": "🎲",
-    "quips": ["feeling random!", "dice says hi", "🎲🎲🎲"],
+    "quips": ["随机心情!", "骰子问好", "掷骰子!"],
     "mood": "🤪",
     "duration": 15
   },

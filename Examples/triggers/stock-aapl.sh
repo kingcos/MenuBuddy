@@ -102,7 +102,7 @@ if [ "$alert" = "true" ]; then
     if echo "$change_pct > 0" | bc -l | grep -q 1; then
         trigger="\"trigger\": {
     \"indicator\": \"📈\",
-    \"quips\": [\"AAPL +${change_str}!\", \"Apple is flying!\", \"stonks!\"],
+    \"quips\": [\"AAPL +${change_str}!\", \"苹果起飞了!\", \"冲冲冲!\"],
     \"mood\": \"🤑\",
     \"eyeOverride\": \"$\",
     \"duration\": 30
@@ -110,7 +110,7 @@ if [ "$alert" = "true" ]; then
     else
         trigger="\"trigger\": {
     \"indicator\": \"📉\",
-    \"quips\": [\"AAPL ${change_str}...\", \"Apple is dropping...\", \"pain.\"],
+    \"quips\": [\"AAPL ${change_str}...\", \"苹果在跌...\", \"痛。\"],
     \"mood\": \"😰\",
     \"eyeOverride\": \".\",
     \"duration\": 30

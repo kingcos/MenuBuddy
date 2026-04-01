@@ -31,7 +31,7 @@ if [ "$cpu_pct" -ge 80 ]; then
     cpu_trend="↑"
     trigger='"trigger": {
     "indicator": "🔥",
-    "quips": ["CPU is on fire!", "so hot...", "fan spinning!"],
+    "quips": ["CPU 着火了!", "好热...", "风扇在转!"],
     "mood": "😰",
     "eyeOverride": "x",
     "duration": 20
@@ -49,7 +49,7 @@ if [ "$mem_pct" -ge 90 ]; then
     mem_trend="↑"
     trigger='"trigger": {
     "indicator": "🧠",
-    "quips": ["brain full!", "too much stuff...", "need more RAM"],
+    "quips": ["脑子满了!", "东西太多了...", "需要更多内存"],
     "mood": "😵",
     "eyeOverride": "~",
     "duration": 20

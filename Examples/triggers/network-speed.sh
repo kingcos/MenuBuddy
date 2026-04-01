@@ -84,14 +84,14 @@ trigger=""
 if [ "$total_bps" -ge 5242880 ]; then
     trigger='"trigger": {
     "indicator": "⚡",
-    "quips": ["downloading fast!", "data incoming!", "network go brrrr"],
+    "quips": ["下载飞快!", "数据涌入!", "网络起飞!"],
     "mood": "🚀",
     "duration": 15
   },'
 elif [ "$total_bps" -ge 1048576 ]; then
     trigger='"trigger": {
     "indicator": "📡",
-    "quips": ["busy network!", "bytes flowing~"],
+    "quips": ["网络忙碌中!", "字节在流动~"],
     "duration": 10
   },'
 fi
