@@ -13,18 +13,18 @@ struct PopoverView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            spriteAreaView
-            hatchFooter
-                .padding(.horizontal, 16)
-                .padding(.bottom, 4)
             SpeechBubbleView(
                 text: engine.speechText ?? " ",
                 color: companion.rarity.color,
                 fading: engine.speechFading
             )
             .padding(.horizontal, 14)
-            .padding(.bottom, 6)
+            .padding(.bottom, 2)
             .opacity(engine.speechText != nil ? 1 : 0)
+            spriteAreaView
+            hatchFooter
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
             Divider()
             StatsView(stats: companion.stats)
                 .padding(.horizontal, 16)
