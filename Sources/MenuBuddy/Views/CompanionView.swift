@@ -324,30 +324,20 @@ struct StatsView: View {
 // MARK: - Metric Strip View
 
 /// Generic metric strip that displays TriggerMetrics from any source.
-/// When metrics exceed 5, switches to a scrollable horizontal layout.
+/// Always scrollable horizontally so nothing gets truncated.
 struct MetricStripView: View {
     let metrics: [TriggerMetric]
 
     var body: some View {
-        if metrics.count <= 5 {
-            HStack(spacing: 10) {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: metrics.count <= 4 ? 16 : 10) {
                 ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
                     metricPill(metric)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 6)
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
-                        metricPill(metric)
-                            .frame(width: 48)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
-            }
+            .frame(minWidth: metrics.count <= 4 ? 248 : nil)
         }
     }
 
@@ -363,7 +353,7 @@ struct MetricStripView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: metrics.count <= 5 ? .infinity : nil)
+        .frame(minWidth: 40)
     }
 }
 

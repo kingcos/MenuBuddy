@@ -122,11 +122,6 @@ final class ScriptTriggerSource: TriggerSource {
     }
 
     private func processOutput(_ json: [String: Any]) {
-        // Update display name if provided
-        if let name = json["name"] as? String, !name.isEmpty {
-            displayName = name
-        }
-
         // Update poll interval if changed
         if let interval = json["interval"] as? Double, interval >= 5 {
             let changed = interval != pollInterval
