@@ -230,6 +230,21 @@
 /* Default companion names (used on very first launch) */
 "default.names" = "Pip,Mochi,Biscuit,Noodle,Dumpling,Pebble,Sprout,Twig,Acorn,Button,Wobble,Fudge,Nugget,Pretzel,Waffle";
 
+/* LLM Settings */
+"settings.section.llm" = "AI Reactions";
+"settings.llm.enable" = "Enable AI-generated reactions";
+"settings.llm.enable.desc" = "Use an LLM to generate contextual companion reactions instead of preset quips.";
+"settings.llm.endpoint" = "API Endpoint";
+"settings.llm.apikey" = "API Key";
+"settings.llm.model" = "Model";
+"settings.llm.maxtokens" = "Max Tokens";
+"settings.llm.usage" = "Usage: %d requests · %d tokens";
+"settings.llm.usage.reset" = "Reset";
+"settings.llm.test" = "Test";
+"settings.llm.testing" = "Testing...";
+"settings.llm.test.ok" = "OK: %@";
+"settings.llm.test.fail" = "Failed: %@";
+
 /* Startup greetings (random, shown each launch) */
 "quip.startup.1" = "ready to go!";
 "quip.startup.2" = "let's do this!";

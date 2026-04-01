@@ -4,6 +4,13 @@ import ServiceManagement
 struct SettingsView: View {
     @ObservedObject var store: CompanionStore
     @State private var launchAtLogin: Bool = false
+    @State private var llmEnabled: Bool = LLMService.shared.config.enabled
+    @State private var llmEndpoint: String = LLMService.shared.config.apiEndpoint
+    @State private var llmApiKey: String = LLMService.shared.config.apiKey
+    @State private var llmModel: String = LLMService.shared.config.model
+    @State private var llmMaxTokens: String = "\(LLMService.shared.config.maxTokens)"
+    @State private var llmTestResult: String?
+    @State private var llmTesting = false
     @State private var selectedLanguage: String = {
         if let langs = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String] {
             if langs.first?.hasPrefix("zh-Hans") == true { return "zh-Hans" }
@@ -26,6 +33,7 @@ struct SettingsView: View {
                     generalSection
                     menuBarSection
                     triggerSection
+                    llmSection
                     advancedSection
                 }
                 .padding(.horizontal, 20)
@@ -208,6 +216,124 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
+            }
+        }
+    }
+
+    // MARK: - LLM / AI Reactions
+
+    private var llmSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionLabel(Strings.settingsSectionLLM)
+            card {
+                row {
+                    Toggle(isOn: $llmEnabled) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsLLMEnable)
+                            Text(Strings.settingsLLMEnableDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: llmEnabled) { _, v in
+                        var cfg = LLMService.shared.config
+                        cfg.enabled = v
+                        LLMService.shared.config = cfg
+                    }
+                }
+                if llmEnabled {
+                    divider
+                    row {
+                        VStack(alignment: .leading, spacing: 8) {
+                            llmField(Strings.settingsLLMEndpoint, text: $llmEndpoint)
+                            llmField(Strings.settingsLLMApiKey, text: $llmApiKey, secure: true)
+                            HStack(spacing: 12) {
+                                llmField(Strings.settingsLLMModel, text: $llmModel)
+                                llmField(Strings.settingsLLMMaxTokens, text: $llmMaxTokens)
+                                    .frame(width: 60)
+                            }
+                        }
+                        .onChange(of: llmEndpoint) { _, _ in saveLLMConfig() }
+                        .onChange(of: llmApiKey) { _, _ in saveLLMConfig() }
+                        .onChange(of: llmModel) { _, _ in saveLLMConfig() }
+                        .onChange(of: llmMaxTokens) { _, _ in saveLLMConfig() }
+                    }
+                    divider
+                    row {
+                        HStack {
+                            // Test button
+                            Button(action: testLLM) {
+                                Text(llmTesting ? Strings.settingsLLMTesting : Strings.settingsLLMTest)
+                                    .font(.system(size: 12))
+                            }
+                            .disabled(llmTesting || llmApiKey.isEmpty)
+
+                            if let result = llmTestResult {
+                                Text(result)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(result.hasPrefix("OK") || result.hasPrefix("成功") ? .green : .red)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                            }
+                            Spacer()
+                        }
+                    }
+                    divider
+                    row {
+                        HStack {
+                            let u = LLMService.shared.usage
+                            Text(Strings.settingsLLMUsage(u.totalRequests, u.totalTokens))
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            actionButton("arrow.counterclockwise", Strings.settingsLLMUsageReset) {
+                                LLMService.shared.resetUsage()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func llmField(_ label: String, text: Binding<String>, secure: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+            if secure {
+                SecureField("", text: text)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 11, design: .monospaced))
+            } else {
+                TextField("", text: text)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 11, design: .monospaced))
+            }
+        }
+    }
+
+    private func saveLLMConfig() {
+        var cfg = LLMService.shared.config
+        cfg.apiEndpoint = llmEndpoint
+        cfg.apiKey = llmApiKey
+        cfg.model = llmModel
+        cfg.maxTokens = Int(llmMaxTokens) ?? 60
+        LLMService.shared.config = cfg
+    }
+
+    private func testLLM() {
+        llmTesting = true
+        llmTestResult = nil
+        LLMService.shared.generateReaction(
+            companion: store.companion,
+            context: "The user just opened settings to test the AI connection."
+        ) { [self] reaction in
+            llmTesting = false
+            if let reaction {
+                llmTestResult = Strings.settingsLLMTestOK(reaction)
+            } else {
+                llmTestResult = Strings.settingsLLMTestFail("No response")
             }
         }
     }

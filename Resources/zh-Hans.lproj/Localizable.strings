@@ -230,6 +230,21 @@
 /* 默认桌宠名字 */
 "default.names" = "小皮,麻薯,小饼,粉条,小笼包,小石头,小芽,小枝,橡果,小扣,小摇,软糖,金块,蝴蝶饼,华夫";
 
+/* LLM 设置 */
+"settings.section.llm" = "AI 反应";
+"settings.llm.enable" = "启用 AI 生成反应";
+"settings.llm.enable.desc" = "使用大语言模型根据上下文生成伙伴反应，替代预设台词。";
+"settings.llm.endpoint" = "API 端点";
+"settings.llm.apikey" = "API Key";
+"settings.llm.model" = "模型";
+"settings.llm.maxtokens" = "最大 Token";
+"settings.llm.usage" = "已用：%d 次请求 · %d tokens";
+"settings.llm.usage.reset" = "重置";
+"settings.llm.test" = "测试";
+"settings.llm.testing" = "测试中…";
+"settings.llm.test.ok" = "成功：%@";
+"settings.llm.test.fail" = "失败：%@";
+
 /* 启动问候（每次启动随机显示）*/
 "quip.startup.1" = "准备好了！";
 "quip.startup.2" = "开始吧！";

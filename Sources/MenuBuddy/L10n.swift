@@ -118,6 +118,21 @@ enum Strings {
         L("default.names").components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
+    // LLM settings
+    static var settingsSectionLLM: String         { L("settings.section.llm") }
+    static var settingsLLMEnable: String          { L("settings.llm.enable") }
+    static var settingsLLMEnableDesc: String      { L("settings.llm.enable.desc") }
+    static var settingsLLMEndpoint: String        { L("settings.llm.endpoint") }
+    static var settingsLLMApiKey: String          { L("settings.llm.apikey") }
+    static var settingsLLMModel: String           { L("settings.llm.model") }
+    static var settingsLLMMaxTokens: String       { L("settings.llm.maxtokens") }
+    static func settingsLLMUsage(_ r: Int, _ t: Int) -> String { L("settings.llm.usage", r, t) }
+    static var settingsLLMUsageReset: String      { L("settings.llm.usage.reset") }
+    static var settingsLLMTest: String            { L("settings.llm.test") }
+    static var settingsLLMTesting: String         { L("settings.llm.testing") }
+    static func settingsLLMTestOK(_ s: String) -> String { L("settings.llm.test.ok", s) }
+    static func settingsLLMTestFail(_ s: String) -> String { L("settings.llm.test.fail", s) }
+
     // Startup greetings
     static var startupQuips: [String] {
         (1...6).map { L("quip.startup.\($0)") }

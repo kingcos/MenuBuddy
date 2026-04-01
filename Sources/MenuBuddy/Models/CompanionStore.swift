@@ -222,9 +222,36 @@ class CompanionStore: ObservableObject {
         }
     }
 
+    /// Tries to generate an LLM reaction for the given context.
+    /// Falls back to the provided quips if LLM is disabled or fails.
+    func requestLLMReaction(context: String, fallbackQuips: [String]) {
+        let llm = LLMService.shared
+        guard llm.config.enabled else { return }
+
+        llm.generateReaction(companion: companion, context: context) { [weak self] reaction in
+            guard let self, let reaction, !reaction.isEmpty else { return }
+            self.onTriggerEvent?(TriggerEvent(
+                sourceId: "llm",
+                indicator: "",
+                quips: [reaction]
+            ))
+            self.showMenuBarQuip(reaction)
+        }
+    }
+
     /// Handles a standardized trigger event from any source.
     private func handleTriggerEvent(_ event: TriggerEvent) {
         logger.debug("Trigger event: [\(event.sourceId)] \(event.indicator) quips=\(event.quips.count)", source: "trigger")
+
+        // Try LLM-generated reaction if enabled
+        if !event.quips.isEmpty, LLMService.shared.config.enabled {
+            let context = "System event: \(event.indicator) \(event.quips.first ?? "")"
+            LLMService.shared.generateReaction(companion: companion, context: context) { [weak self] reaction in
+                if let reaction, !reaction.isEmpty {
+                    self?.onTriggerEvent?(TriggerEvent(sourceId: "llm", indicator: event.indicator, quips: [reaction]))
+                }
+            }
+        }
 
         // Update menu bar indicator
         systemIndicator = event.indicator
