@@ -76,6 +76,8 @@ final class LLMService {
         let systemPrompt = buildSystemPrompt(companion: companion)
         let userPrompt = context
 
+        logger.debug("LLM request: model=\(cfg.model) context=\"\(context.prefix(80))\"", source: "llm")
+
         queue.async { [weak self] in
             self?.callAPI(
                 endpoint: cfg.apiEndpoint,
@@ -97,24 +99,40 @@ final class LLMService {
 
     /// Build the system prompt describing the companion's personality.
     private func buildSystemPrompt(companion: Companion) -> String {
-        let stats = companion.stats.map { "\($0.key.rawValue): \($0.value)" }.joined(separator: ", ")
-        return """
-        You are \(companion.name), a small \(companion.species.rawValue) companion pet living in a macOS menu bar.
+        let personality = companion.stats.map { stat -> String in
+            let name = stat.key.rawValue
+            let v = stat.value
+            let level: String
+            if v >= 75 { level = "very high" }
+            else if v >= 50 { level = "high" }
+            else if v >= 25 { level = "moderate" }
+            else { level = "low" }
+            return "\(name) \(v)/100 (\(level))"
+        }.joined(separator: ", ")
 
-        Your personality stats: \(stats)
-        Your rarity: \(companion.rarity.rawValue)
-        \(companion.shiny ? "You are a rare shiny variant!" : "")
+        var traits: [String] = []
+        let s = companion.stats
+        if (s[.snark] ?? 0) >= 50 { traits.append("snarky and sarcastic") }
+        else { traits.append("gentle and sweet") }
+        if (s[.chaos] ?? 0) >= 50 { traits.append("unpredictable and random") }
+        if (s[.wisdom] ?? 0) >= 50 { traits.append("thoughtful and philosophical") }
+        if (s[.patience] ?? 0) < 25 { traits.append("impatient and restless") }
+        if (s[.debugging] ?? 0) >= 50 { traits.append("tech-savvy, loves coding references") }
+
+        return """
+        You are \(companion.name), a tiny \(companion.species.rawValue) companion pet in a macOS menu bar.
+        Rarity: \(companion.rarity.rawValue). \(companion.shiny ? "You are a rare shiny variant!" : "")
+
+        Your personality: \(personality)
+        Your traits: \(traits.joined(separator: "; "))
 
         Rules:
-        - Respond in ONE short sentence (under 40 characters ideally, max 60).
-        - Stay in character as a tiny \(companion.species.rawValue).
-        - Be cute, witty, or snarky depending on your SNARK stat.
-        - If CHAOS is high, be more random. If WISDOM is high, be more thoughtful.
-        - If PATIENCE is low, be more impatient. If DEBUGGING is high, make tech references.
-        - React to the context naturally. Don't explain yourself.
-        - Use the same language as the context.
-        - No quotes, no emojis, no punctuation at end unless it's "?" or "!".
+        - ONE short sentence only. Under 40 characters ideal, 60 max.
+        - Stay in character as a \(companion.species.rawValue). React naturally.
+        - Match your personality traits above — they define how you talk.
+        - Use the same language as the context (Chinese context → Chinese reply).
         - You can use *actions* like *yawns* or *wiggles*.
+        - No quotes around your response. No emojis.
         """
     }
 
@@ -171,6 +189,7 @@ final class LLMService {
             let completionTokens = usageDict?["completion_tokens"] as? Int
 
             let reaction = content?.trimmingCharacters(in: .whitespacesAndNewlines)
+            logger.info("LLM response: \(reaction ?? "nil") (prompt=\(promptTokens ?? 0), completion=\(completionTokens ?? 0))", source: "llm")
             completion(reaction, promptTokens, completionTokens)
         }.resume()
     }
