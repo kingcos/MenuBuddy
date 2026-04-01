@@ -324,21 +324,30 @@ struct StatsView: View {
 // MARK: - Metric Strip View
 
 /// Generic metric strip that displays TriggerMetrics from any source.
-/// Always scrollable horizontally so nothing gets truncated.
+/// Dynamically wraps into rows — up to 4 per row, additional metrics flow to next row.
 struct MetricStripView: View {
     let metrics: [TriggerMetric]
 
+    private var rows: [[TriggerMetric]] {
+        let perRow = metrics.count <= 4 ? metrics.count : 4
+        guard perRow > 0 else { return [] }
+        return stride(from: 0, to: metrics.count, by: perRow).map {
+            Array(metrics[$0..<min($0 + perRow, metrics.count)])
+        }
+    }
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: metrics.count <= 4 ? 16 : 10) {
-                ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
-                    metricPill(metric)
+        VStack(spacing: 4) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                HStack(spacing: 10) {
+                    ForEach(Array(row.enumerated()), id: \.offset) { _, metric in
+                        metricPill(metric)
+                    }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
-            .frame(minWidth: metrics.count <= 4 ? 248 : nil)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
     }
 
     private func metricPill(_ metric: TriggerMetric) -> some View {
@@ -353,7 +362,7 @@ struct MetricStripView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .frame(minWidth: 40)
+        .frame(maxWidth: .infinity)
     }
 }
 
