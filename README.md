@@ -19,9 +19,24 @@ A tiny companion pet that lives in your macOS menu bar. Click the icon to open t
 - **Rename**: pencil button in header, right-click menu, or Settings
 - **Reset**: get a new companion with a fresh name (bones stay the same — they're machine-tied)
 
-### System Monitoring
+### Pluggable Trigger System
 
-Your buddy reacts to your Mac's real-time state:
+MenuBuddy uses a **plugin architecture** for driving companion reactions. Any data source can be a trigger — system stats, stock prices, weather, CI/CD status, etc. Each trigger source independently monitors its data and produces standardized events that drive the companion's expressions, quips, mood, and menu bar indicators.
+
+```
+┌───────────────┐  ┌──────────────┐  ┌───────────────┐
+│ System Monitor│  │ Stock Prices │  │ Your Plugin   │
+│ (built-in)    │  │ (example)    │  │               │
+└──────┬────────┘  └──────┬───────┘  └───────┬───────┘
+       │ TriggerEvent     │                   │
+       ▼                  ▼                   ▼
+  ┌──────────────────────────────────────────────────┐
+  │              TriggerManager                      │
+  │  routes events → mood, quips, indicator, eyes    │
+  └──────────────────────────────────────────────────┘
+```
+
+**Built-in: System Monitor** — reacts to your Mac's real-time state:
 
 | Metric | Threshold | Indicator | Mood |
 |--------|-----------|-----------|------|
@@ -34,15 +49,44 @@ Your buddy reacts to your Mac's real-time state:
 | Battery | charging | ⚡ | — |
 | Idle | CPU <10%, no net | — | 😴 |
 
-- **System status strip**: live CPU%, MEM%, NET, DSK, BAT pills with trend arrows (↑↓)
-- **CPU sparkline**: rolling 8-sample history rendered as `▁▂▃▄▅▆▇█` block characters
-- **System quips**: buddy reacts with contextual speech bubbles when events fire
-- **Menu bar expression**: the ASCII face in the menu bar changes eyes based on system stress
+**Writing your own trigger source:**
+
+```swift
+class StockTriggerSource: TriggerSource {
+    let id = "stock"
+    var displayName: String { "Stock Monitor" }
+    var isEnabled = true
+    var onTrigger: ((TriggerEvent) -> Void)?
+
+    func start() {
+        // Poll your data source, then emit events:
+        onTrigger?(TriggerEvent(
+            sourceId: id,
+            indicator: "📈",                          // menu bar emoji
+            quips: ["AAPL up 5%!", "stonks!"],        // speech bubble
+            mood: "🤑",                               // companion mood
+            eyeOverride: "$"                           // menu bar face eyes
+        ))
+    }
+
+    func stop() { /* cleanup */ }
+
+    // Optional: provide live metrics for the status strip
+    var currentMetrics: [TriggerMetric] {
+        [TriggerMetric(label: "AAPL", value: "$189", alert: false, trend: "↑")]
+    }
+}
+
+// Register in CompanionStore or AppDelegate:
+store.triggerManager.register(StockTriggerSource())
+```
+
+Each registered source appears in Settings → Trigger Sources and can be toggled on/off independently.
 
 ### Menu Bar
 
 - **Animated face**: your companion's face animates in the menu bar with blink and idle frames
-- **System indicator emoji**: shows next to the face when a system event is active (auto-clears after 30s)
+- **Trigger indicator emoji**: shows next to the face when an event is active (auto-clears after duration)
 - **Menu bar quips**: buddy occasionally says something next to its face (every 2–5 min, clears after 6s)
 - **Do Not Disturb**: configure quiet hours in Settings to suppress menu bar quips (supports overnight wrap, e.g. 22:00→08:00)
 
@@ -57,7 +101,8 @@ Your buddy reacts to your Mac's real-time state:
 - **Left-click**: open/close popover
 - **Right-click**: context menu with pet, rename, mute, launch at login, settings, about, quit
 - **Popover toolbar**: settings gear, info, and quit buttons at the bottom — no need to right-click
-- **Settings window**: General, Menu Bar, Do Not Disturb, System Monitor, Help, and Reset sections
+- **Settings window**: General, Language, Menu Bar, Do Not Disturb, Trigger Sources, Help, and Reset sections
+- **In-app language switcher**: System Default / English / 简体中文
 - **Launch at Login**: via SMAppService
 - **Mute**: silences all speech bubbles and menu bar quips
 - **LSUIElement**: no Dock icon, lives only in the menu bar
@@ -65,8 +110,8 @@ Your buddy reacts to your Mac's real-time state:
 ### Internationalization
 
 - **English** and **Simplified Chinese** (zh-Hans) fully supported
-- 256 localized string keys covering all UI, quips, stats, system messages, and accessibility labels
-- Follows system locale — no in-app language switcher needed
+- 270+ localized string keys covering all UI, quips, stats, system messages, and accessibility labels
+- In-app language switcher or follows system locale
 
 ## Requirements
 
@@ -92,16 +137,20 @@ Sources/MenuBuddy/
 ├── Models/
 │   ├── CompanionTypes.swift       # Species, Rarity, Eye, Hat, StatName enums
 │   ├── CompanionModel.swift       # Mulberry32 PRNG + FNV-1a, deterministic generation
-│   └── CompanionStore.swift       # State management, system monitor, menu bar quips, DND
+│   └── CompanionStore.swift       # State management, trigger routing, menu bar quips, DND
+├── Triggers/
+│   ├── TriggerPlugin.swift        # TriggerSource protocol, TriggerEvent, TriggerMetric
+│   ├── TriggerManager.swift       # Central hub: register sources, route events, persist state
+│   └── SystemTriggerSource.swift  # Built-in system monitor trigger (CPU/mem/net/bat)
 ├── System/
-│   └── SystemMonitor.swift        # CPU, memory, network, disk I/O, battery polling
+│   └── SystemMonitor.swift        # Low-level CPU, memory, network, disk I/O, battery polling
 ├── Sprites/
 │   ├── SpriteData.swift           # ASCII art frames for all 18 species
 │   └── SpriteRenderer.swift       # renderSprite(), renderFace()
 └── Views/
-    ├── CompanionView.swift        # AnimationEngine, SpeechBubbleView, StatsView, SystemStatusView
+    ├── CompanionView.swift        # AnimationEngine, SpeechBubbleView, StatsView, MetricStripView
     ├── PopoverView.swift          # Main popover UI with toolbar
-    └── SettingsView.swift         # Settings window
+    └── SettingsView.swift         # Settings window with trigger source toggles
 
 Resources/
 ├── en.lproj/Localizable.strings       # English strings

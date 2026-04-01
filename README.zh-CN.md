@@ -19,9 +19,24 @@
 - **重命名**：通过表头铅笔图标、右键菜单或设置
 - **重置**：换一个新名字的伙伴（外观不变——由电脑硬件决定）
 
-### 系统监控
+### 可插拔的触发源系统
 
-你的桌宠会对 Mac 的实时状态做出反应：
+MenuBuddy 使用**插件架构**来驱动桌宠的反应。任何数据源都可以成为触发源——系统状态、股票价格、天气、CI/CD 状态等。每个触发源独立监控数据，并产生标准化的事件来驱动桌宠的表情、话语、心情和菜单栏指示器。
+
+```
+┌───────────────┐  ┌──────────────┐  ┌───────────────┐
+│ 系统监控       │  │ 股票价格      │  │ 你的插件       │
+│ (内置)         │  │ (示例)        │  │               │
+└──────┬────────┘  └──────┬───────┘  └───────┬───────┘
+       │ TriggerEvent     │                   │
+       ▼                  ▼                   ▼
+  ┌──────────────────────────────────────────────────┐
+  │              TriggerManager                      │
+  │  路由事件 → 心情、话语、指示器、表情               │
+  └──────────────────────────────────────────────────┘
+```
+
+**内置：系统监控** ——对 Mac 的实时状态做出反应：
 
 | 指标 | 阈值 | 指示器 | 表情 |
 |------|------|--------|------|
@@ -34,15 +49,44 @@
 | 电量 | 充电中 | ⚡ | — |
 | 空闲 | CPU <10%，无网络 | — | 😴 |
 
-- **系统状态条**：实时 CPU%、内存%、网速、磁盘、电量指标，带趋势箭头（↑↓）
-- **CPU 迷你图**：滚动 8 次采样历史，以 `▁▂▃▄▅▆▇█` 方块字符渲染
-- **系统台词**：当系统事件触发时，伙伴会用对话气泡做出反应
-- **菜单栏表情**：菜单栏的 ASCII 脸部会根据系统压力改变眼睛
+**编写自定义触发源：**
+
+```swift
+class StockTriggerSource: TriggerSource {
+    let id = "stock"
+    var displayName: String { "股票监控" }
+    var isEnabled = true
+    var onTrigger: ((TriggerEvent) -> Void)?
+
+    func start() {
+        // 轮询数据源，然后发送事件：
+        onTrigger?(TriggerEvent(
+            sourceId: id,
+            indicator: "📈",                          // 菜单栏 emoji
+            quips: ["苹果涨了 5%！", "起飞！"],          // 对话气泡
+            mood: "🤑",                               // 桌宠心情
+            eyeOverride: "$"                           // 菜单栏表情眼睛
+        ))
+    }
+
+    func stop() { /* 清理资源 */ }
+
+    // 可选：提供实时指标用于状态条显示
+    var currentMetrics: [TriggerMetric] {
+        [TriggerMetric(label: "AAPL", value: "$189", alert: false, trend: "↑")]
+    }
+}
+
+// 注册：
+store.triggerManager.register(StockTriggerSource())
+```
+
+每个注册的触发源都会出现在 设置 → 触发源 中，可独立开关。
 
 ### 菜单栏
 
 - **动画脸**：伙伴的脸在菜单栏中以眨眼和待机帧动画显示
-- **系统指示器**：系统事件激活时在脸旁显示 emoji（30 秒后自动消失）
+- **触发指示器**：事件激活时在脸旁显示 emoji（持续时间后自动消失）
 - **菜单栏话语**：伙伴偶尔在菜单栏表情旁说两句（每 2-5 分钟，6 秒后消失）
 - **勿扰模式**：在设置中配置勿扰时段，抑制菜单栏话语（支持跨午夜，如 22:00→08:00）
 
@@ -57,7 +101,8 @@
 - **左键点击**：打开/关闭面板
 - **右键点击**：上下文菜单，包含摸摸、重命名、静音、开机自启、设置、关于、退出
 - **面板工具栏**：底部有设置齿轮、信息和退出按钮——无需右键即可访问
-- **设置窗口**：通用、菜单栏、勿扰模式、系统监控、使用说明、重置等分区
+- **设置窗口**：通用、语言、菜单栏、勿扰模式、触发源、使用说明、重置等分区
+- **应用内语言切换**：跟随系统 / English / 简体中文
 - **开机自启动**：通过 SMAppService 实现
 - **静音**：关闭所有对话气泡和菜单栏话语
 - **LSUIElement**：无 Dock 图标，仅存在于菜单栏
@@ -65,8 +110,8 @@
 ### 国际化
 
 - 完整支持**英文**和**简体中文**（zh-Hans）
-- 256 个本地化字符串，覆盖所有界面、台词、属性、系统消息和无障碍标签
-- 跟随系统语言设置，无需应用内切换
+- 270+ 个本地化字符串，覆盖所有界面、台词、属性、系统消息和无障碍标签
+- 支持应用内语言切换或跟随系统语言设置
 
 ## 系统要求
 
@@ -92,16 +137,20 @@ Sources/MenuBuddy/
 ├── Models/
 │   ├── CompanionTypes.swift       # Species、Rarity、Eye、Hat、StatName 枚举
 │   ├── CompanionModel.swift       # Mulberry32 PRNG + FNV-1a，确定性生成
-│   └── CompanionStore.swift       # 状态管理、系统监控、菜单栏话语、勿扰模式
+│   └── CompanionStore.swift       # 状态管理、触发路由、菜单栏话语、勿扰模式
+├── Triggers/
+│   ├── TriggerPlugin.swift        # TriggerSource 协议、TriggerEvent、TriggerMetric
+│   ├── TriggerManager.swift       # 中心枢纽：注册源、路由事件、持久化状态
+│   └── SystemTriggerSource.swift  # 内置系统监控触发源（CPU/内存/网速/电量）
 ├── System/
-│   └── SystemMonitor.swift        # CPU、内存、网速、磁盘 I/O、电池轮询
+│   └── SystemMonitor.swift        # 底层 CPU、内存、网速、磁盘 I/O、电池轮询
 ├── Sprites/
 │   ├── SpriteData.swift           # 18 种物种的 ASCII 艺术帧
 │   └── SpriteRenderer.swift       # renderSprite()、renderFace()
 └── Views/
-    ├── CompanionView.swift        # AnimationEngine、对话气泡、属性面板、系统状态条
+    ├── CompanionView.swift        # AnimationEngine、对话气泡、属性面板、指标条
     ├── PopoverView.swift          # 主面板 UI + 工具栏
-    └── SettingsView.swift         # 设置窗口
+    └── SettingsView.swift         # 设置窗口 + 触发源开关
 
 Resources/
 ├── en.lproj/Localizable.strings       # 英文字符串
