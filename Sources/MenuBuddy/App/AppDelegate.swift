@@ -10,6 +10,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventMonitor: Any?
     private var storeObserver: AnyCancellable?
     private var sysIndicatorObserver: AnyCancellable?
+    private var barTimer: Timer?
+    private var barTickIndex = 0
+    private var settingsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         store = CompanionStore.shared
@@ -25,12 +28,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sysIndicatorObserver = store.$systemIndicator
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
+
+        // Animate the status bar face at 500ms tick
+        barTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            self.barTickIndex += 1
+            self.updateStatusButton()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         if let monitor = eventMonitor {
             NSEvent.removeMonitor(monitor)
         }
+        barTimer?.invalidate()
     }
 
     // MARK: - Status Item
@@ -47,7 +58,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateStatusButton() {
         guard let button = statusItem.button else { return }
-        let face = renderFace(bones: store.companion.bones)
+        let seqIdx = barTickIndex % idleSequence.count
+        let isBlink = idleSequence[seqIdx] < 0
+        let face = renderFace(bones: store.companion.bones, blink: isBlink)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
         button.title = "\(sysPrefix)\(shinyPrefix)\(face)"
@@ -137,6 +150,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         loginItem.target = self
         menu.addItem(loginItem)
 
+        let settingsItem = NSMenuItem(title: Strings.menuSettings, action: #selector(showSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
         let aboutItem = NSMenuItem(title: Strings.menuAbout, action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
@@ -186,6 +203,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             alert.addButton(withTitle: "OK")
             alert.runModal()
         }
+    }
+
+    @objc private func showSettings() {
+        if popover.isShown { popover.performClose(nil) }
+
+        if settingsWindow == nil {
+            let view = SettingsView(store: store)
+            let hosting = NSHostingController(rootView: view)
+            hosting.sizingOptions = .preferredContentSize
+            let win = NSWindow(contentViewController: hosting)
+            win.title = Strings.settingsTitle
+            win.styleMask = [.titled, .closable]
+            win.isReleasedWhenClosed = false
+            settingsWindow = win
+        }
+        settingsWindow?.center()
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc private func showAbout() {

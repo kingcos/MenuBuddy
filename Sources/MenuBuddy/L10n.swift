@@ -88,6 +88,20 @@ enum Strings {
     }
     static var batteryChargingQuip: String { L("quip.battery.charging") }
 
+    // Settings & Help
+    static var menuSettings: String        { L("menu.settings") }
+    static var settingsTitle: String       { L("settings.title") }
+    static var settingsSectionGeneral: String  { L("settings.section.general") }
+    static var settingsLaunchAtLogin: String   { L("settings.launchAtLogin") }
+    static var settingsMute: String            { L("settings.mute") }
+    static var settingsSectionMonitor: String  { L("settings.section.monitor") }
+    static var settingsMonitorDesc: String     { L("settings.monitor.desc") }
+    static var settingsSectionHelp: String     { L("settings.section.help") }
+    static var settingsHelpPet: String         { L("settings.help.pet") }
+    static var settingsHelpRename: String      { L("settings.help.rename") }
+    static var settingsHelpShiny: String       { L("settings.help.shiny") }
+    static var settingsDone: String            { L("settings.done") }
+
     // System status strip
     static var sysstatCPU: String { L("sysstat.cpu") }
     static var sysstatMEM: String { L("sysstat.mem") }

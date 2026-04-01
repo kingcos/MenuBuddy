@@ -95,6 +95,20 @@
 /* 首次启动欢迎 */
 "welcome" = "嗨！我是 %@！";
 
+/* 设置 */
+"menu.settings" = "设置…";
+"settings.title" = "MenuBuddy 设置";
+"settings.section.general" = "通用";
+"settings.launchAtLogin" = "开机自启动";
+"settings.mute" = "静音桌宠";
+"settings.section.monitor" = "系统监控";
+"settings.monitor.desc" = "你的桌宠会对 Mac 的 CPU、内存、网络和电池状态做出反应。\n触发条件：CPU >70% 🔥 · 内存 >85% 🧠 · 网速 >5 MB/s ⚡ · 电量 <20% 🪫";
+"settings.section.help" = "使用说明";
+"settings.help.pet" = "点击菜单栏桌宠打开面板，右键单击可打开菜单。";
+"settings.help.rename" = "通过铅笔图标或右键菜单→重命名，可以修改桌宠的名字。";
+"settings.help.shiny" = "桌宠的外观由你的 Mac 唯一决定，永远不会改变。";
+"settings.done" = "完成";
+
 /* 系统状态条 */
 "sysstat.cpu" = "CPU";
 "sysstat.mem" = "内存";

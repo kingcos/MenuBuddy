@@ -95,6 +95,20 @@
 /* First launch */
 "welcome" = "hi! i'm %@!";
 
+/* Settings */
+"menu.settings" = "Settings…";
+"settings.title" = "MenuBuddy Settings";
+"settings.section.general" = "General";
+"settings.launchAtLogin" = "Launch at Login";
+"settings.mute" = "Mute buddy sounds";
+"settings.section.monitor" = "System Monitor";
+"settings.monitor.desc" = "Your buddy reacts to your Mac's CPU, memory, network, and battery.\nThresholds: CPU >70% 🔥 · Memory >85% 🧠 · Network >5 MB/s ⚡ · Battery <20% 🪫";
+"settings.section.help" = "Help";
+"settings.help.pet" = "Click the buddy to open this popover. Right-click for the menu.";
+"settings.help.rename" = "Rename your buddy via the pencil icon or right-click → Rename.";
+"settings.help.shiny" = "Your buddy's appearance is unique to your Mac and never changes.";
+"settings.done" = "Done";
+
 /* System status strip */
 "sysstat.cpu" = "CPU";
 "sysstat.mem" = "MEM";

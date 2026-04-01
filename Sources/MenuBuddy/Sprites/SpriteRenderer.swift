@@ -30,8 +30,8 @@ func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false) ->
 }
 
 /// Returns a compact face string for use in menu bar status button.
-func renderFace(bones: CompanionBones) -> String {
-    let e = bones.eye.character
+func renderFace(bones: CompanionBones, blink: Bool = false) -> String {
+    let e = blink ? "-" : bones.eye.character
     switch bones.species {
     case .duck, .goose:
         return "(\(e)>"
