@@ -342,6 +342,7 @@
 "trigger.section.desc" = "Trigger sources monitor external data and drive your buddy's reactions. Each source is independent and can be toggled on or off.";
 "trigger.scripts.hint" = "Drop executable scripts into ~/.menubuddy/triggers/ to add custom triggers.";
 "trigger.scripts.open" = "Open Triggers Folder";
+"trigger.scripts.rescan" = "Rescan Scripts";
 
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";

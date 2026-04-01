@@ -122,32 +122,44 @@ struct SettingsView: View {
                         }
                     }
                 }
-                if !store.triggerManager.allMetrics.isEmpty {
-                    MetricStripView(metrics: store.triggerManager.allMetrics)
-                }
                 settingsCard {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(Strings.triggerScriptsHint)
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
-                        Button(action: {
-                            let dir = ScriptTriggerSource.triggersDirectory
-                            let fm = FileManager.default
-                            if !fm.fileExists(atPath: dir) {
-                                try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+                        HStack(spacing: 16) {
+                            Button(action: {
+                                let dir = ScriptTriggerSource.triggersDirectory
+                                let fm = FileManager.default
+                                if !fm.fileExists(atPath: dir) {
+                                    try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+                                }
+                                NSWorkspace.shared.open(URL(fileURLWithPath: dir))
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "folder")
+                                        .font(.system(size: 11))
+                                    Text(Strings.triggerScriptsOpen)
+                                        .font(.system(size: 12))
+                                }
                             }
-                            NSWorkspace.shared.open(URL(fileURLWithPath: dir))
-                        }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "folder")
-                                    .font(.system(size: 11))
-                                Text(Strings.triggerScriptsOpen)
-                                    .font(.system(size: 12))
+                            .buttonStyle(.plain)
+                            .foregroundColor(.accentColor)
+
+                            Button(action: {
+                                store.triggerManager.rescanScripts()
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 11))
+                                    Text(Strings.triggerScriptsRescan)
+                                        .font(.system(size: 12))
+                                }
                             }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.accentColor)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.accentColor)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)

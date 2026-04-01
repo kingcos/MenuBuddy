@@ -1,24 +1,15 @@
 import Foundation
+import Combine
 
 // MARK: - Trigger Manager
 
 /// Manages all trigger sources and routes their events to the companion.
-///
-/// This is the central hub of the plugin system. It:
-/// - Holds all registered `TriggerSource` instances
-/// - Routes `TriggerEvent`s to the UI layer via callbacks
-/// - Aggregates metrics from all sources for the status strip
-/// - Persists per-source enabled/disabled state
-final class TriggerManager {
+final class TriggerManager: ObservableObject {
     /// All registered trigger sources.
-    private(set) var sources: [TriggerSource] = []
+    @Published private(set) var sources: [TriggerSource] = []
 
     /// Fired on the main thread when any source produces an event.
     var onEvent: ((TriggerEvent) -> Void)?
-
-    /// Fired on the main thread when any source's metrics may have changed.
-    /// The argument is the combined metrics from all enabled sources.
-    var onMetricsUpdate: (([TriggerMetric]) -> Void)?
 
     /// Register a new trigger source. If a source with the same id already
     /// exists, the old one is stopped and replaced.
@@ -36,7 +27,6 @@ final class TriggerManager {
             source.isEnabled = saved
         }
 
-        // Wire up the event callback
         source.onTrigger = { [weak self] event in
             self?.handleEvent(event)
         }
@@ -59,10 +49,23 @@ final class TriggerManager {
         guard let source = sources.first(where: { $0.id == sourceId }) else { return }
         source.isEnabled = enabled
         UserDefaults.standard.set(enabled, forKey: "trigger.\(sourceId).enabled")
-        if enabled {
-            source.start()
-        } else {
-            source.stop()
+        if enabled { source.start() } else { source.stop() }
+        objectWillChange.send()
+    }
+
+    /// Rescan ~/.menubuddy/triggers/ for new or removed scripts.
+    func rescanScripts() {
+        let discovered = ScriptTriggerSource.discoverScripts()
+        let existingScriptIds = Set(sources.compactMap { ($0 as? ScriptTriggerSource)?.id })
+        let discoveredIds = Set(discovered.map(\.id))
+
+        // Remove scripts that were deleted from disk
+        for id in existingScriptIds where !discoveredIds.contains(id) {
+            unregister(id: id)
+        }
+        // Add new scripts
+        for script in discovered where !existingScriptIds.contains(script.id) {
+            register(script)
         }
     }
 
@@ -71,12 +74,9 @@ final class TriggerManager {
         sources.filter(\.isEnabled).flatMap(\.currentMetrics)
     }
 
-    /// Stop all sources.
     func stopAll() {
         sources.forEach { $0.stop() }
     }
-
-    // MARK: - Private
 
     private func handleEvent(_ event: TriggerEvent) {
         DispatchQueue.main.async { [weak self] in

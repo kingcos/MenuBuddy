@@ -231,6 +231,7 @@ enum Strings {
     static var triggerSectionDesc: String    { L("trigger.section.desc") }
     static var triggerScriptsHint: String    { L("trigger.scripts.hint") }
     static var triggerScriptsOpen: String    { L("trigger.scripts.open") }
+    static var triggerScriptsRescan: String  { L("trigger.scripts.rescan") }
 
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {

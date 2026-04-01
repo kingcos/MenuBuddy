@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // MARK: - Companion Store
 
@@ -86,6 +87,7 @@ class CompanionStore: ObservableObject {
 
     /// The trigger manager — holds all registered plugin sources.
     let triggerManager = TriggerManager()
+    private var triggerManagerSink: AnyCancellable?
 
     /// The built-in system trigger source (exposed for snapshot access).
     let systemSource = SystemTriggerSource()
@@ -178,6 +180,11 @@ class CompanionStore: ObservableObject {
         // Discover and register script-based triggers from ~/.menubuddy/triggers/
         for script in ScriptTriggerSource.discoverScripts() {
             triggerManager.register(script)
+        }
+
+        // Forward trigger manager changes to CompanionStore's objectWillChange
+        triggerManagerSink = triggerManager.objectWillChange.sink { [weak self] in
+            self?.objectWillChange.send()
         }
 
         scheduleMenuBarQuip(delay: Double.random(in: 15...30))

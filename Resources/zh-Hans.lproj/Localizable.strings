@@ -342,6 +342,7 @@
 "trigger.section.desc" = "触发源监控外部数据并驱动桌宠的反应。每个触发源独立运行，可单独开关。";
 "trigger.scripts.hint" = "将可执行脚本放入 ~/.menubuddy/triggers/ 即可添加自定义触发源。";
 "trigger.scripts.open" = "打开触发源目录";
+"trigger.scripts.rescan" = "重新扫描脚本";
 
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";
