@@ -4,16 +4,22 @@ APP_BUNDLE = $(BUILD_DIR)/$(APP_NAME).app
 BINARY = $(BUILD_DIR)/$(APP_NAME)
 INSTALL_DIR = /Applications
 
-.PHONY: build build-universal run install clean dmg
+# Code signing identity (set via environment or override on command line)
+# Example: export MENUBUDDY_SIGN_IDENTITY="Developer ID Application: Name (TEAMID)"
+SIGN_IDENTITY ?= $(MENUBUDDY_SIGN_IDENTITY)
+# Notarytool keychain profile (created via `xcrun notarytool store-credentials`)
+NOTARY_PROFILE ?= $(MENUBUDDY_NOTARY_PROFILE)
+
+.PHONY: build build-universal run install clean dmg release
 
 build: icon
 	swift build -c release
-	@$(MAKE) _bundle BINARY_SRC="$(BINARY)"
+	@$(MAKE) _bundle BINARY_SRC="$(BINARY)" CODESIGN_ID="-"
 
 # Universal binary (arm64 + x86_64) for distribution
 build-universal: icon
 	swift build -c release --arch arm64 --arch x86_64
-	@$(MAKE) _bundle BINARY_SRC=".build/apple/Products/Release/$(APP_NAME)"
+	@$(MAKE) _bundle BINARY_SRC=".build/apple/Products/Release/$(APP_NAME)" CODESIGN_ID="$(SIGN_IDENTITY)"
 
 _bundle:
 	@echo "Creating .app bundle..."
@@ -23,8 +29,8 @@ _bundle:
 	@cp "Resources/Info.plist" "$(APP_BUNDLE)/Contents/Info.plist"
 	@[ -f Resources/AppIcon.icns ] && cp "Resources/AppIcon.icns" "$(APP_BUNDLE)/Contents/Resources/AppIcon.icns" || true
 	@for lproj in Resources/*.lproj; do cp -r "$$lproj" "$(APP_BUNDLE)/Contents/Resources/"; done
-	@echo "Signing .app bundle..."
-	@codesign --sign - --force --deep "$(APP_BUNDLE)"
+	@echo "Signing with: $(CODESIGN_ID)"
+	@codesign --sign "$(CODESIGN_ID)" --force --deep --options runtime "$(APP_BUNDLE)"
 	@echo "Build complete: $(APP_BUNDLE)"
 
 icon:
@@ -52,6 +58,18 @@ dmg: build-universal
 		"$(BUILD_DIR)/$(APP_NAME).dmg"
 	@rm -rf "$(BUILD_DIR)/dmg-staging"
 	@echo "DMG created: $(BUILD_DIR)/$(APP_NAME).dmg"
+
+# Full release: build universal, sign, create DMG, notarize, staple
+release: dmg
+	@echo "Submitting for notarization..."
+	xcrun notarytool submit "$(BUILD_DIR)/$(APP_NAME).dmg" \
+		--keychain-profile "$(NOTARY_PROFILE)" \
+		--wait
+	@echo "Stapling notarization ticket..."
+	xcrun stapler staple "$(BUILD_DIR)/$(APP_NAME).dmg"
+	@echo ""
+	@echo "=== Release ready: $(BUILD_DIR)/$(APP_NAME).dmg ==="
+	@echo "Signed, notarized, and stapled. Users can install without warnings."
 
 clean:
 	swift package clean
