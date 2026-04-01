@@ -81,8 +81,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
         let quipSuffix = store.menuBarQuip.map { " \($0)" } ?? ""
-        button.title = "\(sysPrefix)\(shinyPrefix)\(face)\(quipSuffix)"
-        button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+
+        // Use attributed string: small monospace face + smaller quip
+        let faceStr = "\(sysPrefix)\(shinyPrefix)\(face)"
+        let full = NSMutableAttributedString(
+            string: faceStr,
+            attributes: [.font: NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)]
+        )
+        if !quipSuffix.isEmpty {
+            full.append(NSAttributedString(
+                string: quipSuffix,
+                attributes: [.font: NSFont.systemFont(ofSize: 9)]
+            ))
+        }
+        button.attributedTitle = full
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
     }
 
