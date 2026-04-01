@@ -106,6 +106,7 @@ final class AnimationEngine: ObservableObject {
         case .netSlow:         quip = Strings.netSlowQuips.randomElement()
         case .batteryLow:      quip = Strings.batteryLowQuips.randomElement()
         case .batteryCharging: quip = Strings.batteryChargingQuip
+        case .diskBusy:        quip = Strings.diskBusyQuips.randomElement()
         }
         if let q = quip { showSpeech(q) }
     }
@@ -284,6 +285,11 @@ struct SystemStatusView: View {
             metricPill(label: Strings.sysstatNET,
                        value: netLabel(snapshot.netBytesPerSec),
                        alert: false)
+            if snapshot.diskBytesPerSec > 0 {
+                metricPill(label: Strings.sysstatDisk,
+                           value: netLabel(snapshot.diskBytesPerSec),
+                           alert: snapshot.diskBytesPerSec > 50_000_000)
+            }
             if let bat = snapshot.batteryPct {
                 metricPill(label: snapshot.isCharging ? Strings.sysstatCharging : Strings.sysstatBAT,
                            value: "\(Int(bat * 100))%",

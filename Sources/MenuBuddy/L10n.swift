@@ -143,6 +143,10 @@ enum Strings {
         [L("quip.battery.low1"), L("quip.battery.low2")]
     }
     static var batteryChargingQuip: String { L("quip.battery.charging") }
+    static var diskBusyQuips: [String] {
+        [L("quip.disk.busy1"), L("quip.disk.busy2")]
+    }
+    static var sysstatDisk: String { L("sysstat.disk") }
 
     // Settings & Help
     static var menuSettings: String        { L("menu.settings") }

@@ -236,6 +236,13 @@
 "quip.net.slow1" = "internet? hello?";
 "quip.net.slow2" = "where did the internet go";
 
+/* System quips — Disk */
+"quip.disk.busy1" = "disk spinning hard...";
+"quip.disk.busy2" = "*loads data*";
+
+/* System status strip — Disk */
+"sysstat.disk" = "DSK";
+
 /* System quips — Battery */
 "quip.battery.low1" = "battery... low...";
 "quip.battery.low2" = "need power... soon...";

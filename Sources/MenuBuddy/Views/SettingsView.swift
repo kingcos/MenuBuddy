@@ -78,7 +78,7 @@ struct SettingsView: View {
             HStack {
                 Spacer()
                 Button(Strings.settingsDone) {
-                    NSApp.keyWindow?.close()
+                    NotificationCenter.default.post(name: .closeSettings, object: nil)
                 }
                 .keyboardShortcut(.defaultAction)
                 .padding(.vertical, 10)

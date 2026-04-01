@@ -30,8 +30,9 @@ func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false) ->
 }
 
 /// Returns a compact face string for use in menu bar status button.
-func renderFace(bones: CompanionBones, blink: Bool = false) -> String {
-    let e = blink ? "-" : bones.eye.character
+/// - eyeOverride: if non-nil, replaces the eye character (e.g. "x" for stressed state)
+func renderFace(bones: CompanionBones, blink: Bool = false, eyeOverride: String? = nil) -> String {
+    let e = eyeOverride ?? (blink ? "-" : bones.eye.character)
     switch bones.species {
     case .duck, .goose:
         return "(\(e)>"

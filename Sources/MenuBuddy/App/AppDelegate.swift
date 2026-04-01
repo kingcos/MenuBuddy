@@ -22,6 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         setupEventMonitor()
         setupSleepWakeObservers()
+        NotificationCenter.default.addObserver(self, selector: #selector(closeSettingsWindow),
+                                               name: .closeSettings, object: nil)
 
         // Keep status bar button in sync when companion or system state changes
         storeObserver = store.$companion
@@ -62,7 +64,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button else { return }
         let seqIdx = barTickIndex % idleSequence.count
         let isBlink = idleSequence[seqIdx] < 0
-        let face = renderFace(bones: store.companion.bones, blink: isBlink)
+
+        // Derive a stress eye from the active system indicator
+        let stressEye: String? = {
+            switch store.systemIndicator {
+            case "🔥": return "x"   // CPU hot — X eyes
+            case "🧠": return "~"   // Memory full — squiggly eyes
+            case "🪫": return "."   // Battery dead — tiny dots
+            case "🐌": return "_"   // Net slow — flat lines
+            case "💾": return "o"   // Disk busy — wide eyes
+            default:   return nil
+            }
+        }()
+
+        let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: stressEye)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
         button.title = "\(sysPrefix)\(shinyPrefix)\(face)"
@@ -206,6 +221,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @objc private func closeSettingsWindow() {
+        settingsWindow?.close()
+    }
+
     @objc private func showSettings() {
         if popover.isShown { popover.performClose(nil) }
 
@@ -283,4 +302,5 @@ extension Notification.Name {
     static let triggerPet    = Notification.Name("MenuBuddy.triggerPet")
     static let openRename    = Notification.Name("MenuBuddy.openRename")
     static let companionWoke = Notification.Name("MenuBuddy.companionWoke")
+    static let closeSettings = Notification.Name("MenuBuddy.closeSettings")
 }

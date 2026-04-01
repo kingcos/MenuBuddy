@@ -1,4 +1,5 @@
 import Foundation
+import IOKit
 import IOKit.ps
 
 // MARK: - System State
@@ -10,6 +11,7 @@ enum SystemEvent {
     case netSlow        // Network dropped to 0 after sustained activity
     case batteryLow     // Battery < 20% and not charging
     case batteryCharging
+    case diskBusy       // Disk throughput > 50 MB/s
 }
 
 /// Point-in-time snapshot of system metrics, delivered alongside events.
@@ -19,6 +21,7 @@ struct SystemSnapshot {
     let netBytesPerSec: UInt64  // combined in+out bytes/sec (non-loopback)
     let batteryPct: Double?     // nil on desktops/VMs with no battery
     let isCharging: Bool
+    let diskBytesPerSec: UInt64 // combined read+write bytes/sec
 }
 
 // MARK: - System Monitor
@@ -41,10 +44,16 @@ final class SystemMonitor {
     private var prevNetTimestamp: Date = .distantPast
     private var prevNetWasActive = false   // was throughput > 0 last sample?
 
+    // Disk tracking
+    private var prevDiskRead: UInt64 = 0
+    private var prevDiskWrite: UInt64 = 0
+    private var prevDiskTimestamp: Date = .distantPast
+
     func start() {
         guard timer == nil else { return }
-        // Prime CPU delta baseline immediately (no callbacks fired, just sets prevCPUInfo)
+        // Prime baselines immediately (no callbacks fired, just initialises delta trackers)
         _ = cpuUsage()
+        _ = diskBytesPerSec()
         // First full sample at ~4s so the metrics strip populates quickly
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
             self?.sample()
@@ -63,9 +72,10 @@ final class SystemMonitor {
     // MARK: - Sampling
 
     private func sample() {
-        let cpu = cpuUsage()
-        let net = networkBytesPerSec()   // also updates prevNetCumulative/prevNetTimestamp
-        let mem = memoryPressure()
+        let cpu  = cpuUsage()
+        let net  = networkBytesPerSec()
+        let mem  = memoryPressure()
+        let disk = diskBytesPerSec()
         let (bat, batteryPct, isCharging) = batteryStateDetailed()
 
         // Detect slow-net: had traffic last sample, none now
@@ -76,6 +86,7 @@ final class SystemMonitor {
         if mem < 0.15        { onEvent?(.memHigh) }
         if net > 5_000_000   { onEvent?(.netFast) }
         else if isNetSlow    { onEvent?(.netSlow) }
+        if disk > 50_000_000 { onEvent?(.diskBusy) }   // > 50 MB/s
         switch bat {
         case .low:           onEvent?(.batteryLow)
         case .charging:      onEvent?(.batteryCharging)
@@ -87,7 +98,8 @@ final class SystemMonitor {
             memFree: mem,
             netBytesPerSec: net,
             batteryPct: batteryPct,
-            isCharging: isCharging
+            isCharging: isCharging,
+            diskBytesPerSec: disk
         ))
     }
 
@@ -176,6 +188,44 @@ final class SystemMonitor {
         // Update cumulative trackers (only modified here)
         prevNetCumulative = totalBytes
         prevNetTimestamp = now
+
+        guard elapsed > 0 else { return 0 }
+        return UInt64(Double(delta) / elapsed)
+    }
+
+    // MARK: - Disk
+
+    /// Returns combined read+write bytes-per-second for all block storage devices.
+    private func diskBytesPerSec() -> UInt64 {
+        var iterator: io_iterator_t = 0
+        guard IOServiceGetMatchingServices(kIOMainPortDefault,
+              IOServiceMatching("IOBlockStorageDriver"), &iterator) == KERN_SUCCESS else { return 0 }
+        defer { IOObjectRelease(iterator) }
+
+        var totalRead: UInt64 = 0
+        var totalWrite: UInt64 = 0
+
+        var service: io_registry_entry_t = IOIteratorNext(iterator)
+        while service != 0 {
+            var props: Unmanaged<CFMutableDictionary>?
+            if IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
+               let dict = props?.takeRetainedValue() as? [String: Any],
+               let stats = dict["Statistics"] as? [String: Any] {
+                totalRead  += stats["Bytes (Read)"] as? UInt64 ?? 0
+                totalWrite += stats["Bytes (Write)"] as? UInt64 ?? 0
+            }
+            IOObjectRelease(service)
+            service = IOIteratorNext(iterator)
+        }
+
+        let now = Date()
+        let elapsed = now.timeIntervalSince(prevDiskTimestamp)
+        let total = totalRead + totalWrite
+        let prev = prevDiskRead + prevDiskWrite
+        let delta = total > prev ? total - prev : 0
+        prevDiskRead = totalRead
+        prevDiskWrite = totalWrite
+        prevDiskTimestamp = now
 
         guard elapsed > 0 else { return 0 }
         return UInt64(Double(delta) / elapsed)

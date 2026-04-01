@@ -62,6 +62,7 @@ class CompanionStore: ObservableObject {
         if s.memFree < 0.15 { return "😵" }
         if s.cpuUsage > 0.70 { return "😰" }
         if let bat = s.batteryPct, bat < 0.20, !s.isCharging { return "🪫" }
+        if s.diskBytesPerSec > 50_000_000 { return "💾" }
         if s.netBytesPerSec > 5_000_000 { return "🚀" }
         if s.cpuUsage < 0.10 && s.netBytesPerSec < 1024 { return "😴" }
         return "😊"
@@ -101,6 +102,7 @@ class CompanionStore: ObservableObject {
         case .netSlow:         systemIndicator = "🐌"
         case .batteryLow:      systemIndicator = "🪫"
         case .batteryCharging: systemIndicator = "⚡"
+        case .diskBusy:        systemIndicator = "💾"
         }
         onSystemEvent?(event)
         // Clear after 30 seconds

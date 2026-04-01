@@ -236,6 +236,13 @@
 "quip.net.slow1" = "网？在吗？";
 "quip.net.slow2" = "网络去哪了";
 
+/* 系统状态台词 — 磁盘 */
+"quip.disk.busy1" = "磁盘在转……";
+"quip.disk.busy2" = "*读取数据中*";
+
+/* 系统状态条 — 磁盘 */
+"sysstat.disk" = "磁盘";
+
 /* 系统状态台词 — 电池 */
 "quip.battery.low1" = "电量……不多了……";
 "quip.battery.low2" = "快要没电了……";
