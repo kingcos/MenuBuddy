@@ -322,6 +322,7 @@ struct StatsView: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Strings.a11yStatLabel(Strings.statName(stat), value))
+                .help(Strings.statDesc(stat))
             }
         }
     }
@@ -399,9 +400,12 @@ struct SystemStatusView: View {
             Text(label)
                 .font(.system(size: 8, weight: .medium, design: .monospaced))
                 .foregroundColor(alert ? .orange : .secondary)
+                .lineLimit(1)
             Text(value)
                 .font(.system(size: 9, weight: .semibold, design: .monospaced))
                 .foregroundColor(alert ? .orange : .primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
     }

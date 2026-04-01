@@ -18,6 +18,45 @@ class CompanionStore: ObservableObject {
         }
     }
 
+    /// Show quips in the menu bar alongside the companion face.
+    @Published var menuBarQuips: Bool {
+        didSet { UserDefaults.standard.set(menuBarQuips, forKey: "companion.menuBarQuips") }
+    }
+
+    /// Do Not Disturb — suppresses menu bar quips during specified hours.
+    @Published var dndEnabled: Bool {
+        didSet { UserDefaults.standard.set(dndEnabled, forKey: "companion.dndEnabled") }
+    }
+    @Published var dndFrom: Int {
+        didSet { UserDefaults.standard.set(dndFrom, forKey: "companion.dndFrom") }
+    }
+    @Published var dndTo: Int {
+        didSet { UserDefaults.standard.set(dndTo, forKey: "companion.dndTo") }
+    }
+
+    /// The quip currently displayed in the menu bar (nil = none).
+    @Published private(set) var menuBarQuip: String?
+
+    /// Whether we're currently in the DND window.
+    var isDND: Bool {
+        guard dndEnabled else { return false }
+        let hour = Calendar.current.component(.hour, from: Date())
+        if dndFrom <= dndTo {
+            return hour >= dndFrom && hour < dndTo
+        } else {
+            // Wraps past midnight (e.g., 22:00 → 08:00)
+            return hour >= dndFrom || hour < dndTo
+        }
+    }
+
+    func showMenuBarQuip(_ text: String) {
+        guard menuBarQuips, !isDND else { return }
+        menuBarQuip = text
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
+            if self?.menuBarQuip == text { self?.menuBarQuip = nil }
+        }
+    }
+
     /// Total lifetime pet count — @Published so the footer updates live.
     @Published private(set) var petCount: Int
 
@@ -82,11 +121,16 @@ class CompanionStore: ObservableObject {
     }
 
     private let systemMonitor = SystemMonitor()
+    private var menuBarQuipTimer: Timer?
 
     private init() {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
+        menuBarQuips = UserDefaults.standard.object(forKey: "companion.menuBarQuips") as? Bool ?? true
+        dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
+        dndFrom = UserDefaults.standard.object(forKey: "companion.dndFrom") as? Int ?? 22
+        dndTo = UserDefaults.standard.object(forKey: "companion.dndTo") as? Int ?? 8
 
         let bones = rollCompanion(userId: userId)
         let (soul, isNew) = CompanionStore.loadOrCreateSoul()
@@ -109,6 +153,21 @@ class CompanionStore: ObservableObject {
             }
         }
         systemMonitor.start()
+        scheduleMenuBarQuip()
+    }
+
+    private func scheduleMenuBarQuip() {
+        menuBarQuipTimer?.invalidate()
+        menuBarQuipTimer = Timer.scheduledTimer(withTimeInterval: Double.random(in: 120...300), repeats: false) { [weak self] _ in
+            guard let self else { return }
+            if !self.muted {
+                let quips = Strings.speciesQuips(for: self.companion.species) + Strings.genericQuips
+                if let q = quips.randomElement() {
+                    self.showMenuBarQuip(q)
+                }
+            }
+            self.scheduleMenuBarQuip()
+        }
     }
 
     private func updateSystemIndicator(_ event: SystemEvent) {
@@ -122,7 +181,22 @@ class CompanionStore: ObservableObject {
         case .diskBusy:        systemIndicator = "💾"
         }
         onSystemEvent?(event)
-        // Clear after 30 seconds
+
+        // Show a short quip in the menu bar
+        let quip: String? = {
+            switch event {
+            case .cpuHigh:         return Strings.cpuHighQuips.randomElement()
+            case .memHigh:         return Strings.memHighQuips.randomElement()
+            case .netFast:         return Strings.netFastQuips.randomElement()
+            case .netSlow:         return Strings.netSlowQuips.randomElement()
+            case .batteryLow:      return Strings.batteryLowQuips.randomElement()
+            case .batteryCharging: return Strings.batteryChargingQuip
+            case .diskBusy:        return Strings.diskBusyQuips.randomElement()
+            }
+        }()
+        if let q = quip { showMenuBarQuip(q) }
+
+        // Clear indicator after 30 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
             self?.systemIndicator = ""
         }

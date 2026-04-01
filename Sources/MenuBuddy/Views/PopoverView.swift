@@ -33,7 +33,11 @@ struct PopoverView: View {
             }
             hatchFooter
                 .padding(.horizontal, 16)
-                .padding(.bottom, 10)
+                .padding(.bottom, 4)
+            Divider()
+            popoverToolbar
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
         }
         .frame(width: 280)
         .background(Color(NSColor.windowBackgroundColor))
@@ -171,6 +175,38 @@ struct PopoverView: View {
             Text(Strings.footerPets(store.petCount))
                 .font(.system(size: 9, design: .monospaced))
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Toolbar
+
+    private var popoverToolbar: some View {
+        HStack(spacing: 12) {
+            Button(action: { NotificationCenter.default.post(name: .openSettings, object: nil) }) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.menuSettings)
+
+            Button(action: { NotificationCenter.default.post(name: .openAbout, object: nil) }) {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.menuAbout)
+
+            Spacer()
+
+            Button(action: { NSApp.terminate(nil) }) {
+                Image(systemName: "power")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.menuQuit)
         }
     }
 

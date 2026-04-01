@@ -301,6 +301,28 @@
 "sysstat.net.unit.kb" = "%.0f KB/s";
 "sysstat.net.unit.mb" = "%.1f MB/s";
 
+/* 属性描述 */
+"stat.debugging.desc" = "伙伴的调试能力——稀有度越高，调试直觉越强。";
+"stat.patience.desc" = "伙伴的耐心值——有些种类天生更佛系。";
+"stat.chaos.desc" = "创意混乱程度——影响反应的多样性。";
+"stat.wisdom.desc" = "积累的智慧——越稀有的伙伴起始智慧越高。";
+"stat.snark.desc" = "嘴贱程度——越高的伙伴越爱阴阳怪气。";
+
+/* 属性帮助 */
+"settings.help.stats" = "属性由伙伴的种类和稀有度决定，是性格特征而非可升级的数值。";
+
+/* 勿扰模式 */
+"settings.section.dnd" = "勿扰模式";
+"settings.dnd.desc" = "在勿扰时段内，伙伴不会在菜单栏显示话语。";
+"settings.dnd.enable" = "启用勿扰时段";
+"settings.dnd.from" = "从";
+"settings.dnd.to" = "到";
+
+/* 菜单栏话语 */
+"settings.section.menubar" = "菜单栏";
+"settings.menubar.quips" = "在菜单栏显示话语";
+"settings.menubar.quips.desc" = "伙伴偶尔会在菜单栏表情旁边说两句。";
+
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";
 "a11y.sprite.hint" = "点击抚摸";

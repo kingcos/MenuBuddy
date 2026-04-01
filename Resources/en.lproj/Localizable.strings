@@ -301,6 +301,28 @@
 "sysstat.net.unit.kb" = "%.0f KB/s";
 "sysstat.net.unit.mb" = "%.1f MB/s";
 
+/* Stat descriptions */
+"stat.debugging.desc" = "How well your buddy debugs — higher rarity means better debugging instincts.";
+"stat.patience.desc" = "Your buddy's patience level — some species are more zen than others.";
+"stat.chaos.desc" = "The amount of creative chaos — affects the variety of reactions.";
+"stat.wisdom.desc" = "Accumulated wisdom — rarer buddies start wiser.";
+"stat.snark.desc" = "Sassiness level — expect more attitude from snarky buddies.";
+
+/* Stats help */
+"settings.help.stats" = "Stats are unique to your buddy and determined by its species and rarity. They're personality traits, not things you level up.";
+
+/* Do Not Disturb */
+"settings.section.dnd" = "Do Not Disturb";
+"settings.dnd.desc" = "During quiet hours, your buddy won't show quips in the menu bar.";
+"settings.dnd.enable" = "Enable quiet hours";
+"settings.dnd.from" = "From";
+"settings.dnd.to" = "To";
+
+/* Menu bar quip */
+"settings.section.menubar" = "Menu Bar";
+"settings.menubar.quips" = "Show quips in menu bar";
+"settings.menubar.quips.desc" = "Your buddy occasionally says something next to its face in the menu bar.";
+
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";
 "a11y.sprite.hint" = "Tap to pet";

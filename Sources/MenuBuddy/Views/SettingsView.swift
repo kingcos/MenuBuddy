@@ -42,6 +42,60 @@ struct SettingsView: View {
 
                     Divider()
 
+                    // MARK: Menu Bar
+                    sectionHeader(Strings.settingsSectionMenuBar)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Toggle(isOn: $store.menuBarQuips) {
+                            Text(Strings.settingsMenuBarQuips)
+                                .font(.system(size: 12))
+                        }
+                        Text(Strings.settingsMenuBarQuipsDesc)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 20)
+
+                    Divider()
+
+                    // MARK: Do Not Disturb
+                    sectionHeader(Strings.settingsSectionDND)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Toggle(isOn: $store.dndEnabled) {
+                            Text(Strings.settingsDNDEnable)
+                                .font(.system(size: 12))
+                        }
+                        if store.dndEnabled {
+                            HStack(spacing: 8) {
+                                Text(Strings.settingsDNDFrom)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                                Picker("", selection: $store.dndFrom) {
+                                    ForEach(0..<24, id: \.self) { h in
+                                        Text(String(format: "%02d:00", h)).tag(h)
+                                    }
+                                }
+                                .frame(width: 80)
+                                Text(Strings.settingsDNDTo)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                                Picker("", selection: $store.dndTo) {
+                                    ForEach(0..<24, id: \.self) { h in
+                                        Text(String(format: "%02d:00", h)).tag(h)
+                                    }
+                                }
+                                .frame(width: 80)
+                            }
+                        }
+                        Text(Strings.settingsDNDDesc)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 20)
+
+                    Divider()
+
                     // MARK: System Monitor
                     sectionHeader(Strings.settingsSectionMonitor)
 
@@ -52,7 +106,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 20)
 
                     if let snap = store.systemSnapshot {
-                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
+                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot, cpuHistory: store.cpuHistory)
                             .padding(.horizontal, 4)
                     }
 
@@ -65,6 +119,7 @@ struct SettingsView: View {
                         helpRow("🖱", Strings.settingsHelpPet)
                         helpRow("✏️", Strings.settingsHelpRename)
                         helpRow("✨", Strings.settingsHelpShiny)
+                        helpRow("📊", Strings.settingsHelpStats)
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)

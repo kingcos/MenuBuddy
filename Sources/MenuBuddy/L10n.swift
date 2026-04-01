@@ -186,6 +186,30 @@ enum Strings {
     static func sysstatNetKB(_ v: Double) -> String { L("sysstat.net.unit.kb", v) }
     static func sysstatNetMB(_ v: Double) -> String { L("sysstat.net.unit.mb", v) }
 
+    // Stat descriptions
+    static func statDesc(_ stat: StatName) -> String {
+        switch stat {
+        case .debugging: return L("stat.debugging.desc")
+        case .patience:  return L("stat.patience.desc")
+        case .chaos:     return L("stat.chaos.desc")
+        case .wisdom:    return L("stat.wisdom.desc")
+        case .snark:     return L("stat.snark.desc")
+        }
+    }
+    static var settingsHelpStats: String { L("settings.help.stats") }
+
+    // Do Not Disturb
+    static var settingsSectionDND: String   { L("settings.section.dnd") }
+    static var settingsDNDDesc: String      { L("settings.dnd.desc") }
+    static var settingsDNDEnable: String    { L("settings.dnd.enable") }
+    static var settingsDNDFrom: String      { L("settings.dnd.from") }
+    static var settingsDNDTo: String        { L("settings.dnd.to") }
+
+    // Menu bar quips
+    static var settingsSectionMenuBar: String    { L("settings.section.menubar") }
+    static var settingsMenuBarQuips: String      { L("settings.menubar.quips") }
+    static var settingsMenuBarQuipsDesc: String  { L("settings.menubar.quips.desc") }
+
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {
         L("a11y.sprite.label", name, species)

@@ -10,6 +10,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventMonitor: Any?
     private var storeObserver: AnyCancellable?
     private var sysIndicatorObserver: AnyCancellable?
+    private var menuBarQuipObserver: AnyCancellable?
     private var barTimer: Timer?
     private var barTickIndex = 0
     private var settingsWindow: NSWindow?
@@ -24,12 +25,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupSleepWakeObservers()
         NotificationCenter.default.addObserver(self, selector: #selector(closeSettingsWindow),
                                                name: .closeSettings, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(showSettings),
+                                               name: .openSettings, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(showAbout),
+                                               name: .openAbout, object: nil)
 
         // Keep status bar button in sync when companion or system state changes
         storeObserver = store.$companion
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
         sysIndicatorObserver = store.$systemIndicator
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateStatusButton() }
+        menuBarQuipObserver = store.$menuBarQuip
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
 
@@ -80,7 +88,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: stressEye)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
-        button.title = "\(sysPrefix)\(shinyPrefix)\(face)"
+        let quipSuffix = store.menuBarQuip.map { " \($0)" } ?? ""
+        button.title = "\(sysPrefix)\(shinyPrefix)\(face)\(quipSuffix)"
         button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
     }
@@ -225,7 +234,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         settingsWindow?.close()
     }
 
-    @objc private func showSettings() {
+    @objc func showSettings() {
         if popover.isShown { popover.performClose(nil) }
 
         if settingsWindow == nil {
@@ -243,7 +252,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    @objc private func showAbout() {
+    @objc func showAbout() {
+        if popover.isShown { popover.performClose(nil) }
         let hatchDate: String = {
             let date = Date(timeIntervalSince1970: store.companion.soul.hatchedAt)
             let f = DateFormatter()
@@ -303,4 +313,6 @@ extension Notification.Name {
     static let openRename    = Notification.Name("MenuBuddy.openRename")
     static let companionWoke = Notification.Name("MenuBuddy.companionWoke")
     static let closeSettings = Notification.Name("MenuBuddy.closeSettings")
+    static let openSettings  = Notification.Name("MenuBuddy.openSettings")
+    static let openAbout     = Notification.Name("MenuBuddy.openAbout")
 }
