@@ -95,6 +95,15 @@
 /* 首次启动欢迎 */
 "welcome" = "嗨！我是 %@！";
 
+/* 系统状态条 */
+"sysstat.cpu" = "CPU";
+"sysstat.mem" = "内存";
+"sysstat.net" = "网速";
+"sysstat.bat" = "电量";
+"sysstat.charging" = "⚡";
+"sysstat.net.unit.kb" = "%.0f KB/s";
+"sysstat.net.unit.mb" = "%.1f MB/s";
+
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";
 "a11y.sprite.hint" = "点击抚摸";

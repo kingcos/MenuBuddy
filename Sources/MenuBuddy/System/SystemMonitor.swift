@@ -12,12 +12,23 @@ enum SystemEvent {
     case batteryCharging
 }
 
+/// Point-in-time snapshot of system metrics, delivered alongside events.
+struct SystemSnapshot {
+    let cpuUsage: Double        // [0, 1]
+    let memFree: Double         // [0, 1] fraction of RAM that is free
+    let netBytesPerSec: UInt64  // combined in+out bytes/sec (non-loopback)
+    let batteryPct: Double?     // nil on desktops/VMs with no battery
+    let isCharging: Bool
+}
+
 // MARK: - System Monitor
 
 /// Polls CPU, network, battery, and memory on the main run loop.
 /// Delivers SystemEvent callbacks on the main thread.
 final class SystemMonitor {
     var onEvent: ((SystemEvent) -> Void)?
+    /// Fired after every poll with the latest raw metrics.
+    var onSnapshot: ((SystemSnapshot) -> Void)?
 
     private var timer: Timer?
 
@@ -49,7 +60,7 @@ final class SystemMonitor {
         let cpu = cpuUsage()
         let net = networkBytesPerSec()   // also updates prevNetCumulative/prevNetTimestamp
         let mem = memoryPressure()
-        let bat = batteryState()
+        let (bat, batteryPct, isCharging) = batteryStateDetailed()
 
         // Detect slow-net: had traffic last sample, none now
         let isNetSlow = (net == 0 && prevNetWasActive)
@@ -64,6 +75,14 @@ final class SystemMonitor {
         case .charging:      onEvent?(.batteryCharging)
         case .normal, .notPresent: break
         }
+
+        onSnapshot?(SystemSnapshot(
+            cpuUsage: cpu,
+            memFree: mem,
+            netBytesPerSec: net,
+            batteryPct: batteryPct,
+            isCharging: isCharging
+        ))
     }
 
     // MARK: - CPU
@@ -160,7 +179,8 @@ final class SystemMonitor {
 
     private enum BatteryStatus { case normal, low, charging, notPresent }
 
-    private func batteryState() -> BatteryStatus {
+    /// Returns (status, batteryPct or nil, isCharging).
+    private func batteryStateDetailed() -> (BatteryStatus, Double?, Bool) {
         let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue()
         let list = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef] ?? []
 
@@ -173,10 +193,10 @@ final class SystemMonitor {
             let maxCap     = desc[kIOPSMaxCapacityKey] as? Int ?? 100
             let pct = maxCap > 0 ? Double(capacity) / Double(maxCap) : 1.0
 
-            if isCharging { return .charging }
-            if pct < 0.20 { return .low }
-            return .normal
+            if isCharging { return (.charging, pct, true) }
+            if pct < 0.20 { return (.low, pct, false) }
+            return (.normal, pct, false)
         }
-        return .notPresent
+        return (.notPresent, nil, false)
     }
 }

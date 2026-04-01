@@ -27,6 +27,10 @@ struct PopoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
+            if let snap = store.systemSnapshot {
+                Divider()
+                SystemStatusView(snapshot: snap)
+            }
             hatchFooter
                 .padding(.horizontal, 16)
                 .padding(.bottom, 10)

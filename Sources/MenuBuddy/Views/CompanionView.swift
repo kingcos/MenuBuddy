@@ -302,6 +302,53 @@ struct StatsView: View {
     }
 }
 
+// MARK: - System Status Strip
+
+struct SystemStatusView: View {
+    let snapshot: SystemSnapshot
+
+    var body: some View {
+        HStack(spacing: 10) {
+            metricPill(label: Strings.sysstatCPU,
+                       value: "\(Int(snapshot.cpuUsage * 100))%",
+                       alert: snapshot.cpuUsage > 0.70)
+            metricPill(label: Strings.sysstatMEM,
+                       value: "\(Int((1 - snapshot.memFree) * 100))%",
+                       alert: snapshot.memFree < 0.15)
+            metricPill(label: Strings.sysstatNET,
+                       value: netLabel(snapshot.netBytesPerSec),
+                       alert: false)
+            if let bat = snapshot.batteryPct {
+                metricPill(label: snapshot.isCharging ? Strings.sysstatCharging : Strings.sysstatBAT,
+                           value: "\(Int(bat * 100))%",
+                           alert: bat < 0.20 && !snapshot.isCharging)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+    }
+
+    private func metricPill(label: String, value: String, alert: Bool) -> some View {
+        VStack(spacing: 1) {
+            Text(label)
+                .font(.system(size: 8, weight: .medium, design: .monospaced))
+                .foregroundColor(alert ? .orange : .secondary)
+            Text(value)
+                .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                .foregroundColor(alert ? .orange : .primary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func netLabel(_ bps: UInt64) -> String {
+        if bps >= 1_000_000 {
+            return Strings.sysstatNetMB(Double(bps) / 1_000_000)
+        } else {
+            return Strings.sysstatNetKB(Double(bps) / 1_000)
+        }
+    }
+}
+
 // MARK: - Color Extension
 
 extension Color {

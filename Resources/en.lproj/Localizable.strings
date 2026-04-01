@@ -95,6 +95,15 @@
 /* First launch */
 "welcome" = "hi! i'm %@!";
 
+/* System status strip */
+"sysstat.cpu" = "CPU";
+"sysstat.mem" = "MEM";
+"sysstat.net" = "NET";
+"sysstat.bat" = "BAT";
+"sysstat.charging" = "⚡";
+"sysstat.net.unit.kb" = "%.0f KB/s";
+"sysstat.net.unit.mb" = "%.1f MB/s";
+
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";
 "a11y.sprite.hint" = "Tap to pet";

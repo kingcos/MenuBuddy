@@ -30,6 +30,9 @@ class CompanionStore: ObservableObject {
     /// Called (on main thread) whenever a system event fires. PopoverView wires this to the engine.
     var onSystemEvent: ((SystemEvent) -> Void)?
 
+    /// Latest system metrics snapshot; nil until first poll fires.
+    @Published private(set) var systemSnapshot: SystemSnapshot?
+
     private let systemMonitor = SystemMonitor()
 
     private init() {
@@ -46,6 +49,11 @@ class CompanionStore: ObservableObject {
         systemMonitor.onEvent = { [weak self] event in
             DispatchQueue.main.async {
                 self?.updateSystemIndicator(event)
+            }
+        }
+        systemMonitor.onSnapshot = { [weak self] snapshot in
+            DispatchQueue.main.async {
+                self?.systemSnapshot = snapshot
             }
         }
         systemMonitor.start()

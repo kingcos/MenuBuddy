@@ -88,6 +88,15 @@ enum Strings {
     }
     static var batteryChargingQuip: String { L("quip.battery.charging") }
 
+    // System status strip
+    static var sysstatCPU: String { L("sysstat.cpu") }
+    static var sysstatMEM: String { L("sysstat.mem") }
+    static var sysstatNET: String { L("sysstat.net") }
+    static var sysstatBAT: String { L("sysstat.bat") }
+    static var sysstatCharging: String { L("sysstat.charging") }
+    static func sysstatNetKB(_ v: Double) -> String { L("sysstat.net.unit.kb", v) }
+    static func sysstatNetMB(_ v: Double) -> String { L("sysstat.net.unit.mb", v) }
+
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {
         L("a11y.sprite.label", name, species)
