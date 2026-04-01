@@ -63,11 +63,23 @@ class CompanionStore: ObservableObject {
     /// True if this is the very first launch (soul was just created now).
     let isFirstLaunch: Bool
 
-    /// Current system state indicator shown in the menu bar (e.g. "🔥" when CPU is high).
+    /// Current indicator shown in the menu bar (e.g. "🔥" when CPU is high).
     @Published private(set) var systemIndicator: String = ""
 
-    /// Called (on main thread) whenever a system event fires. PopoverView wires this to the engine.
-    var onSystemEvent: ((SystemEvent) -> Void)?
+    /// Current eye override from the active trigger (e.g. "x" for stress).
+    @Published private(set) var triggerEyeOverride: String?
+
+    /// Current mood override from triggers (nil = use default mood logic).
+    @Published private(set) var triggerMood: String?
+
+    /// Called (on main thread) whenever a trigger event fires. PopoverView wires this to the engine.
+    var onTriggerEvent: ((TriggerEvent) -> Void)?
+
+    /// The trigger manager — holds all registered plugin sources.
+    let triggerManager = TriggerManager()
+
+    /// The built-in system trigger source (exposed for snapshot access).
+    let systemSource = SystemTriggerSource()
 
     /// A wake quip to show next time the popover opens (cleared after use).
     private(set) var pendingWakeQuip: String?
@@ -105,19 +117,19 @@ class CompanionStore: ObservableObject {
         return pendingResetWelcome
     }
 
-    /// Emoji reflecting the companion's current mood based on system state.
+    /// Emoji reflecting the companion's current mood.
+    /// Trigger-sourced mood takes priority; falls back to system snapshot heuristic.
     var mood: String {
+        if let m = triggerMood { return m }
         guard let s = systemSnapshot else { return "😊" }
         if s.memFree < 0.15 { return "😵" }
         if s.cpuUsage > 0.70 { return "😰" }
         if let bat = s.batteryPct, bat < 0.20, !s.isCharging { return "🪫" }
-        if s.diskBytesPerSec > 50_000_000 { return "💾" }
         if s.netBytesPerSec > 5_000_000 { return "🚀" }
         if s.cpuUsage < 0.10 && s.netBytesPerSec < 1024 { return "😴" }
         return "😊"
     }
 
-    private let systemMonitor = SystemMonitor()
     private var menuBarQuipTimer: Timer?
 
     private init() {
@@ -135,19 +147,20 @@ class CompanionStore: ObservableObject {
 
         companion = Companion(bones: bones, soul: soul)
 
-        systemMonitor.onEvent = { [weak self] event in
-            DispatchQueue.main.async {
-                self?.updateSystemIndicator(event)
-            }
+        // Wire system source snapshots
+        systemSource.onSnapshot = { [weak self] snapshot in
+            guard let self else { return }
+            self.prevSystemSnapshot = self.systemSnapshot
+            self.systemSnapshot = snapshot
         }
-        systemMonitor.onSnapshot = { [weak self] snapshot in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                self.prevSystemSnapshot = self.systemSnapshot
-                self.systemSnapshot = snapshot
-            }
+
+        // Wire trigger manager events
+        triggerManager.onEvent = { [weak self] event in
+            self?.handleTriggerEvent(event)
         }
-        systemMonitor.start()
+
+        // Register built-in system trigger source
+        triggerManager.register(systemSource)
         scheduleMenuBarQuip(delay: Double.random(in: 15...30))
     }
 
@@ -166,35 +179,31 @@ class CompanionStore: ObservableObject {
         }
     }
 
-    private func updateSystemIndicator(_ event: SystemEvent) {
-        switch event {
-        case .cpuHigh:         systemIndicator = "🔥"
-        case .memHigh:         systemIndicator = "🧠"
-        case .netFast:         systemIndicator = "⚡"
-        case .netSlow:         systemIndicator = "🐌"
-        case .batteryLow:      systemIndicator = "🪫"
-        case .batteryCharging: systemIndicator = "⚡"
-        case .diskBusy:        systemIndicator = "💾"
+    /// Handles a standardized trigger event from any source.
+    private func handleTriggerEvent(_ event: TriggerEvent) {
+        // Update menu bar indicator
+        systemIndicator = event.indicator
+        triggerEyeOverride = event.eyeOverride
+        triggerMood = event.mood
+
+        // Notify UI (speech bubble in popover)
+        onTriggerEvent?(event)
+
+        // Show a quip in the menu bar
+        if let q = event.quips.randomElement() {
+            showMenuBarQuip(q)
         }
-        onSystemEvent?(event)
 
-        // Show a short quip in the menu bar
-        let quip: String? = {
-            switch event {
-            case .cpuHigh:         return Strings.cpuHighQuips.randomElement()
-            case .memHigh:         return Strings.memHighQuips.randomElement()
-            case .netFast:         return Strings.netFastQuips.randomElement()
-            case .netSlow:         return Strings.netSlowQuips.randomElement()
-            case .batteryLow:      return Strings.batteryLowQuips.randomElement()
-            case .batteryCharging: return Strings.batteryChargingQuip
-            case .diskBusy:        return Strings.diskBusyQuips.randomElement()
+        // Clear indicator after duration
+        let indicator = event.indicator
+        DispatchQueue.main.asyncAfter(deadline: .now() + event.duration) { [weak self] in
+            guard let self else { return }
+            // Only clear if it hasn't been replaced by a newer event
+            if self.systemIndicator == indicator {
+                self.systemIndicator = ""
+                self.triggerEyeOverride = nil
+                self.triggerMood = nil
             }
-        }()
-        if let q = quip { showMenuBarQuip(q) }
-
-        // Clear indicator after 30 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
-            self?.systemIndicator = ""
         }
     }
 

@@ -10,6 +10,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventMonitor: Any?
     private var storeObserver: AnyCancellable?
     private var sysIndicatorObserver: AnyCancellable?
+    private var eyeOverrideObserver: AnyCancellable?
     private var menuBarQuipObserver: AnyCancellable?
     private var barTimer: Timer?
     private var barTickIndex = 0
@@ -35,6 +36,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
         sysIndicatorObserver = store.$systemIndicator
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateStatusButton() }
+        eyeOverrideObserver = store.$triggerEyeOverride
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
         menuBarQuipObserver = store.$menuBarQuip
@@ -73,19 +77,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let seqIdx = barTickIndex % idleSequence.count
         let isBlink = idleSequence[seqIdx] < 0
 
-        // Derive a stress eye from the active system indicator
-        let stressEye: String? = {
-            switch store.systemIndicator {
-            case "🔥": return "x"   // CPU hot — X eyes
-            case "🧠": return "~"   // Memory full — squiggly eyes
-            case "🪫": return "."   // Battery dead — tiny dots
-            case "🐌": return "_"   // Net slow — flat lines
-            case "💾": return "o"   // Disk busy — wide eyes
-            default:   return nil
-            }
-        }()
-
-        let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: stressEye)
+        let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: store.triggerEyeOverride)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
         let quipSuffix = store.menuBarQuip.map { " \($0)" } ?? ""

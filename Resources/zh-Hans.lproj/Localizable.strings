@@ -332,6 +332,11 @@
 "settings.menubar.quips" = "在菜单栏显示话语";
 "settings.menubar.quips.desc" = "伙伴偶尔会在菜单栏表情旁边说两句。";
 
+/* 触发源 */
+"trigger.system.name" = "系统监控";
+"trigger.section.title" = "触发源";
+"trigger.section.desc" = "触发源监控外部数据并驱动桌宠的反应。每个触发源独立运行，可单独开关。";
+
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";
 "a11y.sprite.hint" = "点击抚摸";

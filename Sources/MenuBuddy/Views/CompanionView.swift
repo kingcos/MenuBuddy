@@ -158,22 +158,6 @@ final class AnimationEngine: ObservableObject {
         showSpeech(quip)
     }
 
-    /// Called by PopoverView when a system event fires, to show a relevant quip.
-    func showSystemQuip(for event: SystemEvent) {
-        guard !isMuted, speechText == nil else { return }
-        let quip: String?
-        switch event {
-        case .cpuHigh:         quip = Strings.cpuHighQuips.randomElement()
-        case .memHigh:         quip = Strings.memHighQuips.randomElement()
-        case .netFast:         quip = Strings.netFastQuips.randomElement()
-        case .netSlow:         quip = Strings.netSlowQuips.randomElement()
-        case .batteryLow:      quip = Strings.batteryLowQuips.randomElement()
-        case .batteryCharging: quip = Strings.batteryChargingQuip
-        case .diskBusy:        quip = Strings.diskBusyQuips.randomElement()
-        }
-        if let q = quip { showSpeech(q) }
-    }
-
     func stop() {
         mainTimer?.invalidate()
         mainTimer = nil
@@ -337,33 +321,20 @@ struct StatsView: View {
     }
 }
 
-// MARK: - System Status Strip
+// MARK: - Metric Strip View
 
-struct SystemStatusView: View {
-    let snapshot: SystemSnapshot
-    var prev: SystemSnapshot? = nil
+/// Generic metric strip that displays TriggerMetrics from any source.
+struct MetricStripView: View {
+    let metrics: [TriggerMetric]
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                metricPill(label: Strings.sysstatCPU,
-                           value: "\(Int(snapshot.cpuUsage * 100))%\(trend(snapshot.cpuUsage, prev?.cpuUsage, threshold: 0.05))",
-                           alert: snapshot.cpuUsage > 0.70)
-                metricPill(label: Strings.sysstatMEM,
-                           value: "\(Int((1 - snapshot.memFree) * 100))%\(trend(1 - snapshot.memFree, prev.map { 1 - $0.memFree }, threshold: 0.05))",
-                           alert: snapshot.memFree < 0.15)
-                metricPill(label: Strings.sysstatNET,
-                           value: netLabel(snapshot.netBytesPerSec),
-                           alert: false)
-                if let bat = snapshot.batteryPct {
-                    metricPill(label: snapshot.isCharging ? Strings.sysstatCharging : Strings.sysstatBAT,
-                               value: "\(Int(bat * 100))%",
-                               alert: bat < 0.20 && !snapshot.isCharging)
-                }
+        HStack(spacing: 10) {
+            ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
+                metricPill(label: metric.label, value: "\(metric.value)\(metric.trend)", alert: metric.alert)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
     }
 
     private func metricPill(label: String, value: String, alert: Bool) -> some View {
@@ -379,23 +350,6 @@ struct SystemStatusView: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func netLabel(_ bps: UInt64) -> String {
-        if bps >= 1_000_000 {
-            return Strings.sysstatNetMB(Double(bps) / 1_000_000)
-        } else {
-            return Strings.sysstatNetKB(Double(bps) / 1_000)
-        }
-    }
-
-    /// Returns "↑", "↓", or "" based on the change between current and previous value.
-    private func trend(_ current: Double, _ previous: Double?, threshold: Double) -> String {
-        guard let previous else { return "" }
-        let delta = current - previous
-        if delta > threshold { return "↑" }
-        if delta < -threshold { return "↓" }
-        return ""
     }
 }
 

@@ -219,6 +219,11 @@ enum Strings {
     static var settingsMenuBarQuips: String      { L("settings.menubar.quips") }
     static var settingsMenuBarQuipsDesc: String  { L("settings.menubar.quips.desc") }
 
+    // Trigger sources
+    static var triggerSystemName: String     { L("trigger.system.name") }
+    static var triggerSectionTitle: String   { L("trigger.section.title") }
+    static var triggerSectionDesc: String    { L("trigger.section.desc") }
+
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {
         L("a11y.sprite.label", name, species)

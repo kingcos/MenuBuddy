@@ -332,6 +332,11 @@
 "settings.menubar.quips" = "Show quips in menu bar";
 "settings.menubar.quips.desc" = "Your buddy occasionally says something next to its face in the menu bar.";
 
+/* Trigger sources */
+"trigger.system.name" = "System Monitor";
+"trigger.section.title" = "Trigger Sources";
+"trigger.section.desc" = "Trigger sources monitor external data and drive your buddy's reactions. Each source is independent and can be toggled on or off.";
+
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";
 "a11y.sprite.hint" = "Tap to pet";

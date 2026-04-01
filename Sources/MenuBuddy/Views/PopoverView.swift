@@ -25,9 +25,9 @@ struct PopoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
-            if let snap = store.systemSnapshot {
+            if !store.triggerManager.allMetrics.isEmpty {
                 Divider()
-                SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
+                MetricStripView(metrics: store.triggerManager.allMetrics)
             }
             hatchFooter
                 .padding(.horizontal, 16)
@@ -41,7 +41,10 @@ struct PopoverView: View {
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             engine.onPet = { store.recordPet() }
-            store.onSystemEvent = { [weak engine] event in engine?.showSystemQuip(for: event) }
+            store.onTriggerEvent = { [weak engine] event in
+                guard let quip = event.quips.randomElement() else { return }
+                engine?.showSpeech(quip)
+            }
             engine.start(
                 muted: store.muted,
                 species: companion.species,
@@ -68,7 +71,7 @@ struct PopoverView: View {
             }
         }
         .onDisappear {
-            store.onSystemEvent = nil
+            store.onTriggerEvent = nil
             engine.stop()
         }
         .onChange(of: store.muted) { _, newValue in engine.updateMuted(newValue) }

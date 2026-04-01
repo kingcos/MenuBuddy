@@ -122,17 +122,32 @@ struct SettingsView: View {
 
                     Divider()
 
-                    // MARK: System Monitor
-                    sectionHeader(Strings.settingsSectionMonitor)
+                    // MARK: Trigger Sources
+                    sectionHeader(Strings.triggerSectionTitle)
 
-                    Text(Strings.settingsMonitorDesc)
-                        .font(.system(size: 11))
+                    Text(Strings.triggerSectionDesc)
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 20)
 
-                    if let snap = store.systemSnapshot {
-                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(Array(store.triggerManager.sources.enumerated()), id: \.offset) { _, source in
+                            HStack {
+                                Toggle(isOn: Binding(
+                                    get: { source.isEnabled },
+                                    set: { store.triggerManager.setEnabled($0, for: source.id) }
+                                )) {
+                                    Text(source.displayName)
+                                        .font(.system(size: 12))
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    if !store.triggerManager.allMetrics.isEmpty {
+                        MetricStripView(metrics: store.triggerManager.allMetrics)
                             .padding(.horizontal, 4)
                     }
 
