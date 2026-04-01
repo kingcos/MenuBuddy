@@ -95,6 +95,10 @@
 /* 首次启动欢迎 */
 "welcome" = "嗨！我是 %@！";
 
+/* 桌宠年龄 */
+"footer.age.days" = "已陪伴 %d 天";
+"footer.age.today" = "今天诞生！";
+
 /* 设置 */
 "menu.settings" = "设置…";
 "settings.title" = "MenuBuddy 设置";

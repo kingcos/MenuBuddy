@@ -39,6 +39,8 @@ enum Strings {
     // Footer
     static func footerHatched(_ d: String) -> String { L("footer.hatched", d) }
     static func footerPets(_ n: Int)       -> String { L("footer.pets", n) }
+    static func footerAgeDays(_ n: Int)    -> String { L("footer.age.days", n) }
+    static var footerAgeToday: String      { L("footer.age.today") }
 
     // Tooltip
     static func tooltip(_ name: String, _ species: String) -> String { L("tooltip.companion", name, species) }

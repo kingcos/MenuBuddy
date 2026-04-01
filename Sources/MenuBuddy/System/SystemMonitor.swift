@@ -43,7 +43,13 @@ final class SystemMonitor {
 
     func start() {
         guard timer == nil else { return }
-        // First sample after 5s so CPU delta is meaningful
+        // Prime CPU delta baseline immediately (no callbacks fired, just sets prevCPUInfo)
+        _ = cpuUsage()
+        // First full sample at ~4s so the metrics strip populates quickly
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            self?.sample()
+        }
+        // Regular poll every 10s thereafter
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             self?.sample()
         }

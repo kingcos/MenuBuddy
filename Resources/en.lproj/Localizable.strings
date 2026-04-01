@@ -95,6 +95,10 @@
 /* First launch */
 "welcome" = "hi! i'm %@!";
 
+/* Companion age in footer */
+"footer.age.days" = "%d days old";
+"footer.age.today" = "born today!";
+
 /* Settings */
 "menu.settings" = "Settings…";
 "settings.title" = "MenuBuddy Settings";

@@ -33,6 +33,17 @@ class CompanionStore: ObservableObject {
     /// Latest system metrics snapshot; nil until first poll fires.
     @Published private(set) var systemSnapshot: SystemSnapshot?
 
+    /// Emoji reflecting the companion's current mood based on system state.
+    var mood: String {
+        guard let s = systemSnapshot else { return "😊" }
+        if s.memFree < 0.15 { return "😵" }
+        if s.cpuUsage > 0.70 { return "😰" }
+        if let bat = s.batteryPct, bat < 0.20, !s.isCharging { return "🪫" }
+        if s.netBytesPerSec > 5_000_000 { return "🚀" }
+        if s.cpuUsage < 0.10 && s.netBytesPerSec < 1024 { return "😴" }
+        return "😊"
+    }
+
     private let systemMonitor = SystemMonitor()
 
     private init() {

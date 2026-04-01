@@ -71,6 +71,8 @@ struct PopoverView: View {
                 HStack(spacing: 4) {
                     Text(companion.name)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    Text(store.mood)
+                        .font(.system(size: 12))
                     if companion.shiny {
                         Text("✨")
                             .font(.system(size: 11))
@@ -135,13 +137,10 @@ struct PopoverView: View {
 
     private var hatchFooter: some View {
         HStack {
-            let date = Date(timeIntervalSince1970: companion.soul.hatchedAt)
-            let formatter: DateFormatter = {
-                let f = DateFormatter()
-                f.dateStyle = .medium
-                return f
-            }()
-            Text(Strings.footerHatched(formatter.string(from: date)))
+            let hatchDate = Date(timeIntervalSince1970: companion.soul.hatchedAt)
+            let days = Calendar.current.dateComponents([.day], from: hatchDate, to: Date()).day ?? 0
+            let ageText = days == 0 ? Strings.footerAgeToday : Strings.footerAgeDays(days)
+            Text(ageText)
                 .font(.system(size: 9))
                 .foregroundColor(.secondary)
             Spacer()
