@@ -62,6 +62,143 @@
 "stat.wisdom" = "WISDOM";
 "stat.snark" = "SNARK";
 
+/* Generic idle quips */
+"quip.generic.1" = "…";
+"quip.generic.2" = "*yawns*";
+"quip.generic.3" = "*stares at you*";
+"quip.generic.4" = "meep.";
+"quip.generic.5" = "*wiggles*";
+"quip.generic.6" = "did you pet me yet";
+"quip.generic.7" = "i am watching.";
+"quip.generic.8" = "*does a little spin*";
+"quip.generic.9" = "working hard?";
+"quip.generic.10" = "proud of u :)";
+"quip.generic.11" = "*blinks slowly*";
+"quip.generic.12" = "almost done?";
+"quip.generic.13" = "you got this!";
+"quip.generic.14" = "*investigates cursor*";
+"quip.generic.15" = "hi.";
+"quip.generic.16" = "sup.";
+"quip.generic.17" = "*stretches*";
+"quip.generic.18" = "still here.";
+"quip.generic.19" = "…ok.";
+
+/* Pet responses */
+"quip.pet.1" = "♥";
+"quip.pet.2" = "hehe";
+"quip.pet.3" = "*purrs*";
+"quip.pet.4" = "yay!";
+"quip.pet.5" = "uwu";
+"quip.pet.6" = "eee!";
+"quip.pet.7" = "*happy wiggle*";
+
+/* Species quips — Duck */
+"quip.species.duck.1" = "quack.";
+"quip.species.duck.2" = "*quacks softly*";
+"quip.species.duck.3" = "bread?";
+"quip.species.duck.4" = "QUACK.";
+"quip.species.duck.5" = "*shakes tail feathers*";
+/* Species quips — Goose */
+"quip.species.goose.1" = "HONK.";
+"quip.species.goose.2" = "mine.";
+"quip.species.goose.3" = "*stares menacingly*";
+"quip.species.goose.4" = "honk honk.";
+"quip.species.goose.5" = "i want that.";
+/* Species quips — Blob */
+"quip.species.blob.1" = "blop.";
+"quip.species.blob.2" = "*jiggles*";
+"quip.species.blob.3" = "bloop?";
+"quip.species.blob.4" = "*merges with shadow*";
+"quip.species.blob.5" = "i am formless.";
+/* Species quips — Cat */
+"quip.species.cat.1" = "*knocks something off the desk*";
+"quip.species.cat.2" = "feed me.";
+"quip.species.cat.3" = "*loafs*";
+"quip.species.cat.4" = "purrr.";
+"quip.species.cat.5" = "no.";
+/* Species quips — Dragon */
+"quip.species.dragon.1" = "*smoke from nostrils*";
+"quip.species.dragon.2" = "scales: perfect.";
+"quip.species.dragon.3" = "fire later.";
+"quip.species.dragon.4" = "*hoards things*";
+"quip.species.dragon.5" = "magnificent.";
+/* Species quips — Octopus */
+"quip.species.octopus.1" = "*eight-armed hug?*";
+"quip.species.octopus.2" = "i have plans.";
+"quip.species.octopus.3" = "*changes color*";
+"quip.species.octopus.4" = "ink. soon.";
+"quip.species.octopus.5" = "eight brains. sort of.";
+/* Species quips — Owl */
+"quip.species.owl.1" = "*rotates head*";
+"quip.species.owl.2" = "wise. very wise.";
+"quip.species.owl.3" = "hoot.";
+"quip.species.owl.4" = "*judges quietly*";
+"quip.species.owl.5" = "observed.";
+/* Species quips — Penguin */
+"quip.species.penguin.1" = "*waddles*";
+"quip.species.penguin.2" = "cold please.";
+"quip.species.penguin.3" = "*slides on belly*";
+"quip.species.penguin.4" = "fish time?";
+"quip.species.penguin.5" = "tuxedo ready.";
+/* Species quips — Turtle */
+"quip.species.turtle.1" = "*retreats into shell*";
+"quip.species.turtle.2" = "slowly.";
+"quip.species.turtle.3" = "patience.";
+"quip.species.turtle.4" = "*peeks out*";
+"quip.species.turtle.5" = "no rush.";
+/* Species quips — Snail */
+"quip.species.snail.1" = "still getting there.";
+"quip.species.snail.2" = "*leaves trail*";
+"quip.species.snail.3" = "…";
+"quip.species.snail.4" = "*slides imperceptibly*";
+/* Species quips — Ghost */
+"quip.species.ghost.1" = "boo.";
+"quip.species.ghost.2" = "*fades slightly*";
+"quip.species.ghost.3" = "spooky?";
+"quip.species.ghost.4" = "*floats through wall*";
+"quip.species.ghost.5" = "haunting vibes.";
+/* Species quips — Axolotl */
+"quip.species.axolotl.1" = "*regenerates*";
+"quip.species.axolotl.2" = "neotenic.";
+"quip.species.axolotl.3" = "*wiggles gills*";
+"quip.species.axolotl.4" = "axolotl rights.";
+"quip.species.axolotl.5" = "yep.";
+/* Species quips — Capybara */
+"quip.species.capybara.1" = "chill.";
+"quip.species.capybara.2" = "*lets other animals sit on me*";
+"quip.species.capybara.3" = "content.";
+"quip.species.capybara.4" = "*closes eyes*";
+"quip.species.capybara.5" = "ok.";
+/* Species quips — Cactus */
+"quip.species.cactus.1" = "*grows slowly*";
+"quip.species.cactus.2" = "prickly today.";
+"quip.species.cactus.3" = "*photosynthesizes*";
+"quip.species.cactus.4" = "don't touch.";
+"quip.species.cactus.5" = "…";
+/* Species quips — Robot */
+"quip.species.robot.1" = "processing…";
+"quip.species.robot.2" = "beep boop.";
+"quip.species.robot.3" = "01101000 01101001";
+"quip.species.robot.4" = "*whirrs*";
+"quip.species.robot.5" = "calculating.";
+/* Species quips — Rabbit */
+"quip.species.rabbit.1" = "*nose twitch*";
+"quip.species.rabbit.2" = "hop.";
+"quip.species.rabbit.3" = "*binkies*";
+"quip.species.rabbit.4" = "lettuce?";
+"quip.species.rabbit.5" = "*digs determinedly*";
+/* Species quips — Mushroom */
+"quip.species.mushroom.1" = "*sporulates*";
+"quip.species.mushroom.2" = "decomposing things.";
+"quip.species.mushroom.3" = "fungi vibes.";
+"quip.species.mushroom.4" = "*grows quietly*";
+/* Species quips — Chonk */
+"quip.species.chonk.1" = "*sits heavily*";
+"quip.species.chonk.2" = "big.";
+"quip.species.chonk.3" = "chonky and content.";
+"quip.species.chonk.4" = "*belly flop*";
+"quip.species.chonk.5" = "dense.";
+
 /* System quips — CPU */
 "quip.cpu.high1" = "getting warm in here...";
 "quip.cpu.high2" = "fan is spinning!";

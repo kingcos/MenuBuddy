@@ -16,42 +16,8 @@ let petHearts = [
     "·    ·   ·  ",
 ]
 
-// Generic quips (fallback)
-private let genericQuips = [
-    "…", "*yawns*", "*stares at you*", "meep.", "*wiggles*",
-    "did you pet me yet", "i am watching.", "*does a little spin*",
-    "working hard?", "proud of u :)", "*blinks slowly*",
-    "almost done?", "you got this!", "*investigates cursor*",
-    "hi.", "sup.", "*stretches*", "still here.", "…ok.",
-]
-
-// Species-specific quips — personality flavoring
-private let speciesQuips: [Species: [String]] = [
-    .duck:     ["quack.", "*quacks softly*", "bread?", "QUACK.", "*shakes tail feathers*"],
-    .goose:    ["HONK.", "mine.", "*stares menacingly*", "honk honk.", "i want that."],
-    .blob:     ["blop.", "*jiggles*", "bloop?", "*merges with shadow*", "i am formless."],
-    .cat:      ["*knocks something off the desk*", "feed me.", "*loafs*", "purrr.", "no."],
-    .dragon:   ["*smoke from nostrils*", "scales: perfect.", "fire later.", "*hoards things*"],
-    .octopus:  ["*eight-armed hug?*", "i have plans.", "*changes color*", "ink. soon."],
-    .owl:      ["*rotates head*", "wise. very wise.", "hoot.", "*judges quietly*", "observed."],
-    .penguin:  ["*waddles*", "cold please.", "*slides on belly*", "fish time?", "tuxedo ready."],
-    .turtle:   ["*retreats into shell*", "slowly.", "patience.", "*peeks out*", "no rush."],
-    .snail:    ["still getting there.", "*leaves trail*", "…", "*slides imperceptibly*"],
-    .ghost:    ["boo.", "*fades slightly*", "spooky?", "*floats through wall*", "haunting vibes."],
-    .axolotl:  ["*regenerates*", "neotenic.", "*wiggles gills*", "axolotl rights.", "yep."],
-    .capybara: ["chill.", "*lets other animals sit on me*", "content.", "*closes eyes*", "ok."],
-    .cactus:   ["*grows slowly*", "prickly today.", "*photosynthesizes*", "don't touch.", "…"],
-    .robot:    ["processing…", "beep boop.", "01101000 01101001", "*whirrs*", "calculating."],
-    .rabbit:   ["*nose twitch*", "hop.", "*binkies*", "lettuce?", "*digs determinedly*"],
-    .mushroom: ["*sporulates*", "decomposing things.", "fungi vibes.", "*grows quietly*"],
-    .chonk:    ["*sits heavily*", "big.", "chonky and content.", "*belly flop*", "dense."],
-]
-
-private let petResponses = ["♥", "hehe", "*purrs*", "yay!", "uwu", "eee!", "*happy wiggle*"]
-
 func quipsFor(species: Species) -> [String] {
-    let specific = speciesQuips[species] ?? []
-    return specific + genericQuips
+    Strings.speciesQuips(for: species) + Strings.genericQuips
 }
 
 // MARK: - Shuffled Quip Deck
@@ -100,7 +66,7 @@ final class AnimationEngine: ObservableObject {
     private var nextQuipTask: Task<Void, Never>?
     private var isMuted: Bool = false
     private var species: Species = .duck
-    private var quipDeck: QuipDeck = QuipDeck(source: { genericQuips })
+    private var quipDeck: QuipDeck = QuipDeck(source: { Strings.genericQuips })
 
     /// Called when a pet is triggered; returns optional milestone message.
     var onPet: (() -> String?)? = nil
@@ -159,7 +125,7 @@ final class AnimationEngine: ObservableObject {
     func triggerPet() {
         petHeartFrame = 0
         // Check for milestone first, otherwise use pet response
-        let message = onPet?() ?? petResponses.randomElement() ?? "♥"
+        let message = onPet?() ?? Strings.petResponses.randomElement() ?? "♥"
         showSpeech(message)
     }
 

@@ -62,6 +62,143 @@
 "stat.wisdom" = "智慧值";
 "stat.snark" = "嘴贱度";
 
+/* 通用闲聊 */
+"quip.generic.1" = "……";
+"quip.generic.2" = "*打了个哈欠*";
+"quip.generic.3" = "*盯着你看*";
+"quip.generic.4" = "咪噗。";
+"quip.generic.5" = "*扭来扭去*";
+"quip.generic.6" = "你还没摸我呢";
+"quip.generic.7" = "我一直在看着。";
+"quip.generic.8" = "*转了一圈*";
+"quip.generic.9" = "在认真工作？";
+"quip.generic.10" = "我为你骄傲 :)";
+"quip.generic.11" = "*慢慢眨眼*";
+"quip.generic.12" = "快好了吗？";
+"quip.generic.13" = "你可以的！";
+"quip.generic.14" = "*研究光标*";
+"quip.generic.15" = "嗨。";
+"quip.generic.16" = "在呢。";
+"quip.generic.17" = "*伸了个懒腰*";
+"quip.generic.18" = "还在这儿。";
+"quip.generic.19" = "……好吧。";
+
+/* 抚摸反应 */
+"quip.pet.1" = "♥";
+"quip.pet.2" = "嘿嘿";
+"quip.pet.3" = "*呼噜噜*";
+"quip.pet.4" = "耶！";
+"quip.pet.5" = "呜呜~";
+"quip.pet.6" = "啊啊啊！";
+"quip.pet.7" = "*开心地扭动*";
+
+/* 种类台词 — 鸭子 */
+"quip.species.duck.1" = "呱。";
+"quip.species.duck.2" = "*轻声呱呱*";
+"quip.species.duck.3" = "面包？";
+"quip.species.duck.4" = "呱！！！";
+"quip.species.duck.5" = "*抖动尾巴*";
+/* 种类台词 — 大鹅 */
+"quip.species.goose.1" = "嘎！";
+"quip.species.goose.2" = "是我的。";
+"quip.species.goose.3" = "*凶狠地盯视*";
+"quip.species.goose.4" = "嘎嘎。";
+"quip.species.goose.5" = "我要那个。";
+/* 种类台词 — 史莱姆 */
+"quip.species.blob.1" = "噗噗。";
+"quip.species.blob.2" = "*颤颤巍巍*";
+"quip.species.blob.3" = "噗噗？";
+"quip.species.blob.4" = "*融入阴影*";
+"quip.species.blob.5" = "我是无形的。";
+/* 种类台词 — 猫咪 */
+"quip.species.cat.1" = "*把东西从桌上推下去*";
+"quip.species.cat.2" = "喂我。";
+"quip.species.cat.3" = "*面包猫*";
+"quip.species.cat.4" = "呼噜噜。";
+"quip.species.cat.5" = "不。";
+/* 种类台词 — 龙 */
+"quip.species.dragon.1" = "*鼻孔冒烟*";
+"quip.species.dragon.2" = "鳞片：完美。";
+"quip.species.dragon.3" = "待会儿喷火。";
+"quip.species.dragon.4" = "*囤积东西*";
+"quip.species.dragon.5" = "壮观。";
+/* 种类台词 — 章鱼 */
+"quip.species.octopus.1" = "*八臂抱抱？*";
+"quip.species.octopus.2" = "我有计划。";
+"quip.species.octopus.3" = "*变了个色*";
+"quip.species.octopus.4" = "墨水……要来了。";
+"quip.species.octopus.5" = "八个脑子。大概。";
+/* 种类台词 — 猫头鹰 */
+"quip.species.owl.1" = "*转了转脑袋*";
+"quip.species.owl.2" = "很聪明。非常聪明。";
+"quip.species.owl.3" = "咕。";
+"quip.species.owl.4" = "*默默评判*";
+"quip.species.owl.5" = "已观察。";
+/* 种类台词 — 企鹅 */
+"quip.species.penguin.1" = "*摇摇摆摆*";
+"quip.species.penguin.2" = "给点凉的。";
+"quip.species.penguin.3" = "*肚皮滑行*";
+"quip.species.penguin.4" = "鱼？";
+"quip.species.penguin.5" = "燕尾服已就位。";
+/* 种类台词 — 乌龟 */
+"quip.species.turtle.1" = "*缩进壳里*";
+"quip.species.turtle.2" = "慢慢来。";
+"quip.species.turtle.3" = "耐心。";
+"quip.species.turtle.4" = "*探出头来*";
+"quip.species.turtle.5" = "不急。";
+/* 种类台词 — 蜗牛 */
+"quip.species.snail.1" = "还在路上。";
+"quip.species.snail.2" = "*留了条痕*";
+"quip.species.snail.3" = "……";
+"quip.species.snail.4" = "*以肉眼不可见的速度移动*";
+/* 种类台词 — 小鬼 */
+"quip.species.ghost.1" = "哇。";
+"quip.species.ghost.2" = "*渐渐透明*";
+"quip.species.ghost.3" = "恐怖吗？";
+"quip.species.ghost.4" = "*穿墙而过*";
+"quip.species.ghost.5" = "闹鬼气息。";
+/* 种类台词 — 六角恐龙 */
+"quip.species.axolotl.1" = "*再生了*";
+"quip.species.axolotl.2" = "幼态持续。";
+"quip.species.axolotl.3" = "*摆动鳃*";
+"quip.species.axolotl.4" = "六角恐龙权利。";
+"quip.species.axolotl.5" = "嗯。";
+/* 种类台词 — 水豚 */
+"quip.species.capybara.1" = "淡定。";
+"quip.species.capybara.2" = "*让别的动物坐在我身上*";
+"quip.species.capybara.3" = "满足。";
+"quip.species.capybara.4" = "*闭上眼睛*";
+"quip.species.capybara.5" = "好的。";
+/* 种类台词 — 仙人掌 */
+"quip.species.cactus.1" = "*缓缓生长*";
+"quip.species.cactus.2" = "今天有点扎。";
+"quip.species.cactus.3" = "*光合作用中*";
+"quip.species.cactus.4" = "别摸。";
+"quip.species.cactus.5" = "……";
+/* 种类台词 — 机器人 */
+"quip.species.robot.1" = "处理中……";
+"quip.species.robot.2" = "哔 哔。";
+"quip.species.robot.3" = "01101000 01101001";
+"quip.species.robot.4" = "*嗡嗡作响*";
+"quip.species.robot.5" = "计算中。";
+/* 种类台词 — 兔子 */
+"quip.species.rabbit.1" = "*鼻子抖动*";
+"quip.species.rabbit.2" = "蹦。";
+"quip.species.rabbit.3" = "*兔子跳*";
+"quip.species.rabbit.4" = "生菜？";
+"quip.species.rabbit.5" = "*认真地刨地*";
+/* 种类台词 — 蘑菇 */
+"quip.species.mushroom.1" = "*释放孢子*";
+"quip.species.mushroom.2" = "分解中。";
+"quip.species.mushroom.3" = "菌菌气息。";
+"quip.species.mushroom.4" = "*悄悄生长*";
+/* 种类台词 — 肥肥 */
+"quip.species.chonk.1" = "*重重坐下*";
+"quip.species.chonk.2" = "大。";
+"quip.species.chonk.3" = "圆滚滚且满足。";
+"quip.species.chonk.4" = "*肚皮着地*";
+"quip.species.chonk.5" = "结实。";
+
 /* 系统状态台词 — CPU */
 "quip.cpu.high1" = "好热啊……";
 "quip.cpu.high2" = "风扇在转！";

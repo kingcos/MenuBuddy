@@ -72,6 +72,28 @@ enum Strings {
     // Welcome
     static func welcome(_ name: String) -> String { L("welcome", name) }
 
+    // Generic idle quips
+    static var genericQuips: [String] {
+        (1...19).map { L("quip.generic.\($0)") }
+    }
+
+    // Pet response quips
+    static var petResponses: [String] {
+        (1...7).map { L("quip.pet.\($0)") }
+    }
+
+    // Species-specific quips
+    static func speciesQuips(for species: Species) -> [String] {
+        let counts: [Species: Int] = [
+            .duck: 5, .goose: 5, .blob: 5, .cat: 5, .dragon: 5,
+            .octopus: 5, .owl: 5, .penguin: 5, .turtle: 5, .snail: 4,
+            .ghost: 5, .axolotl: 5, .capybara: 5, .cactus: 5, .robot: 5,
+            .rabbit: 5, .mushroom: 4, .chonk: 5,
+        ]
+        let n = counts[species] ?? 0
+        return (1...max(1, n)).map { L("quip.species.\(species.rawValue).\($0)") }
+    }
+
     // System quips
     static var cpuHighQuips: [String] {
         [L("quip.cpu.high1"), L("quip.cpu.high2"), L("quip.cpu.high3"), L("quip.cpu.high4")]

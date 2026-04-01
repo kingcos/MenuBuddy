@@ -3,7 +3,7 @@ import ServiceManagement
 
 struct SettingsView: View {
     @ObservedObject var store: CompanionStore
-    @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLogin: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -87,6 +87,7 @@ struct SettingsView: View {
         }
         .frame(width: 340)
         .background(Color(NSColor.windowBackgroundColor))
+        .onAppear { launchAtLogin = SMAppService.mainApp.status == .enabled }
     }
 
     private func sectionHeader(_ title: String) -> some View {
