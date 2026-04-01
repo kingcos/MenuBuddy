@@ -50,12 +50,8 @@ final class SystemMonitor {
     private var prevDiskWrite: UInt64 = 0
     private var prevDiskTimestamp: Date = .distantPast
 
-    // State tracking — only fire events on edge (transition), not every poll
-    private var prevWasCharging = false
-    private var prevWasLow = false
-    private var prevCPUWasHigh = false
-    private var prevMemWasHigh = false
-    private var prevDiskWasBusy = false
+    // Network slow detection only
+
 
     func start() {
         guard timer == nil else { return }
@@ -92,31 +88,16 @@ final class SystemMonitor {
         let isNetSlow = (net == 0 && prevNetWasActive)
         prevNetWasActive = net > 1024   // >1 KB/s counts as active
 
-        let cpuHigh = cpu > 0.70
-        if cpuHigh && !prevCPUWasHigh { onEvent?(.cpuHigh) }
-        prevCPUWasHigh = cpuHigh
-
-        let memHigh = mem < 0.15
-        if memHigh && !prevMemWasHigh { onEvent?(.memHigh) }
-        prevMemWasHigh = memHigh
-
+        if cpu > 0.70        { onEvent?(.cpuHigh) }
+        if mem < 0.15        { onEvent?(.memHigh) }
         if net > 5_000_000   { onEvent?(.netFast) }
         else if isNetSlow    { onEvent?(.netSlow) }
-
-        let diskBusy = disk > 50_000_000
-        if diskBusy && !prevDiskWasBusy { onEvent?(.diskBusy) }
-        prevDiskWasBusy = diskBusy
-        // Only fire battery events on state change
+        if disk > 50_000_000 { onEvent?(.diskBusy) }
         switch bat {
-        case .low:
-            if !prevWasLow { onEvent?(.batteryLow) }
-        case .charging:
-            if !prevWasCharging { onEvent?(.batteryCharging) }
-        case .normal, .notPresent:
-            break
+        case .low:           onEvent?(.batteryLow)
+        case .charging:      onEvent?(.batteryCharging)
+        case .normal, .notPresent: break
         }
-        prevWasCharging = (bat == .charging)
-        prevWasLow = (bat == .low)
 
         onSnapshot?(SystemSnapshot(
             cpuUsage: cpu,
