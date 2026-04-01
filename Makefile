@@ -4,7 +4,7 @@ APP_BUNDLE = $(BUILD_DIR)/$(APP_NAME).app
 BINARY = $(BUILD_DIR)/$(APP_NAME)
 INSTALL_DIR = /Applications
 
-.PHONY: build run install clean
+.PHONY: build run install clean dmg
 
 build: icon
 	swift build -c release
@@ -32,7 +32,21 @@ install: build
 	@cp -r "$(APP_BUNDLE)" "$(INSTALL_DIR)/"
 	@echo "Installed to $(INSTALL_DIR)/$(APP_NAME).app"
 
+dmg: build
+	@echo "Creating DMG..."
+	@rm -f "$(BUILD_DIR)/$(APP_NAME).dmg"
+	@mkdir -p "$(BUILD_DIR)/dmg-staging"
+	@cp -r "$(APP_BUNDLE)" "$(BUILD_DIR)/dmg-staging/"
+	@ln -sf /Applications "$(BUILD_DIR)/dmg-staging/Applications"
+	@hdiutil create -volname "$(APP_NAME)" \
+		-srcfolder "$(BUILD_DIR)/dmg-staging" \
+		-ov -format UDZO \
+		"$(BUILD_DIR)/$(APP_NAME).dmg"
+	@rm -rf "$(BUILD_DIR)/dmg-staging"
+	@echo "DMG created: $(BUILD_DIR)/$(APP_NAME).dmg"
+
 clean:
 	swift package clean
 	@rm -rf "$(BUILD_DIR)/$(APP_NAME).app"
+	@rm -f "$(BUILD_DIR)/$(APP_NAME).dmg"
 	@echo "Clean complete"

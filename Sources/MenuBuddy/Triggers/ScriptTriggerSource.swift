@@ -107,9 +107,25 @@ final class ScriptTriggerSource: TriggerSource {
 
         do {
             try process.run()
-            process.waitUntilExit()
         } catch {
             logger.error("Script failed to run: \(error.localizedDescription)", source: "script.\(id)")
+            return nil
+        }
+
+        // Read stdout BEFORE waitUntilExit to avoid pipe buffer deadlock.
+        // If the script outputs > 64KB, the pipe fills and waitUntilExit hangs.
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+
+        // Enforce a 30s timeout to prevent hung scripts from blocking forever
+        let deadline = DispatchTime.now() + 30
+        let done = DispatchSemaphore(value: 0)
+        DispatchQueue.global(qos: .utility).async {
+            process.waitUntilExit()
+            done.signal()
+        }
+        if done.wait(timeout: deadline) == .timedOut {
+            process.terminate()
+            logger.warn("Script timed out after 30s: \(scriptPath)", source: "script.\(id)")
             return nil
         }
 
@@ -117,7 +133,6 @@ final class ScriptTriggerSource: TriggerSource {
             logger.warn("Script exited with code \(process.terminationStatus): \(scriptPath)", source: "script.\(id)")
             return nil
         }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
         return String(data: data, encoding: .utf8)
     }
 

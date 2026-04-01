@@ -254,7 +254,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
     }
 
     @objc func showAbout() {

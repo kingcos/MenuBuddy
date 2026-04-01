@@ -324,7 +324,7 @@ struct SettingsView: View {
 
     private var footerView: some View {
         VStack(spacing: 4) {
-            Text("MenuBuddy v1.0")
+            Text("MenuBuddy v\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.secondary)
             Button(action: {

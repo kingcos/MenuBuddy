@@ -59,8 +59,7 @@ final class SystemMonitor {
     private var prevDiskBusy = false
     private var prevBatLow = false
     private var prevBatCharging = false
-
-    // Network slow detection only
+    private var prevNetFast = false
 
 
     func start() {
@@ -104,16 +103,19 @@ final class SystemMonitor {
         let batLow = (bat == .low)
         let batCharging = (bat == .charging)
 
+        let netFast = net > 5_000_000
+
         if cpuHigh    && (repeatEvents || !prevCPUHigh)      { onEvent?(.cpuHigh) }
         if memHigh    && (repeatEvents || !prevMemHigh)      { onEvent?(.memHigh) }
-        if net > 5_000_000   { onEvent?(.netFast) }
-        else if isNetSlow    { onEvent?(.netSlow) }
+        if netFast    && (repeatEvents || !prevNetFast)      { onEvent?(.netFast) }
+        else if isNetSlow                                    { onEvent?(.netSlow) }
         if diskBusy   && (repeatEvents || !prevDiskBusy)     { onEvent?(.diskBusy) }
         if batLow     && (repeatEvents || !prevBatLow)       { onEvent?(.batteryLow) }
         if batCharging && (repeatEvents || !prevBatCharging) { onEvent?(.batteryCharging) }
 
         prevCPUHigh = cpuHigh
         prevMemHigh = memHigh
+        prevNetFast = netFast
         prevDiskBusy = diskBusy
         prevBatLow = batLow
         prevBatCharging = batCharging
@@ -130,13 +132,17 @@ final class SystemMonitor {
 
     // MARK: - CPU
 
+    /// Cached host port — `mach_host_self()` increments a send right each
+    /// call, so we capture it once to avoid leaking mach ports.
+    private let hostPort = mach_host_self()
+
     /// Returns total CPU utilization in [0, 1] across all cores.
     private func cpuUsage() -> Double {
         var numCPUs: natural_t = 0
         var newInfo: processor_info_array_t?
         var newCount: mach_msg_type_number_t = 0
 
-        guard host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO,
+        guard host_processor_info(hostPort, PROCESSOR_CPU_LOAD_INFO,
                                    &numCPUs, &newInfo, &newCount) == KERN_SUCCESS,
               let info = newInfo else { return 0 }
 
@@ -174,7 +180,7 @@ final class SystemMonitor {
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)
         let result = withUnsafeMutablePointer(to: &vmStats) {
             $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
+                host_statistics64(hostPort, HOST_VM_INFO64, $0, &count)
             }
         }
         guard result == KERN_SUCCESS else { return 1.0 }
@@ -197,9 +203,11 @@ final class SystemMonitor {
         var cursor: UnsafeMutablePointer<ifaddrs>? = first
         while let ifa = cursor {
             let name = String(cString: ifa.pointee.ifa_name)
-            // Skip loopback
+            // Skip loopback and interfaces without data
             if !name.hasPrefix("lo"),
-               ifa.pointee.ifa_addr.pointee.sa_family == UInt8(AF_LINK) {
+               let addr = ifa.pointee.ifa_addr,
+               addr.pointee.sa_family == UInt8(AF_LINK),
+               ifa.pointee.ifa_data != nil {
                 let data = unsafeBitCast(ifa.pointee.ifa_data,
                                          to: UnsafeMutablePointer<if_data>.self)
                 totalBytes += UInt64(data.pointee.ifi_ibytes) + UInt64(data.pointee.ifi_obytes)
