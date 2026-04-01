@@ -65,6 +65,12 @@ struct PopoverView: View {
                     engine.showSpeech(Strings.welcome(companion.name))
                 }
             }
+            // Show pending LLM reaction
+            else if let llm = store.consumeLLMReaction() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    engine.showSpeech(llm)
+                }
+            }
             // Show startup greeting (random, once per launch)
             else if let startup = store.consumeStartupGreeting() {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

@@ -20,77 +20,20 @@ struct SettingsView: View {
     }()
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Companion header card
-            companionCard
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
-
-            // Tab-free scrollable settings
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    generalSection
-                    menuBarSection
-                    triggerSection
-                    llmSection
-                    advancedSection
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                generalSection
+                menuBarSection
+                triggerSection
+                llmSection
+                advancedSection
+                footerView
             }
+            .padding(20)
         }
-        .frame(width: 400, height: 560)
+        .frame(width: 400, height: 520)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear { launchAtLogin = SMAppService.mainApp.status == .enabled }
-    }
-
-    // MARK: - Companion Card (replaces About dialog)
-
-    private var companionCard: some View {
-        HStack(spacing: 14) {
-            // Mini sprite
-            let lines = renderFace(bones: store.companion.bones, blink: false, eyeOverride: nil)
-            Text(lines)
-                .font(.system(size: 18, design: .monospaced))
-                .foregroundColor(store.companion.shiny ? Color(hex: "#f59e0b") : Color(hex: store.companion.rarity.color))
-                .frame(width: 52, height: 36)
-
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    Text(store.companion.name)
-                        .font(.system(size: 14, weight: .semibold))
-                    if store.companion.shiny {
-                        Text("✨").font(.system(size: 11))
-                    }
-                }
-                Text("\(store.companion.species.localizedName) · \(store.companion.rarity.localizedName) \(store.companion.rarity.stars)")
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                let hatchDate = Date(timeIntervalSince1970: store.companion.soul.hatchedAt)
-                Text(Strings.aboutHatched(DateFormatter.localizedString(from: hatchDate, dateStyle: .medium, timeStyle: .none)))
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("v1.0")
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundColor(.secondary)
-                Text("kingcos")
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(hex: store.companion.rarity.color).opacity(0.06))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color(hex: store.companion.rarity.color).opacity(0.2), lineWidth: 1)
-        )
     }
 
     // MARK: - General
@@ -375,6 +318,28 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Footer
+
+    private var footerView: some View {
+        VStack(spacing: 4) {
+            Text("MenuBuddy v1.0")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.secondary)
+            Button(action: {
+                if let url = URL(string: "https://github.com/kingcos/MenuBuddy") {
+                    NSWorkspace.shared.open(url)
+                }
+            }) {
+                Text("github.com/kingcos/MenuBuddy")
+                    .font(.system(size: 11))
+                    .foregroundColor(.accentColor)
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 4)
     }
 
     // MARK: - Reusable Components

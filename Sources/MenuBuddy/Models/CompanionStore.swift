@@ -131,6 +131,14 @@ class CompanionStore: ObservableObject {
     /// Startup greeting — consumed on first popover open each launch.
     private(set) var pendingStartupGreeting: String? = Strings.startupQuips.randomElement()
 
+    /// Pending LLM reaction — shown next time popover opens if it was closed.
+    @Published private(set) var pendingLLMReaction: String?
+
+    func consumeLLMReaction() -> String? {
+        defer { pendingLLMReaction = nil }
+        return pendingLLMReaction
+    }
+
     func consumeResetWelcome() -> Bool {
         defer { pendingResetWelcome = false }
         return pendingResetWelcome
@@ -243,13 +251,21 @@ class CompanionStore: ObservableObject {
     private func handleTriggerEvent(_ event: TriggerEvent) {
         logger.debug("Trigger event: [\(event.sourceId)] \(event.indicator) quips=\(event.quips.count)", source: "trigger")
 
+        let llmEnabled = LLMService.shared.config.enabled
+
         // Try LLM-generated reaction if enabled
-        if !event.quips.isEmpty, LLMService.shared.config.enabled {
+        if !event.quips.isEmpty, llmEnabled {
             let context = "System event: \(event.indicator) \(event.quips.first ?? "")"
             LLMService.shared.generateReaction(companion: companion, context: context) { [weak self] reaction in
-                if let reaction, !reaction.isEmpty {
-                    self?.onTriggerEvent?(TriggerEvent(sourceId: "llm", indicator: event.indicator, quips: [reaction]))
+                guard let self, let reaction, !reaction.isEmpty else { return }
+                logger.info("LLM reaction for [\(event.sourceId)]: \(reaction)", source: "llm")
+                // Show immediately if popover is open, otherwise store as pending
+                if self.onTriggerEvent != nil {
+                    self.onTriggerEvent?(TriggerEvent(sourceId: "llm", indicator: "", quips: [reaction]))
+                } else {
+                    self.pendingLLMReaction = reaction
                 }
+                self.showMenuBarQuip(reaction)
             }
         }
 
@@ -258,10 +274,12 @@ class CompanionStore: ObservableObject {
         triggerEyeOverride = event.eyeOverride
         triggerMood = event.mood
 
-        // Notify UI (speech bubble in popover)
-        onTriggerEvent?(event)
+        // Show preset quip in popover only when LLM is disabled
+        if !llmEnabled {
+            onTriggerEvent?(event)
+        }
 
-        // Show a quip in the menu bar
+        // Show a preset quip in the menu bar (LLM will override with its own later)
         if let q = event.quips.randomElement() {
             showMenuBarQuip(q)
         }
