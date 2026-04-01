@@ -200,10 +200,10 @@
 "quip.species.chonk.5" = "dense.";
 
 /* Reset companion */
-"settings.reset" = "Get New Companion…";
-"settings.reset.confirm.title" = "Get a new companion?";
-"settings.reset.confirm.body" = "Your current companion will be gone forever. This cannot be undone.";
-"settings.reset.confirm.ok" = "Get New Companion";
+"settings.reset" = "Reset Name & Progress…";
+"settings.reset.confirm.title" = "Reset companion?";
+"settings.reset.confirm.body" = "This will give your buddy a new random name and reset the pet counter to zero. The appearance stays the same — it's tied to your Mac.";
+"settings.reset.confirm.ok" = "Reset";
 "settings.reset.confirm.cancel" = "Keep %@";
 
 /* Workspace app-context quips */
