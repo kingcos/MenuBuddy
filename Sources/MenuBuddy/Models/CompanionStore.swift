@@ -130,7 +130,6 @@ class CompanionStore: ObservableObject {
         }
         let soul = CompanionSoul(
             name: Strings.defaultNames.randomElement() ?? "Buddy",
-            personality: "curious and cheerful",
             hatchedAt: Date().timeIntervalSince1970
         )
         if let data = try? JSONEncoder().encode(soul) {
@@ -144,11 +143,20 @@ class CompanionStore: ObservableObject {
         guard !trimmed.isEmpty else { return }
         let newSoul = CompanionSoul(
             name: trimmed,
-            personality: companion.soul.personality,
             hatchedAt: companion.soul.hatchedAt
         )
         saveSoul(newSoul)
         companion = Companion(bones: companion.bones, soul: newSoul)
+    }
+
+    /// Wipes the current soul and creates a fresh one. Companion bones stay the same (machine-tied).
+    func resetCompanion() {
+        UserDefaults.standard.removeObject(forKey: soulKey)
+        UserDefaults.standard.removeObject(forKey: petCountKey)
+        UserDefaults.standard.removeObject(forKey: "companion.lastGreetedDay")
+        petCount = 0
+        let (soul, _) = CompanionStore.loadOrCreateSoul()
+        companion = Companion(bones: companion.bones, soul: soul)
     }
 
     private func saveSoul(_ soul: CompanionSoul) {

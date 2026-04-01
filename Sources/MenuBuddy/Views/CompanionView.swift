@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 // MARK: - Animation Constants (matching buddy source)
 let tickInterval: TimeInterval = 0.5     // 500ms tick
@@ -67,6 +68,8 @@ final class AnimationEngine: ObservableObject {
     private var isMuted: Bool = false
     private var species: Species = .duck
     private var quipDeck: QuipDeck = QuipDeck(source: { Strings.genericQuips })
+    private var workspaceObserver: NSObjectProtocol?
+    private var lastContextBundleId: String = ""
 
     /// Called when a pet is triggered; returns optional milestone message.
     var onPet: (() -> String?)? = nil
@@ -93,6 +96,66 @@ final class AnimationEngine: ObservableObject {
         } else {
             scheduleNextQuip(delay: Double.random(in: 5...15))
         }
+
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil, queue: .main
+        ) { [weak self] note in
+            guard let self,
+                  let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                  let bundleId = app.bundleIdentifier,
+                  bundleId != "com.menubuddy.app"  // ignore ourselves
+            else { return }
+            Task { @MainActor [weak self] in self?.handleAppActivation(bundleId: bundleId) }
+        }
+    }
+
+    private func handleAppActivation(bundleId: String) {
+        guard !isMuted, speechText == nil else { return }
+        guard bundleId != lastContextBundleId else { return }  // same app, skip
+        lastContextBundleId = bundleId
+
+        let quip: String? = {
+            switch true {
+            case bundleId.hasPrefix("com.apple.dt.Xcode"),
+                 bundleId.hasPrefix("com.microsoft.VSCode"),
+                 bundleId.hasPrefix("com.jetbrains"),
+                 bundleId.contains("cursor"),
+                 bundleId.contains("zed"):
+                return Strings.appCodingQuip
+            case bundleId.hasPrefix("com.apple.Terminal"),
+                 bundleId.hasPrefix("com.googlecode.iterm2"),
+                 bundleId.hasPrefix("dev.warp"),
+                 bundleId.contains("terminal"),
+                 bundleId.contains("hyper"):
+                return Strings.appTerminalQuip
+            case bundleId.hasPrefix("com.apple.Safari"),
+                 bundleId.hasPrefix("com.google.Chrome"),
+                 bundleId.hasPrefix("org.mozilla.firefox"),
+                 bundleId.hasPrefix("company.thebrowser"),   // Arc
+                 bundleId.hasPrefix("com.microsoft.edgemac"):
+                return Strings.appBrowsingQuip
+            case bundleId.hasPrefix("com.tinyspeck.slackmacgap"),
+                 bundleId.hasPrefix("com.hnc.Discord"),
+                 bundleId.hasPrefix("com.microsoft.teams"),
+                 bundleId.hasPrefix("ru.keepcoder.Telegram"):
+                return Strings.appChattingQuip
+            case bundleId.hasPrefix("com.figma"),
+                 bundleId.hasPrefix("com.bohemiancoding.sketch"),
+                 bundleId.hasPrefix("com.affinity"):
+                return Strings.appDesignQuip
+            case bundleId.hasPrefix("com.spotify.client"),
+                 bundleId.hasPrefix("com.apple.Music"):
+                return Strings.appMusicQuip
+            default:
+                return nil
+            }
+        }()
+
+        guard let quip else { return }
+        // 25% chance so context quips don't get annoying
+        guard Double.random(in: 0...1) < 0.25 else { return }
+        showSpeech(quip)
     }
 
     /// Called by PopoverView when a system event fires, to show a relevant quip.
@@ -116,6 +179,10 @@ final class AnimationEngine: ObservableObject {
         mainTimer = nil
         nextQuipTask?.cancel()
         nextQuipTask = nil
+        if let obs = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(obs)
+            workspaceObserver = nil
+        }
     }
 
     func updateMuted(_ muted: Bool) {

@@ -148,6 +148,21 @@ enum Strings {
     }
     static var sysstatDisk: String { L("sysstat.disk") }
 
+    // Reset companion
+    static var settingsReset: String              { L("settings.reset") }
+    static var resetConfirmTitle: String          { L("settings.reset.confirm.title") }
+    static var resetConfirmBody: String           { L("settings.reset.confirm.body") }
+    static var resetConfirmOK: String             { L("settings.reset.confirm.ok") }
+    static func resetConfirmCancel(_ n: String) -> String { L("settings.reset.confirm.cancel", n) }
+
+    // Workspace app-context quips
+    static var appCodingQuip: String   { L("quip.app.coding") }
+    static var appTerminalQuip: String { L("quip.app.terminal") }
+    static var appBrowsingQuip: String { L("quip.app.browsing") }
+    static var appChattingQuip: String { L("quip.app.chatting") }
+    static var appDesignQuip: String   { L("quip.app.design") }
+    static var appMusicQuip: String    { L("quip.app.music") }
+
     // Settings & Help
     static var menuSettings: String        { L("menu.settings") }
     static var settingsTitle: String       { L("settings.title") }

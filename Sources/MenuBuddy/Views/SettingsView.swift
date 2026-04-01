@@ -67,6 +67,18 @@ struct SettingsView: View {
                         helpRow("✨", Strings.settingsHelpShiny)
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+
+                    Divider()
+
+                    // Reset
+                    Button(action: confirmReset) {
+                        Text(Strings.settingsReset)
+                            .font(.system(size: 11))
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 16)
                 }
                 .padding(.top, 16)
@@ -95,6 +107,18 @@ struct SettingsView: View {
             .font(.system(size: 11, weight: .semibold))
             .foregroundColor(.secondary)
             .padding(.horizontal, 20)
+    }
+
+    private func confirmReset() {
+        let alert = NSAlert()
+        alert.messageText = Strings.resetConfirmTitle
+        alert.informativeText = Strings.resetConfirmBody
+        alert.addButton(withTitle: Strings.resetConfirmOK)
+        alert.addButton(withTitle: Strings.resetConfirmCancel(store.companion.name))
+        alert.alertStyle = .warning
+        if alert.runModal() == .alertFirstButtonReturn {
+            store.resetCompanion()
+        }
     }
 
     private func helpRow(_ icon: String, _ text: String) -> some View {

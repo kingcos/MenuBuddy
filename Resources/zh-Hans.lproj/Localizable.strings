@@ -199,6 +199,21 @@
 "quip.species.chonk.4" = "*肚皮着地*";
 "quip.species.chonk.5" = "结实。";
 
+/* 重置桌宠 */
+"settings.reset" = "换个新伙伴…";
+"settings.reset.confirm.title" = "要换新伙伴吗？";
+"settings.reset.confirm.body" = "现在的伙伴将永久消失，无法撤销。";
+"settings.reset.confirm.ok" = "换新伙伴";
+"settings.reset.confirm.cancel" = "留下 %@";
+
+/* 应用场景台词 */
+"quip.app.coding" = "写代码咯！";
+"quip.app.terminal" = "开终端了。";
+"quip.app.browsing" = "逛网页呢？";
+"quip.app.chatting" = "在聊天！";
+"quip.app.design" = "在搞设计！";
+"quip.app.music" = "听歌了~";
+
 /* 时段问候（每天第一次打开面板时显示）*/
 "quip.tod.morning" = "早上好！";
 "quip.tod.afternoon" = "下午好！";

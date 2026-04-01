@@ -199,6 +199,21 @@
 "quip.species.chonk.4" = "*belly flop*";
 "quip.species.chonk.5" = "dense.";
 
+/* Reset companion */
+"settings.reset" = "Get New Companion…";
+"settings.reset.confirm.title" = "Get a new companion?";
+"settings.reset.confirm.body" = "Your current companion will be gone forever. This cannot be undone.";
+"settings.reset.confirm.ok" = "Get New Companion";
+"settings.reset.confirm.cancel" = "Keep %@";
+
+/* Workspace app-context quips */
+"quip.app.coding" = "code time!";
+"quip.app.terminal" = "terminal stuff.";
+"quip.app.browsing" = "browsing?";
+"quip.app.chatting" = "chatting away!";
+"quip.app.design" = "making things!";
+"quip.app.music" = "music time!";
+
 /* Time-of-day greetings (shown once per day on first popover open) */
 "quip.tod.morning" = "good morning!";
 "quip.tod.afternoon" = "good afternoon!";

@@ -137,8 +137,10 @@ struct CompanionBones {
 
 struct CompanionSoul: Codable {
     var name: String
-    var personality: String
     var hatchedAt: TimeInterval
+
+    // Legacy key ignored on decode — was stored in older builds, never displayed
+    private enum CodingKeys: String, CodingKey { case name, hatchedAt }
 }
 
 struct Companion {
@@ -152,5 +154,4 @@ struct Companion {
     var shiny: Bool { bones.shiny }
     var stats: [StatName: Int] { bones.stats }
     var name: String { soul.name }
-    var personality: String { soul.personality }
 }
