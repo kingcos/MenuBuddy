@@ -129,6 +129,21 @@ final class AnimationEngine: ObservableObject {
         }
     }
 
+    /// Called by PopoverView when a system event fires, to show a relevant quip.
+    func showSystemQuip(for event: SystemEvent) {
+        guard !isMuted, speechText == nil else { return }
+        let quip: String?
+        switch event {
+        case .cpuHigh:         quip = Strings.cpuHighQuips.randomElement()
+        case .memHigh:         quip = Strings.memHighQuips.randomElement()
+        case .netFast:         quip = Strings.netFastQuips.randomElement()
+        case .netSlow:         quip = Strings.netSlowQuips.randomElement()
+        case .batteryLow:      quip = Strings.batteryLowQuips.randomElement()
+        case .batteryCharging: quip = Strings.batteryChargingQuip
+        }
+        if let q = quip { showSpeech(q) }
+    }
+
     func stop() {
         mainTimer?.invalidate()
         mainTimer = nil

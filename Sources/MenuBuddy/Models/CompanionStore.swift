@@ -24,6 +24,14 @@ class CompanionStore: ObservableObject {
     /// True if this is the very first launch (soul was just created now).
     let isFirstLaunch: Bool
 
+    /// Current system state indicator shown in the menu bar (e.g. "🔥" when CPU is high).
+    @Published private(set) var systemIndicator: String = ""
+
+    /// Called (on main thread) whenever a system event fires. PopoverView wires this to the engine.
+    var onSystemEvent: ((SystemEvent) -> Void)?
+
+    private let systemMonitor = SystemMonitor()
+
     private init() {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
@@ -34,6 +42,29 @@ class CompanionStore: ObservableObject {
         isFirstLaunch = isNew
 
         companion = Companion(bones: bones, soul: soul)
+
+        systemMonitor.onEvent = { [weak self] event in
+            DispatchQueue.main.async {
+                self?.updateSystemIndicator(event)
+            }
+        }
+        systemMonitor.start()
+    }
+
+    private func updateSystemIndicator(_ event: SystemEvent) {
+        switch event {
+        case .cpuHigh:         systemIndicator = "🔥"
+        case .memHigh:         systemIndicator = "🧠"
+        case .netFast:         systemIndicator = "⚡"
+        case .netSlow:         systemIndicator = "🐌"
+        case .batteryLow:      systemIndicator = "🪫"
+        case .batteryCharging: systemIndicator = "⚡"
+        }
+        onSystemEvent?(event)
+        // Clear after 30 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+            self?.systemIndicator = ""
+        }
     }
 
     /// Increments pet count, persists it, and returns any milestone message.

@@ -9,6 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var store: CompanionStore!
     private var eventMonitor: Any?
     private var storeObserver: AnyCancellable?
+    private var sysIndicatorObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         store = CompanionStore.shared
@@ -17,8 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         setupEventMonitor()
 
-        // Keep status bar button in sync when companion changes (name, etc.)
+        // Keep status bar button in sync when companion or system state changes
         storeObserver = store.$companion
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateStatusButton() }
+        sysIndicatorObserver = store.$systemIndicator
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
     }
@@ -45,7 +49,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button else { return }
         let face = renderFace(bones: store.companion.bones)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
-        button.title = "\(shinyPrefix)\(face)"
+        let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
+        button.title = "\(sysPrefix)\(shinyPrefix)\(face)"
         button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
     }

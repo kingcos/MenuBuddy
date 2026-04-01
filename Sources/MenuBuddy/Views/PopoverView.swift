@@ -35,6 +35,7 @@ struct PopoverView: View {
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             engine.onPet = { store.recordPet() }
+            store.onSystemEvent = { [weak engine] event in engine?.showSystemQuip(for: event) }
             engine.start(
                 muted: store.muted,
                 species: companion.species,
@@ -42,7 +43,10 @@ struct PopoverView: View {
                 companionName: companion.name
             )
         }
-        .onDisappear { engine.stop() }
+        .onDisappear {
+            store.onSystemEvent = nil
+            engine.stop()
+        }
         .onChange(of: store.muted) { _, newValue in engine.updateMuted(newValue) }
         .onReceive(NotificationCenter.default.publisher(for: .triggerPet)) { _ in
             engine.triggerPet()
