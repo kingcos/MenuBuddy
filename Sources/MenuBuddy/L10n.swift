@@ -233,6 +233,11 @@ enum Strings {
     static var triggerScriptsOpen: String    { L("trigger.scripts.open") }
     static var triggerScriptsRescan: String  { L("trigger.scripts.rescan") }
 
+    // Species Atlas
+    static var atlasTitle: String  { L("atlas.title") }
+    static var atlasYours: String  { L("atlas.yours") }
+    static var atlasClose: String  { L("atlas.close") }
+
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {
         L("a11y.sprite.label", name, species)

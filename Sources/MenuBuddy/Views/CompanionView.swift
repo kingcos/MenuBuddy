@@ -324,32 +324,46 @@ struct StatsView: View {
 // MARK: - Metric Strip View
 
 /// Generic metric strip that displays TriggerMetrics from any source.
+/// When metrics exceed 5, switches to a scrollable horizontal layout.
 struct MetricStripView: View {
     let metrics: [TriggerMetric]
 
     var body: some View {
-        HStack(spacing: 10) {
-            ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
-                metricPill(label: metric.label, value: "\(metric.value)\(metric.trend)", alert: metric.alert)
+        if metrics.count <= 5 {
+            HStack(spacing: 10) {
+                ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
+                    metricPill(metric)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
+                        metricPill(metric)
+                            .frame(width: 48)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
     }
 
-    private func metricPill(label: String, value: String, alert: Bool) -> some View {
+    private func metricPill(_ metric: TriggerMetric) -> some View {
         VStack(spacing: 1) {
-            Text(label)
+            Text(metric.label)
                 .font(.system(size: 8, weight: .medium, design: .monospaced))
-                .foregroundColor(alert ? .orange : .secondary)
+                .foregroundColor(metric.alert ? .orange : .secondary)
                 .lineLimit(1)
-            Text(value)
+            Text("\(metric.value)\(metric.trend)")
                 .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                .foregroundColor(alert ? .orange : .primary)
+                .foregroundColor(metric.alert ? .orange : .primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: metrics.count <= 5 ? .infinity : nil)
     }
 }
 

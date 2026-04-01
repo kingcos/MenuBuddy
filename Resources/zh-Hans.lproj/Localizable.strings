@@ -344,6 +344,11 @@
 "trigger.scripts.open" = "打开触发源目录";
 "trigger.scripts.rescan" = "重新扫描脚本";
 
+/* 物种图鉴 */
+"atlas.title" = "物种图鉴";
+"atlas.yours" = "你的";
+"atlas.close" = "关闭";
+
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";
 "a11y.sprite.hint" = "点击抚摸";

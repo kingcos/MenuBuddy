@@ -344,6 +344,11 @@
 "trigger.scripts.open" = "Open Triggers Folder";
 "trigger.scripts.rescan" = "Rescan Scripts";
 
+/* Species Atlas */
+"atlas.title" = "Species Atlas";
+"atlas.yours" = "YOURS";
+"atlas.close" = "Close";
+
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";
 "a11y.sprite.hint" = "Tap to pet";

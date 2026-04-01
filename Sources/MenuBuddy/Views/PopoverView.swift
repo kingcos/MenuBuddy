@@ -8,10 +8,15 @@ struct PopoverView: View {
 
     var companion: Companion { store.companion }
 
+    @State private var showingAtlas = false
+
     var body: some View {
         VStack(spacing: 0) {
             headerView
             spriteAreaView
+            hatchFooter
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
             SpeechBubbleView(
                 text: engine.speechText ?? " ",
                 color: companion.rarity.color,
@@ -29,9 +34,6 @@ struct PopoverView: View {
                 Divider()
                 MetricStripView(metrics: store.triggerManager.allMetrics)
             }
-            hatchFooter
-                .padding(.horizontal, 16)
-                .padding(.bottom, 4)
             Divider()
             popoverToolbar
                 .padding(.horizontal, 16)
@@ -89,6 +91,9 @@ struct PopoverView: View {
         }
         .sheet(isPresented: $isRenaming) {
             renameSheet
+        }
+        .sheet(isPresented: $showingAtlas) {
+            SpeciesAtlasView(currentSpecies: companion.species)
         }
     }
 
@@ -149,7 +154,7 @@ struct PopoverView: View {
                 ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                     Text(line)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : .primary)
+                        .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : Color(hex: companion.rarity.color))
                 }
             }
             .accessibilityElement(children: .ignore)
@@ -190,6 +195,14 @@ struct PopoverView: View {
             }
             .buttonStyle(.plain)
             .help(Strings.menuSettings)
+
+            Button(action: { showingAtlas = true }) {
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.atlasTitle)
 
             Button(action: { NotificationCenter.default.post(name: .openAbout, object: nil) }) {
                 Image(systemName: "info.circle")
