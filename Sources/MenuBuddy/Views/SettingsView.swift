@@ -13,197 +13,200 @@ struct SettingsView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Title bar area
-            HStack {
-                Text(Strings.settingsTitle)
-                    .font(.system(size: 13, weight: .semibold))
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
 
-            Divider()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // MARK: General
-                    sectionHeader(Strings.settingsSectionGeneral)
-
-                    VStack(alignment: .leading, spacing: 10) {
+                // MARK: - General
+                settingsCard {
+                    settingsRow {
                         Toggle(isOn: $launchAtLogin) {
                             Text(Strings.settingsLaunchAtLogin)
-                                .font(.system(size: 12))
                         }
-                        .onChange(of: launchAtLogin) { _, on in
-                            toggleLaunchAtLogin(on)
-                        }
-
+                        .onChange(of: launchAtLogin) { _, on in toggleLaunchAtLogin(on) }
+                    }
+                    cardDivider
+                    settingsRow {
                         Toggle(isOn: $store.muted) {
                             Text(Strings.settingsMute)
-                                .font(.system(size: 12))
                         }
                     }
-                    .padding(.horizontal, 20)
+                }
 
-                    Divider()
-
-                    // MARK: Language
-                    sectionHeader(Strings.settingsSectionLanguage)
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        Picker("", selection: $selectedLanguage) {
+                // MARK: - Language
+                sectionLabel(Strings.settingsSectionLanguage)
+                settingsCard {
+                    settingsRow {
+                        Picker(Strings.settingsSectionLanguage, selection: $selectedLanguage) {
                             Text(Strings.settingsLanguageSystem).tag("system")
                             Text(Strings.settingsLanguageEN).tag("en")
                             Text(Strings.settingsLanguageZHHans).tag("zh-Hans")
                         }
-                        .pickerStyle(.radioGroup)
-                        .font(.system(size: 12))
-                        .onChange(of: selectedLanguage) { _, lang in
-                            changeLanguage(lang)
-                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: selectedLanguage) { _, lang in changeLanguage(lang) }
                     }
-                    .padding(.horizontal, 20)
+                }
 
-                    Divider()
-
-                    // MARK: Menu Bar
-                    sectionHeader(Strings.settingsSectionMenuBar)
-
-                    VStack(alignment: .leading, spacing: 10) {
+                // MARK: - Menu Bar
+                sectionLabel(Strings.settingsSectionMenuBar)
+                settingsCard {
+                    settingsRow {
                         Toggle(isOn: $store.menuBarQuips) {
-                            Text(Strings.settingsMenuBarQuips)
-                                .font(.system(size: 12))
-                        }
-                        Text(Strings.settingsMenuBarQuipsDesc)
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 20)
-
-                    Divider()
-
-                    // MARK: Do Not Disturb
-                    sectionHeader(Strings.settingsSectionDND)
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        Toggle(isOn: $store.dndEnabled) {
-                            Text(Strings.settingsDNDEnable)
-                                .font(.system(size: 12))
-                        }
-                        if store.dndEnabled {
-                            HStack(spacing: 8) {
-                                Text(Strings.settingsDNDFrom)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Strings.settingsMenuBarQuips)
+                                Text(Strings.settingsMenuBarQuipsDesc)
                                     .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    cardDivider
+                    settingsRow {
+                        Toggle(isOn: $store.dndEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Strings.settingsDNDEnable)
+                                Text(Strings.settingsDNDDesc)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    if store.dndEnabled {
+                        cardDivider
+                        settingsRow {
+                            HStack(spacing: 12) {
+                                Text(Strings.settingsDNDFrom)
                                     .foregroundColor(.secondary)
                                 Picker("", selection: $store.dndFrom) {
                                     ForEach(0..<24, id: \.self) { h in
                                         Text(String(format: "%02d:00", h)).tag(h)
                                     }
                                 }
-                                .frame(width: 80)
+                                .frame(width: 90)
                                 Text(Strings.settingsDNDTo)
-                                    .font(.system(size: 11))
                                     .foregroundColor(.secondary)
                                 Picker("", selection: $store.dndTo) {
                                     ForEach(0..<24, id: \.self) { h in
                                         Text(String(format: "%02d:00", h)).tag(h)
                                     }
                                 }
-                                .frame(width: 80)
+                                .frame(width: 90)
+                                Spacer()
                             }
                         }
-                        Text(Strings.settingsDNDDesc)
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 20)
+                }
 
-                    Divider()
+                // MARK: - Trigger Sources
+                sectionLabel(Strings.triggerSectionTitle)
+                settingsCard {
+                    ForEach(Array(store.triggerManager.sources.enumerated()), id: \.offset) { idx, source in
+                        if idx > 0 { cardDivider }
+                        settingsRow {
+                            Toggle(isOn: Binding(
+                                get: { source.isEnabled },
+                                set: { store.triggerManager.setEnabled($0, for: source.id) }
+                            )) {
+                                Text(source.displayName)
+                            }
+                        }
+                    }
+                }
+                if !store.triggerManager.allMetrics.isEmpty {
+                    MetricStripView(metrics: store.triggerManager.allMetrics)
+                }
 
-                    // MARK: Trigger Sources
-                    sectionHeader(Strings.triggerSectionTitle)
+                // MARK: - Help
+                sectionLabel(Strings.settingsSectionHelp)
+                settingsCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        helpItem("cursorarrow.click.2", Strings.settingsHelpPet)
+                        helpItem("pencil", Strings.settingsHelpRename)
+                        helpItem("sparkles", Strings.settingsHelpShiny)
+                        helpItem("chart.bar.fill", Strings.settingsHelpStats)
+                    }
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 16)
+                }
 
-                    Text(Strings.triggerSectionDesc)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 20)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(Array(store.triggerManager.sources.enumerated()), id: \.offset) { _, source in
+                // MARK: - Danger Zone
+                settingsCard {
+                    settingsRow {
+                        Button(action: confirmReset) {
                             HStack {
-                                Toggle(isOn: Binding(
-                                    get: { source.isEnabled },
-                                    set: { store.triggerManager.setEnabled($0, for: source.id) }
-                                )) {
-                                    Text(source.displayName)
-                                        .font(.system(size: 12))
-                                }
+                                Image(systemName: "arrow.counterclockwise")
+                                    .foregroundColor(.red)
+                                Text(Strings.settingsReset)
+                                    .foregroundColor(.red)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.secondary.opacity(0.5))
                             }
                         }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 20)
-
-                    if !store.triggerManager.allMetrics.isEmpty {
-                        MetricStripView(metrics: store.triggerManager.allMetrics)
-                            .padding(.horizontal, 4)
-                    }
-
-                    Divider()
-
-                    // MARK: Help
-                    sectionHeader(Strings.settingsSectionHelp)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        helpRow("🖱", Strings.settingsHelpPet)
-                        helpRow("✏️", Strings.settingsHelpRename)
-                        helpRow("✨", Strings.settingsHelpShiny)
-                        helpRow("📊", Strings.settingsHelpStats)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
-
-                    Divider()
-
-                    // Reset
-                    Button(action: confirmReset) {
-                        Text(Strings.settingsReset)
-                            .font(.system(size: 11))
-                            .foregroundColor(.red)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
                 }
-                .padding(.top, 16)
-            }
 
-            Divider()
-
-            // Done button
-            HStack {
-                Spacer()
-                Button(Strings.settingsDone) {
-                    NotificationCenter.default.post(name: .closeSettings, object: nil)
-                }
-                .keyboardShortcut(.defaultAction)
-                .padding(.vertical, 10)
-                .padding(.trailing, 16)
+                Spacer().frame(height: 4)
             }
+            .padding(20)
         }
-        .frame(width: 340)
+        .frame(width: 380, height: 520)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear { launchAtLogin = SMAppService.mainApp.status == .enabled }
     }
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 11, weight: .semibold))
+    // MARK: - Components
+
+    private func sectionLabel(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.system(size: 11, weight: .medium))
             .foregroundColor(.secondary)
-            .padding(.horizontal, 20)
+            .padding(.leading, 4)
+            .padding(.bottom, -14)
     }
+
+    private func settingsCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            content()
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(NSColor.separatorColor).opacity(0.5), lineWidth: 0.5)
+        )
+    }
+
+    private func settingsRow<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .font(.system(size: 13))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var cardDivider: some View {
+        Divider().padding(.leading, 16)
+    }
+
+    private func helpItem(_ icon: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundColor(.accentColor)
+                .frame(width: 16, alignment: .center)
+                .padding(.top, 1)
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Actions
 
     private func confirmReset() {
         let alert = NSAlert()
@@ -214,18 +217,6 @@ struct SettingsView: View {
         alert.alertStyle = .warning
         if alert.runModal() == .alertFirstButtonReturn {
             store.resetCompanion()
-        }
-    }
-
-    private func helpRow(_ icon: String, _ text: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(icon)
-                .font(.system(size: 12))
-                .frame(width: 18)
-            Text(text)
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
