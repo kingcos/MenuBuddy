@@ -33,6 +33,11 @@ class CompanionStore: ObservableObject {
         }
     }
 
+    /// Logging on/off — delegates to BuddyLogger.
+    @Published var loggingEnabled: Bool {
+        didSet { BuddyLogger.shared.enabled = loggingEnabled }
+    }
+
     /// Do Not Disturb — suppresses menu bar quips during specified hours.
     @Published var dndEnabled: Bool {
         didSet { UserDefaults.standard.set(dndEnabled, forKey: "companion.dndEnabled") }
@@ -149,6 +154,7 @@ class CompanionStore: ObservableObject {
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
         menuBarQuips = UserDefaults.standard.object(forKey: "companion.menuBarQuips") as? Bool ?? true
         repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
+        loggingEnabled = UserDefaults.standard.bool(forKey: "companion.loggingEnabled")
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
         dndFrom = UserDefaults.standard.object(forKey: "companion.dndFrom") as? Int ?? 22
         dndTo = UserDefaults.standard.object(forKey: "companion.dndTo") as? Int ?? 8

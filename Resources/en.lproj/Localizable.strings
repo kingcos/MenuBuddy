@@ -344,6 +344,8 @@
 "trigger.scripts.open" = "Open Triggers Folder";
 "trigger.scripts.rescan" = "Rescan Scripts";
 "settings.logs.open" = "View Logs";
+"settings.logs.enable" = "Enable logging";
+"settings.logs.enable.desc" = "Logs are saved to ~/.menubuddy/logs/ (7-day rotation).";
 
 /* Species Atlas */
 "atlas.title" = "Species Atlas";

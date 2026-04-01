@@ -232,7 +232,9 @@ enum Strings {
     static var triggerScriptsHint: String    { L("trigger.scripts.hint") }
     static var triggerScriptsOpen: String    { L("trigger.scripts.open") }
     static var triggerScriptsRescan: String  { L("trigger.scripts.rescan") }
-    static var settingsLogsOpen: String    { L("settings.logs.open") }
+    static var settingsLogsOpen: String        { L("settings.logs.open") }
+    static var settingsLogsEnable: String      { L("settings.logs.enable") }
+    static var settingsLogsEnableDesc: String   { L("settings.logs.enable.desc") }
 
     // Species Atlas
     static var atlasTitle: String  { L("atlas.title") }

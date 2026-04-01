@@ -7,6 +7,12 @@ import Foundation
 final class BuddyLogger {
     static let shared = BuddyLogger()
 
+    /// Master switch. When false, all log calls are no-ops.
+    var enabled: Bool {
+        get { UserDefaults.standard.bool(forKey: "companion.loggingEnabled") }
+        set { UserDefaults.standard.set(newValue, forKey: "companion.loggingEnabled") }
+    }
+
     enum Level: String {
         case debug = "DEBUG"
         case info  = "INFO"
@@ -69,6 +75,7 @@ final class BuddyLogger {
     // MARK: - Private
 
     private func log(_ level: Level, _ message: String, source: String) {
+        guard enabled else { return }
         queue.async { [self] in
             let now = Date()
             let date = dateFormatter.string(from: now)

@@ -178,23 +178,36 @@ struct SettingsView: View {
                     .padding(.horizontal, 16)
                 }
 
-                // MARK: - Danger Zone
+                // MARK: - Logs & Reset
                 settingsCard {
                     settingsRow {
-                        Button(action: {
-                            NSWorkspace.shared.open(URL(fileURLWithPath: BuddyLogger.shared.logsDirectory))
-                        }) {
-                            HStack {
-                                Image(systemName: "doc.text.magnifyingglass")
+                        Toggle(isOn: $store.loggingEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Strings.settingsLogsEnable)
+                                Text(Strings.settingsLogsEnableDesc)
+                                    .font(.system(size: 11))
                                     .foregroundColor(.secondary)
-                                Text(Strings.settingsLogsOpen)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(.secondary.opacity(0.5))
                             }
                         }
-                        .buttonStyle(.plain)
+                    }
+                    if store.loggingEnabled {
+                        cardDivider
+                        settingsRow {
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(fileURLWithPath: BuddyLogger.shared.logsDirectory))
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.text.magnifyingglass")
+                                        .foregroundColor(.secondary)
+                                    Text(Strings.settingsLogsOpen)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     cardDivider
                     settingsRow {
