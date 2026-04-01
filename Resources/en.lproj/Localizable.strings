@@ -13,6 +13,8 @@
 "about.species" = "Species: %@";
 "about.rarity" = "Rarity: %@ %@";
 "about.hatched" = "Hatched: %@";
+"about.author" = "Author: kingcos";
+"about.homepage" = "GitHub: kingcos/MenuBuddy";
 "about.ok" = "OK";
 
 /* Rename Sheet */
@@ -336,6 +338,8 @@
 "trigger.system.name" = "System Monitor";
 "trigger.section.title" = "Trigger Sources";
 "trigger.section.desc" = "Trigger sources monitor external data and drive your buddy's reactions. Each source is independent and can be toggled on or off.";
+"trigger.scripts.hint" = "Drop executable scripts into ~/.menubuddy/triggers/ to add custom triggers.";
+"trigger.scripts.open" = "Open Triggers Folder";
 
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";

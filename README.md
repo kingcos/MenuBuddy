@@ -49,37 +49,52 @@ MenuBuddy uses a **plugin architecture** for driving companion reactions. Any da
 | Battery | charging | ⚡ | — |
 | Idle | CPU <10%, no net | — | 😴 |
 
-**Writing your own trigger source:**
+**Script triggers (no coding required):**
 
-```swift
-class StockTriggerSource: TriggerSource {
-    let id = "stock"
-    var displayName: String { "Stock Monitor" }
-    var isEnabled = true
-    var onTrigger: ((TriggerEvent) -> Void)?
+Drop any executable script into `~/.menubuddy/triggers/`. MenuBuddy runs it periodically and reads JSON from stdout:
 
-    func start() {
-        // Poll your data source, then emit events:
-        onTrigger?(TriggerEvent(
-            sourceId: id,
-            indicator: "📈",                          // menu bar emoji
-            quips: ["AAPL up 5%!", "stonks!"],        // speech bubble
-            mood: "🤑",                               // companion mood
-            eyeOverride: "$"                           // menu bar face eyes
-        ))
-    }
-
-    func stop() { /* cleanup */ }
-
-    // Optional: provide live metrics for the status strip
-    var currentMetrics: [TriggerMetric] {
-        [TriggerMetric(label: "AAPL", value: "$189", alert: false, trend: "↑")]
-    }
-}
-
-// Register in CompanionStore or AppDelegate:
-store.triggerManager.register(StockTriggerSource())
+```bash
+#!/bin/bash
+# ~/.menubuddy/triggers/stock.sh
+curl -s "https://api.example.com/stock/AAPL" | jq '{
+  name: "Stock Monitor",
+  interval: 60,
+  trigger: {
+    indicator: "📈",
+    quips: ["AAPL is moving!", "stonks!"],
+    mood: "🤑",
+    eyeOverride: "$",
+    duration: 30
+  },
+  metrics: [
+    { label: "AAPL", value: ("$" + (.price | tostring)), alert: (.change > 5), trend: (if .change > 0 then "↑" else "↓" end) }
+  ]
+}'
 ```
+
+JSON format:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | No | Display name in Settings (default: filename) |
+| `interval` | No | Polling interval in seconds (default: 60, min: 5) |
+| `trigger.indicator` | Yes* | Emoji for menu bar (e.g. "📈") |
+| `trigger.quips` | No | Speech bubble texts (one picked at random) |
+| `trigger.mood` | No | Companion mood emoji override |
+| `trigger.eyeOverride` | No | Menu bar face eye character |
+| `trigger.duration` | No | How long indicator stays (default: 30s) |
+| `metrics[].label` | Yes* | Metric label (e.g. "AAPL") |
+| `metrics[].value` | Yes* | Metric value (e.g. "$189") |
+| `metrics[].alert` | No | Highlight in orange (default: false) |
+| `metrics[].trend` | No | "↑", "↓", or "" |
+
+\* Required within their respective objects; both `trigger` and `metrics` are optional top-level.
+
+Scripts can be bash, python, node, or any language. See `Examples/triggers/` for samples.
+
+**Swift API (for compiled plugins):**
+
+Implement the `TriggerSource` protocol and register with `store.triggerManager.register(source)`.
 
 Each registered source appears in Settings → Trigger Sources and can be toggled on/off independently.
 
@@ -156,6 +171,8 @@ Resources/
 ├── en.lproj/Localizable.strings       # English strings
 ├── zh-Hans.lproj/Localizable.strings  # Simplified Chinese strings
 └── Info.plist                         # Bundle config + localization declarations
+
+Examples/triggers/                         # Sample trigger scripts
 ```
 
 ## How Companion Generation Works
@@ -163,6 +180,10 @@ Resources/
 Your companion is generated deterministically from your machine's IOPlatformUUID, salted and hashed with FNV-1a 32-bit, then fed into a Mulberry32 PRNG. The resulting sequence picks rarity, species, eye style, hat, shiny chance, and stats — same inputs always yield the same output.
 
 Only the companion's **name** is stored in UserDefaults. Everything else is derived at runtime from your machine UUID, so editing preferences can't fake a legendary.
+
+## Author
+
+**kingcos** — [github.com/kingcos](https://github.com/kingcos)
 
 ## Acknowledgements
 

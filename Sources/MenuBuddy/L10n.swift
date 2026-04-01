@@ -28,7 +28,9 @@ enum Strings {
     static func aboutSpecies(_ s: String)   -> String { L("about.species", s) }
     static func aboutRarity(_ r: String, _ stars: String) -> String { L("about.rarity", r, stars) }
     static func aboutHatched(_ d: String)   -> String { L("about.hatched", d) }
-    static var aboutOK: String              { L("about.ok") }
+    static var aboutAuthor: String           { L("about.author") }
+    static var aboutHomepage: String         { L("about.homepage") }
+    static var aboutOK: String               { L("about.ok") }
 
     // Rename
     static var renameTitle:       String { L("rename.title") }
@@ -223,6 +225,8 @@ enum Strings {
     static var triggerSystemName: String     { L("trigger.system.name") }
     static var triggerSectionTitle: String   { L("trigger.section.title") }
     static var triggerSectionDesc: String    { L("trigger.section.desc") }
+    static var triggerScriptsHint: String    { L("trigger.scripts.hint") }
+    static var triggerScriptsOpen: String    { L("trigger.scripts.open") }
 
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {

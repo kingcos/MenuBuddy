@@ -261,6 +261,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Strings.aboutSpecies(store.companion.species.localizedName),
             Strings.aboutRarity(store.companion.rarity.localizedName, store.companion.rarity.stars + shiny),
             Strings.aboutHatched(hatchDate),
+            "",
+            Strings.aboutAuthor,
+            Strings.aboutHomepage,
         ].joined(separator: "\n")
         alert.addButton(withTitle: Strings.aboutOK)
         alert.runModal()

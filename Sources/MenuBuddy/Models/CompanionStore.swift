@@ -161,6 +161,12 @@ class CompanionStore: ObservableObject {
 
         // Register built-in system trigger source
         triggerManager.register(systemSource)
+
+        // Discover and register script-based triggers from ~/.menubuddy/triggers/
+        for script in ScriptTriggerSource.discoverScripts() {
+            triggerManager.register(script)
+        }
+
         scheduleMenuBarQuip(delay: Double.random(in: 15...30))
     }
 

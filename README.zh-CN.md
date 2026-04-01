@@ -49,37 +49,52 @@ MenuBuddy 使用**插件架构**来驱动桌宠的反应。任何数据源都可
 | 电量 | 充电中 | ⚡ | — |
 | 空闲 | CPU <10%，无网络 | — | 😴 |
 
-**编写自定义触发源：**
+**脚本触发源（无需编码）：**
 
-```swift
-class StockTriggerSource: TriggerSource {
-    let id = "stock"
-    var displayName: String { "股票监控" }
-    var isEnabled = true
-    var onTrigger: ((TriggerEvent) -> Void)?
+将可执行脚本放入 `~/.menubuddy/triggers/`，MenuBuddy 会定期运行并读取 stdout 的 JSON：
 
-    func start() {
-        // 轮询数据源，然后发送事件：
-        onTrigger?(TriggerEvent(
-            sourceId: id,
-            indicator: "📈",                          // 菜单栏 emoji
-            quips: ["苹果涨了 5%！", "起飞！"],          // 对话气泡
-            mood: "🤑",                               // 桌宠心情
-            eyeOverride: "$"                           // 菜单栏表情眼睛
-        ))
-    }
-
-    func stop() { /* 清理资源 */ }
-
-    // 可选：提供实时指标用于状态条显示
-    var currentMetrics: [TriggerMetric] {
-        [TriggerMetric(label: "AAPL", value: "$189", alert: false, trend: "↑")]
-    }
-}
-
-// 注册：
-store.triggerManager.register(StockTriggerSource())
+```bash
+#!/bin/bash
+# ~/.menubuddy/triggers/stock.sh
+curl -s "https://api.example.com/stock/AAPL" | jq '{
+  name: "股票监控",
+  interval: 60,
+  trigger: {
+    indicator: "📈",
+    quips: ["苹果在涨！", "起飞！"],
+    mood: "🤑",
+    eyeOverride: "$",
+    duration: 30
+  },
+  metrics: [
+    { label: "AAPL", value: ("$" + (.price | tostring)), alert: (.change > 5), trend: (if .change > 0 then "↑" else "↓" end) }
+  ]
+}'
 ```
+
+JSON 格式：
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `name` | 否 | 在设置中显示的名称（默认：文件名） |
+| `interval` | 否 | 轮询间隔（秒，默认 60，最小 5） |
+| `trigger.indicator` | 是* | 菜单栏 emoji（如 "📈"） |
+| `trigger.quips` | 否 | 对话气泡文字（随机选一条） |
+| `trigger.mood` | 否 | 伙伴心情 emoji |
+| `trigger.eyeOverride` | 否 | 菜单栏表情眼睛字符 |
+| `trigger.duration` | 否 | 指示器持续时间（默认 30 秒） |
+| `metrics[].label` | 是* | 指标标签（如 "AAPL"） |
+| `metrics[].value` | 是* | 指标值（如 "$189"） |
+| `metrics[].alert` | 否 | 是否橙色高亮（默认 false） |
+| `metrics[].trend` | 否 | "↑"、"↓" 或 "" |
+
+\* 在各自对象内必填；`trigger` 和 `metrics` 本身都是可选的顶层字段。
+
+脚本可以用 bash、python、node 或任何语言编写。参见 `Examples/triggers/` 中的示例。
+
+**Swift API（编译型插件）：**
+
+实现 `TriggerSource` 协议并通过 `store.triggerManager.register(source)` 注册。
 
 每个注册的触发源都会出现在 设置 → 触发源 中，可独立开关。
 
@@ -156,6 +171,8 @@ Resources/
 ├── en.lproj/Localizable.strings       # 英文字符串
 ├── zh-Hans.lproj/Localizable.strings  # 简体中文字符串
 └── Info.plist                         # Bundle 配置 + 本地化声明
+
+Examples/triggers/                         # 示例触发脚本
 ```
 
 ## 伙伴生成原理
@@ -163,6 +180,10 @@ Resources/
 你的伙伴由电脑的 IOPlatformUUID 确定性生成：先经过加盐 + FNV-1a 32 位哈希，再送入 Mulberry32 伪随机数生成器。生成序列依次决定稀有度、物种、眼睛样式、帽子、闪光概率和属性——相同输入永远产生相同输出。
 
 只有伙伴的**名字**保存在 UserDefaults 中。其他一切都在运行时从电脑 UUID 派生，所以修改偏好设置无法伪造传说级伙伴。
+
+## 作者
+
+**kingcos** — [github.com/kingcos](https://github.com/kingcos)
 
 ## 致谢
 
