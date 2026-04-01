@@ -110,6 +110,17 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    cardDivider
+                    settingsRow {
+                        Toggle(isOn: $store.repeatTriggers) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Strings.settingsRepeatTriggers)
+                                Text(Strings.settingsRepeatTriggersDesc)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
                 }
                 if !store.triggerManager.allMetrics.isEmpty {
                     MetricStripView(metrics: store.triggerManager.allMetrics)

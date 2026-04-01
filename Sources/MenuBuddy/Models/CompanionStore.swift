@@ -23,6 +23,15 @@ class CompanionStore: ObservableObject {
         didSet { UserDefaults.standard.set(menuBarQuips, forKey: "companion.menuBarQuips") }
     }
 
+    /// When true, system events fire every poll while condition holds.
+    /// When false, events only fire once per state transition (edge-triggered).
+    @Published var repeatTriggers: Bool {
+        didSet {
+            UserDefaults.standard.set(repeatTriggers, forKey: "companion.repeatTriggers")
+            systemSource.monitor.repeatEvents = repeatTriggers
+        }
+    }
+
     /// Do Not Disturb — suppresses menu bar quips during specified hours.
     @Published var dndEnabled: Bool {
         didSet { UserDefaults.standard.set(dndEnabled, forKey: "companion.dndEnabled") }
@@ -137,6 +146,7 @@ class CompanionStore: ObservableObject {
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
         menuBarQuips = UserDefaults.standard.object(forKey: "companion.menuBarQuips") as? Bool ?? true
+        repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
         dndFrom = UserDefaults.standard.object(forKey: "companion.dndFrom") as? Int ?? 22
         dndTo = UserDefaults.standard.object(forKey: "companion.dndTo") as? Int ?? 8
@@ -146,6 +156,9 @@ class CompanionStore: ObservableObject {
         isFirstLaunch = isNew
 
         companion = Companion(bones: bones, soul: soul)
+
+        // Sync repeat setting to system monitor
+        systemSource.monitor.repeatEvents = repeatTriggers
 
         // Wire system source snapshots
         systemSource.onSnapshot = { [weak self] snapshot in

@@ -209,6 +209,10 @@ enum Strings {
     }
     static var settingsHelpStats: String { L("settings.help.stats") }
 
+    // Repeat triggers
+    static var settingsRepeatTriggers: String      { L("settings.repeat.triggers") }
+    static var settingsRepeatTriggersDesc: String   { L("settings.repeat.triggers.desc") }
+
     // Do Not Disturb
     static var settingsSectionDND: String   { L("settings.section.dnd") }
     static var settingsDNDDesc: String      { L("settings.dnd.desc") }

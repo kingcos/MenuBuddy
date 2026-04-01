@@ -287,6 +287,8 @@
 "settings.launchAtLogin" = "Launch at Login";
 "settings.mute" = "Mute buddy sounds";
 "settings.section.monitor" = "System Monitor";
+"settings.repeat.triggers" = "Repeat alerts while condition holds";
+"settings.repeat.triggers.desc" = "When off, alerts fire once per state change instead of every poll.";
 "settings.monitor.desc" = "Your buddy reacts to your Mac's CPU, memory, network, and battery.\nThresholds: CPU >70% 🔥 · Memory >85% 🧠 · Network >5 MB/s ⚡ · Battery <20% 🪫";
 "settings.section.help" = "Help";
 "settings.help.pet" = "Click the buddy to open this popover. Right-click for the menu.";

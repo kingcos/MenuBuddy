@@ -33,6 +33,9 @@ final class SystemMonitor {
     /// Fired after every poll with the latest raw metrics.
     var onSnapshot: ((SystemSnapshot) -> Void)?
 
+    /// When false, events only fire on state transitions (edge-triggered).
+    var repeatEvents: Bool = true
+
     private var timer: Timer?
     private var initialSampleTask: DispatchWorkItem?
 
@@ -49,6 +52,13 @@ final class SystemMonitor {
     private var prevDiskRead: UInt64 = 0
     private var prevDiskWrite: UInt64 = 0
     private var prevDiskTimestamp: Date = .distantPast
+
+    // Edge-trigger state (used when repeatEvents == false)
+    private var prevCPUHigh = false
+    private var prevMemHigh = false
+    private var prevDiskBusy = false
+    private var prevBatLow = false
+    private var prevBatCharging = false
 
     // Network slow detection only
 
@@ -88,16 +98,25 @@ final class SystemMonitor {
         let isNetSlow = (net == 0 && prevNetWasActive)
         prevNetWasActive = net > 1024   // >1 KB/s counts as active
 
-        if cpu > 0.70        { onEvent?(.cpuHigh) }
-        if mem < 0.15        { onEvent?(.memHigh) }
+        let cpuHigh = cpu > 0.70
+        let memHigh = mem < 0.15
+        let diskBusy = disk > 50_000_000
+        let batLow = (bat == .low)
+        let batCharging = (bat == .charging)
+
+        if cpuHigh    && (repeatEvents || !prevCPUHigh)      { onEvent?(.cpuHigh) }
+        if memHigh    && (repeatEvents || !prevMemHigh)      { onEvent?(.memHigh) }
         if net > 5_000_000   { onEvent?(.netFast) }
         else if isNetSlow    { onEvent?(.netSlow) }
-        if disk > 50_000_000 { onEvent?(.diskBusy) }
-        switch bat {
-        case .low:           onEvent?(.batteryLow)
-        case .charging:      onEvent?(.batteryCharging)
-        case .normal, .notPresent: break
-        }
+        if diskBusy   && (repeatEvents || !prevDiskBusy)     { onEvent?(.diskBusy) }
+        if batLow     && (repeatEvents || !prevBatLow)       { onEvent?(.batteryLow) }
+        if batCharging && (repeatEvents || !prevBatCharging) { onEvent?(.batteryCharging) }
+
+        prevCPUHigh = cpuHigh
+        prevMemHigh = memHigh
+        prevDiskBusy = diskBusy
+        prevBatLow = batLow
+        prevBatCharging = batCharging
 
         onSnapshot?(SystemSnapshot(
             cpuUsage: cpu,
