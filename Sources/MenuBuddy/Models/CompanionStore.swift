@@ -30,6 +30,19 @@ class CompanionStore: ObservableObject {
     /// Called (on main thread) whenever a system event fires. PopoverView wires this to the engine.
     var onSystemEvent: ((SystemEvent) -> Void)?
 
+    /// A wake quip to show next time the popover opens (cleared after use).
+    private(set) var pendingWakeQuip: String?
+
+    func setWakeQuip(_ quip: String) {
+        pendingWakeQuip = quip
+        NotificationCenter.default.post(name: .companionWoke, object: quip)
+    }
+
+    func consumeWakeQuip() -> String? {
+        defer { pendingWakeQuip = nil }
+        return pendingWakeQuip
+    }
+
     /// Latest system metrics snapshot; nil until first poll fires.
     @Published private(set) var systemSnapshot: SystemSnapshot?
 

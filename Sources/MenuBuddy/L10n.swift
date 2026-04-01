@@ -91,7 +91,18 @@ enum Strings {
             .rabbit: 5, .mushroom: 4, .chonk: 5,
         ]
         let n = counts[species] ?? 0
-        return (1...max(1, n)).map { L("quip.species.\(species.rawValue).\($0)") }
+        guard n > 0 else { return [] }
+        return (1...n).map { L("quip.species.\(species.rawValue).\($0)") }
+    }
+
+    // Sleep/wake quips
+    static func wakeQuip(sleepSeconds: TimeInterval) -> String {
+        switch sleepSeconds {
+        case ..<1800:   return L("quip.wake.short")     // < 30 min
+        case ..<14400:  return L("quip.wake.medium")    // < 4 h
+        case ..<57600:  return L("quip.wake.long")      // < 16 h
+        default:        return L("quip.wake.overnight") // >= 16 h
+        }
     }
 
     // System quips

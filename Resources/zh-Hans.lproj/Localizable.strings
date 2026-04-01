@@ -199,6 +199,12 @@
 "quip.species.chonk.4" = "*肚皮着地*";
 "quip.species.chonk.5" = "结实。";
 
+/* 睡眠 / 唤醒台词 */
+"quip.wake.short" = "你回来啦！";
+"quip.wake.medium" = "想你了。";
+"quip.wake.long" = "你去哪了……";
+"quip.wake.overnight" = "早上好！";
+
 /* 系统状态台词 — CPU */
 "quip.cpu.high1" = "好热啊……";
 "quip.cpu.high2" = "风扇在转！";

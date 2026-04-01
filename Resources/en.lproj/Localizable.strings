@@ -199,6 +199,12 @@
 "quip.species.chonk.4" = "*belly flop*";
 "quip.species.chonk.5" = "dense.";
 
+/* Sleep / wake quips */
+"quip.wake.short" = "oh you're back!";
+"quip.wake.medium" = "missed you.";
+"quip.wake.long" = "you were gone a while…";
+"quip.wake.overnight" = "good morning!";
+
 /* System quips — CPU */
 "quip.cpu.high1" = "getting warm in here...";
 "quip.cpu.high2" = "fan is spinning!";

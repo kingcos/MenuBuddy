@@ -46,6 +46,12 @@ struct PopoverView: View {
                 isFirstLaunch: store.isFirstLaunch,
                 companionName: companion.name
             )
+            // Show pending wake quip if Mac woke while popover was closed
+            if let quip = store.consumeWakeQuip() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    engine.showSpeech(quip)
+                }
+            }
         }
         .onDisappear {
             store.onSystemEvent = nil
@@ -57,6 +63,12 @@ struct PopoverView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .openRename)) { _ in
             startRename()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .companionWoke)) { note in
+            if let quip = note.object as? String {
+                engine.showSpeech(quip)
+                _ = store.consumeWakeQuip()  // clear the pending quip
+            }
         }
         .sheet(isPresented: $isRenaming) {
             renameSheet

@@ -13,6 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var barTimer: Timer?
     private var barTickIndex = 0
     private var settingsWindow: NSWindow?
+    private var sleepStartTime: Date?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         store = CompanionStore.shared
@@ -20,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         setupPopover()
         setupEventMonitor()
+        setupSleepWakeObservers()
 
         // Keep status bar button in sync when companion or system state changes
         storeObserver = store.$companion
@@ -244,6 +246,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.runModal()
     }
 
+    // MARK: - Sleep / Wake
+
+    private func setupSleepWakeObservers() {
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(systemWillSleep),
+            name: NSWorkspace.willSleepNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(systemDidWake),
+            name: NSWorkspace.didWakeNotification, object: nil)
+    }
+
+    @objc private func systemWillSleep() {
+        sleepStartTime = Date()
+    }
+
+    @objc private func systemDidWake() {
+        guard let start = sleepStartTime else { return }
+        let duration = Date().timeIntervalSince(start)
+        sleepStartTime = nil
+        store.setWakeQuip(Strings.wakeQuip(sleepSeconds: duration))
+    }
+
     // MARK: - Event Monitor
 
     private func setupEventMonitor() {
@@ -257,6 +281,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - Notification Names
 
 extension Notification.Name {
-    static let triggerPet = Notification.Name("MenuBuddy.triggerPet")
-    static let openRename = Notification.Name("MenuBuddy.openRename")
+    static let triggerPet    = Notification.Name("MenuBuddy.triggerPet")
+    static let openRename    = Notification.Name("MenuBuddy.openRename")
+    static let companionWoke = Notification.Name("MenuBuddy.companionWoke")
 }
