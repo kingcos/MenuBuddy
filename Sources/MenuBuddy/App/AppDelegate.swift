@@ -47,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         button.title = "\(shinyPrefix)\(face)"
         button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
-        button.toolTip = "\(store.companion.name) the \(store.companion.species.rawValue)"
+        button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
     }
 
     // MARK: - Popover
@@ -92,11 +92,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
 
         let name = store.companion.name
-        let species = store.companion.species.rawValue.capitalized
+        let speciesName = store.companion.species.localizedName
 
-        // Companion identity header
+        // Companion identity header (not localized — rarity stars + name)
         let headerItem = NSMenuItem(
-            title: "\(store.companion.rarity.stars) \(name) the \(species)",
+            title: "\(store.companion.rarity.stars) \(name)（\(speciesName)）",
             action: nil,
             keyEquivalent: ""
         )
@@ -105,62 +105,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
-        // Pet
-        let petItem = NSMenuItem(
-            title: "Pet \(name)",
-            action: #selector(openAndPet),
-            keyEquivalent: ""
-        )
+        let petItem = NSMenuItem(title: Strings.menuPet(name), action: #selector(openAndPet), keyEquivalent: "")
         petItem.target = self
         menu.addItem(petItem)
 
-        // Rename
-        let renameItem = NSMenuItem(
-            title: "Rename \(name)…",
-            action: #selector(renameCompanion),
-            keyEquivalent: ""
-        )
+        let renameItem = NSMenuItem(title: Strings.menuRename(name), action: #selector(renameCompanion), keyEquivalent: "")
         renameItem.target = self
         menu.addItem(renameItem)
 
         menu.addItem(.separator())
 
-        // Mute toggle
         let muteItem = NSMenuItem(
-            title: store.muted ? "Unmute Buddy" : "Mute Buddy",
+            title: store.muted ? Strings.menuUnmute : Strings.menuMute,
             action: #selector(toggleMute),
             keyEquivalent: ""
         )
         muteItem.target = self
         menu.addItem(muteItem)
 
-        // Launch at Login toggle
         let launchAtLogin = SMAppService.mainApp.status == .enabled
         let loginItem = NSMenuItem(
-            title: launchAtLogin ? "✓ Launch at Login" : "Launch at Login",
+            title: (launchAtLogin ? "✓ " : "") + Strings.menuLaunchAtLogin,
             action: #selector(toggleLaunchAtLogin),
             keyEquivalent: ""
         )
         loginItem.target = self
         menu.addItem(loginItem)
 
-        // About
-        let aboutItem = NSMenuItem(
-            title: "About MenuBuddy",
-            action: #selector(showAbout),
-            keyEquivalent: ""
-        )
+        let aboutItem = NSMenuItem(title: Strings.menuAbout, action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
         menu.addItem(.separator())
 
-        // Quit
-        let quitItem = NSMenuItem(
-            title: "Quit MenuBuddy",
-            action: #selector(NSApplication.terminate(_:)),
-            keyEquivalent: "q"
-        )
+        let quitItem = NSMenuItem(title: Strings.menuQuit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         menu.addItem(quitItem)
 
         statusItem.menu = menu
@@ -213,15 +191,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return f.string(from: date)
         }()
 
+        let shiny = store.companion.shiny ? " ✨" : ""
         let alert = NSAlert()
-        alert.messageText = "MenuBuddy"
-        alert.informativeText = """
-        Your companion: \(store.companion.name)
-        Species: \(store.companion.species.rawValue.capitalized)
-        Rarity: \(store.companion.rarity.rawValue.capitalized) \(store.companion.rarity.stars)\(store.companion.shiny ? " ✨" : "")
-        Hatched: \(hatchDate)
-        """
-        alert.addButton(withTitle: "OK")
+        alert.messageText = Strings.aboutTitle
+        alert.informativeText = [
+            Strings.aboutCompanion(store.companion.name),
+            Strings.aboutSpecies(store.companion.species.localizedName),
+            Strings.aboutRarity(store.companion.rarity.localizedName, store.companion.rarity.stars + shiny),
+            Strings.aboutHatched(hatchDate),
+        ].joined(separator: "\n")
+        alert.addButton(withTitle: Strings.aboutOK)
         alert.runModal()
     }
 

@@ -68,7 +68,7 @@ struct PopoverView: View {
                             .font(.system(size: 11))
                     }
                 }
-                Text("\(companion.species.rawValue.capitalized) · \(companion.rarity.rawValue.capitalized)")
+                Text("\(companion.species.localizedName) · \(companion.rarity.localizedName)")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
@@ -83,7 +83,7 @@ struct PopoverView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("Rename \(companion.name)")
+                .help(Strings.menuRename(companion.name))
             }
         }
         .padding(.horizontal, 16)
@@ -114,11 +114,11 @@ struct PopoverView: View {
                 }
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(companion.name) the \(companion.species.rawValue)")
-            .accessibilityHint("Tap to pet")
+            .accessibilityLabel(Strings.a11ySpriteLabel(companion.name, companion.species.localizedName))
+            .accessibilityHint(Strings.a11ySpriteHint)
             .accessibilityAddTraits(.isButton)
             .onTapGesture { engine.triggerPet() }
-            .help("Tap to pet \(companion.name)!")
+            .help(Strings.a11ySpriteHint)
         }
         .padding(.vertical, 8)
     }
@@ -128,11 +128,16 @@ struct PopoverView: View {
     private var hatchFooter: some View {
         HStack {
             let date = Date(timeIntervalSince1970: companion.soul.hatchedAt)
-            Text("Hatched \(date, style: .date)")
+            let formatter: DateFormatter = {
+                let f = DateFormatter()
+                f.dateStyle = .medium
+                return f
+            }()
+            Text(Strings.footerHatched(formatter.string(from: date)))
                 .font(.system(size: 9))
                 .foregroundColor(.secondary)
             Spacer()
-            Text("pets: \(store.petCount)")
+            Text(Strings.footerPets(store.petCount))
                 .font(.system(size: 9, design: .monospaced))
                 .foregroundColor(.secondary)
         }
@@ -142,16 +147,16 @@ struct PopoverView: View {
 
     private var renameSheet: some View {
         VStack(spacing: 16) {
-            Text("Rename your buddy")
+            Text(Strings.renameTitle)
                 .font(.headline)
-            TextField("Name", text: $renameText)
+            TextField(Strings.renamePlaceholder, text: $renameText)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 200)
                 .onSubmit { commitRename() }
             HStack(spacing: 12) {
-                Button("Cancel") { isRenaming = false }
+                Button(Strings.renameCancel) { isRenaming = false }
                     .keyboardShortcut(.cancelAction)
-                Button("Rename") { commitRename() }
+                Button(Strings.renameConfirm) { commitRename() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(renameText.trimmingCharacters(in: .whitespaces).isEmpty)
             }

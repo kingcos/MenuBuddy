@@ -45,15 +45,7 @@ class CompanionStore: ObservableObject {
     }
 
     private func milestoneMessage(for count: Int) -> String? {
-        switch count {
-        case 1:   return "first pet ever! ♥"
-        case 5:   return "5 pets! you care!"
-        case 10:  return "10 pets. we're bonded."
-        case 25:  return "25 pets. best friends."
-        case 50:  return "50 pets. legendary friendship."
-        case 100: return "100 pets. i am eternal."
-        default:  return nil
-        }
+        Strings.milestone(count)
     }
 
     private static func loadOrCreateSoul() -> (CompanionSoul, isNew: Bool) {

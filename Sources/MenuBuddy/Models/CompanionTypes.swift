@@ -48,6 +48,11 @@ enum Rarity: String, CaseIterable, Codable {
         case .legendary: return 50
         }
     }
+
+    /// Localized display name (e.g. "普通" in Chinese, "Common" in English)
+    var localizedName: String {
+        NSLocalizedString("rarity.\(rawValue)", bundle: .main, comment: "")
+    }
 }
 
 enum Species: String, CaseIterable, Codable {
@@ -69,6 +74,11 @@ enum Species: String, CaseIterable, Codable {
     case rabbit
     case mushroom
     case chonk
+
+    /// Localized display name (e.g. "鸭子" in Chinese, "Duck" in English)
+    var localizedName: String {
+        NSLocalizedString("species.\(rawValue)", bundle: .main, comment: "")
+    }
 }
 
 enum Eye: String, CaseIterable, Codable {

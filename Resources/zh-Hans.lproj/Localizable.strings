@@ -1,0 +1,102 @@
+/* 菜单项 */
+"menu.pet" = "摸摸 %@";
+"menu.rename" = "重命名 %@…";
+"menu.mute" = "静音桌宠";
+"menu.unmute" = "取消静音";
+"menu.launchAtLogin" = "开机自启动";
+"menu.about" = "关于 MenuBuddy";
+"menu.quit" = "退出 MenuBuddy";
+
+/* 关于对话框 */
+"about.title" = "MenuBuddy";
+"about.companion" = "你的伙伴：%@";
+"about.species" = "种类：%@";
+"about.rarity" = "稀有度：%@ %@";
+"about.hatched" = "孵化时间：%@";
+"about.ok" = "好";
+
+/* 重命名面板 */
+"rename.title" = "给你的伙伴改个名字";
+"rename.placeholder" = "名字";
+"rename.cancel" = "取消";
+"rename.confirm" = "确认";
+
+/* 底部信息 */
+"footer.hatched" = "孵化于 %@";
+"footer.pets" = "抚摸：%d 次";
+
+/* 提示文字 */
+"tooltip.companion" = "%@（%@）";
+
+/* 种类 */
+"species.duck" = "鸭子";
+"species.goose" = "大鹅";
+"species.blob" = "史莱姆";
+"species.cat" = "猫咪";
+"species.dragon" = "龙";
+"species.octopus" = "章鱼";
+"species.owl" = "猫头鹰";
+"species.penguin" = "企鹅";
+"species.turtle" = "乌龟";
+"species.snail" = "蜗牛";
+"species.ghost" = "小鬼";
+"species.axolotl" = "六角恐龙";
+"species.capybara" = "水豚";
+"species.cactus" = "仙人掌";
+"species.robot" = "机器人";
+"species.rabbit" = "兔子";
+"species.mushroom" = "蘑菇";
+"species.chonk" = "肥肥";
+
+/* 稀有度 */
+"rarity.common" = "普通";
+"rarity.uncommon" = "优秀";
+"rarity.rare" = "稀有";
+"rarity.epic" = "史诗";
+"rarity.legendary" = "传说";
+
+/* 属性名 */
+"stat.debugging" = "调试力";
+"stat.patience" = "耐心值";
+"stat.chaos" = "混乱度";
+"stat.wisdom" = "智慧值";
+"stat.snark" = "嘴贱度";
+
+/* 系统状态台词 — CPU */
+"quip.cpu.high1" = "好热啊……";
+"quip.cpu.high2" = "风扇在转！";
+"quip.cpu.high3" = "*冒汗*";
+"quip.cpu.high4" = "忙忙忙忙忙";
+
+/* 系统状态台词 — 内存 */
+"quip.mem.high1" = "东西好多……";
+"quip.mem.high2" = "脑子满了。";
+"quip.mem.high3" = "*使劲儿*";
+
+/* 系统状态台词 — 网络 */
+"quip.net.fast1" = "嗖嗖嗖！";
+"quip.net.fast2" = "数据来了！";
+"quip.net.slow1" = "网？在吗？";
+"quip.net.slow2" = "网络去哪了";
+
+/* 系统状态台词 — 电池 */
+"quip.battery.low1" = "电量……不多了……";
+"quip.battery.low2" = "快要没电了……";
+"quip.battery.charging" = "充电中！⚡";
+
+/* 宠物互动里程碑 */
+"milestone.1" = "第一次抚摸！♥";
+"milestone.5" = "5次！你真的在乎我！";
+"milestone.10" = "10次，我们是好朋友了。";
+"milestone.25" = "25次，形影不离！";
+"milestone.50" = "50次，传奇般的友谊。";
+"milestone.100" = "100次，我永生了。";
+
+/* 首次启动欢迎 */
+"welcome" = "嗨！我是 %@！";
+
+/* 无障碍 */
+"a11y.sprite.label" = "%@（%@）";
+"a11y.sprite.hint" = "点击抚摸";
+"a11y.speech.label" = "伙伴说：%@";
+"a11y.stat.label" = "%@：%d / 100";

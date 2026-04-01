@@ -14,6 +14,7 @@ build: icon
 	@cp "$(BINARY)" "$(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)"
 	@cp "Resources/Info.plist" "$(APP_BUNDLE)/Contents/Info.plist"
 	@[ -f Resources/AppIcon.icns ] && cp "Resources/AppIcon.icns" "$(APP_BUNDLE)/Contents/Resources/AppIcon.icns" || true
+	@for lproj in Resources/*.lproj; do cp -r "$$lproj" "$(APP_BUNDLE)/Contents/Resources/"; done
 	@echo "Signing .app bundle..."
 	@codesign --sign - --force --deep "$(APP_BUNDLE)"
 	@echo "Build complete: $(APP_BUNDLE)"

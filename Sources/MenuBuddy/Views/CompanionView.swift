@@ -173,7 +173,7 @@ final class AnimationEngine: ObservableObject {
         nextQuipTask = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             guard !Task.isCancelled else { return }
-            self?.showSpeech("hi! i'm \(name)!")
+            self?.showSpeech(Strings.welcome(name))
             // Schedule regular quips after welcome
             self?.scheduleNextQuip(delay: Double.random(in: 12...20))
         }
@@ -218,7 +218,7 @@ struct SpeechBubbleView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
-                .accessibilityLabel("Companion says: \(text)")
+                .accessibilityLabel(Strings.a11ySpeechLabel(text))
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
@@ -251,7 +251,7 @@ struct StatsView: View {
             ForEach(StatName.allCases, id: \.self) { stat in
                 let value = stats[stat] ?? 0
                 HStack(spacing: 6) {
-                    Text(stat.rawValue)
+                    Text(Strings.statName(stat))
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                         .frame(width: 72, alignment: .leading)
@@ -272,7 +272,7 @@ struct StatsView: View {
                         .frame(width: 24, alignment: .trailing)
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(stat.rawValue): \(value) out of 100")
+                .accessibilityLabel(Strings.a11yStatLabel(Strings.statName(stat), value))
             }
         }
     }

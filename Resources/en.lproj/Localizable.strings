@@ -1,0 +1,102 @@
+/* Menu Items */
+"menu.pet" = "Pet %@";
+"menu.rename" = "Rename %@…";
+"menu.mute" = "Mute Buddy";
+"menu.unmute" = "Unmute Buddy";
+"menu.launchAtLogin" = "Launch at Login";
+"menu.about" = "About MenuBuddy";
+"menu.quit" = "Quit MenuBuddy";
+
+/* About Dialog */
+"about.title" = "MenuBuddy";
+"about.companion" = "Your companion: %@";
+"about.species" = "Species: %@";
+"about.rarity" = "Rarity: %@ %@";
+"about.hatched" = "Hatched: %@";
+"about.ok" = "OK";
+
+/* Rename Sheet */
+"rename.title" = "Rename your buddy";
+"rename.placeholder" = "Name";
+"rename.cancel" = "Cancel";
+"rename.confirm" = "Rename";
+
+/* Footer */
+"footer.hatched" = "Hatched %@";
+"footer.pets" = "pets: %d";
+
+/* Tooltip */
+"tooltip.companion" = "%@ the %@";
+
+/* Species */
+"species.duck" = "Duck";
+"species.goose" = "Goose";
+"species.blob" = "Blob";
+"species.cat" = "Cat";
+"species.dragon" = "Dragon";
+"species.octopus" = "Octopus";
+"species.owl" = "Owl";
+"species.penguin" = "Penguin";
+"species.turtle" = "Turtle";
+"species.snail" = "Snail";
+"species.ghost" = "Ghost";
+"species.axolotl" = "Axolotl";
+"species.capybara" = "Capybara";
+"species.cactus" = "Cactus";
+"species.robot" = "Robot";
+"species.rabbit" = "Rabbit";
+"species.mushroom" = "Mushroom";
+"species.chonk" = "Chonk";
+
+/* Rarity */
+"rarity.common" = "Common";
+"rarity.uncommon" = "Uncommon";
+"rarity.rare" = "Rare";
+"rarity.epic" = "Epic";
+"rarity.legendary" = "Legendary";
+
+/* Stats */
+"stat.debugging" = "DEBUGGING";
+"stat.patience" = "PATIENCE";
+"stat.chaos" = "CHAOS";
+"stat.wisdom" = "WISDOM";
+"stat.snark" = "SNARK";
+
+/* System quips — CPU */
+"quip.cpu.high1" = "getting warm in here...";
+"quip.cpu.high2" = "fan is spinning!";
+"quip.cpu.high3" = "*sweating*";
+"quip.cpu.high4" = "busy busy busy";
+
+/* System quips — Memory */
+"quip.mem.high1" = "so much stuff...";
+"quip.mem.high2" = "brain full.";
+"quip.mem.high3" = "*strains*";
+
+/* System quips — Network */
+"quip.net.fast1" = "zoom zoom!";
+"quip.net.fast2" = "data incoming!";
+"quip.net.slow1" = "internet? hello?";
+"quip.net.slow2" = "where did the internet go";
+
+/* System quips — Battery */
+"quip.battery.low1" = "battery... low...";
+"quip.battery.low2" = "need power... soon...";
+"quip.battery.charging" = "charging! ⚡";
+
+/* Pet milestone */
+"milestone.1" = "first pet ever! ♥";
+"milestone.5" = "5 pets! you care!";
+"milestone.10" = "10 pets. we're bonded.";
+"milestone.25" = "25 pets. best friends.";
+"milestone.50" = "50 pets. legendary friendship.";
+"milestone.100" = "100 pets. i am eternal.";
+
+/* First launch */
+"welcome" = "hi! i'm %@!";
+
+/* Accessibility */
+"a11y.sprite.label" = "%@ the %@";
+"a11y.sprite.hint" = "Tap to pet";
+"a11y.speech.label" = "Companion says: %@";
+"a11y.stat.label" = "%@: %d out of 100";
