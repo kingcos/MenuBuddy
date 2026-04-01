@@ -52,7 +52,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 20)
 
                     if let snap = store.systemSnapshot {
-                        SystemStatusView(snapshot: snap)
+                        SystemStatusView(snapshot: snap, prev: store.prevSystemSnapshot)
                             .padding(.horizontal, 4)
                     }
 

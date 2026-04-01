@@ -340,14 +340,15 @@ struct StatsView: View {
 
 struct SystemStatusView: View {
     let snapshot: SystemSnapshot
+    var prev: SystemSnapshot? = nil
 
     var body: some View {
         HStack(spacing: 10) {
             metricPill(label: Strings.sysstatCPU,
-                       value: "\(Int(snapshot.cpuUsage * 100))%",
+                       value: "\(Int(snapshot.cpuUsage * 100))%\(trend(snapshot.cpuUsage, prev?.cpuUsage, threshold: 0.05))",
                        alert: snapshot.cpuUsage > 0.70)
             metricPill(label: Strings.sysstatMEM,
-                       value: "\(Int((1 - snapshot.memFree) * 100))%",
+                       value: "\(Int((1 - snapshot.memFree) * 100))%\(trend(1 - snapshot.memFree, prev.map { 1 - $0.memFree }, threshold: 0.05))",
                        alert: snapshot.memFree < 0.15)
             metricPill(label: Strings.sysstatNET,
                        value: netLabel(snapshot.netBytesPerSec),
@@ -385,6 +386,15 @@ struct SystemStatusView: View {
         } else {
             return Strings.sysstatNetKB(Double(bps) / 1_000)
         }
+    }
+
+    /// Returns "↑", "↓", or "" based on the change between current and previous value.
+    private func trend(_ current: Double, _ previous: Double?, threshold: Double) -> String {
+        guard let previous else { return "" }
+        let delta = current - previous
+        if delta > threshold { return "↑" }
+        if delta < -threshold { return "↓" }
+        return ""
     }
 }
 

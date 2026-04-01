@@ -34,6 +34,7 @@ final class SystemMonitor {
     var onSnapshot: ((SystemSnapshot) -> Void)?
 
     private var timer: Timer?
+    private var initialSampleTask: DispatchWorkItem?
 
     // CPU tracking
     private var prevCPUInfo: processor_info_array_t?
@@ -55,9 +56,9 @@ final class SystemMonitor {
         _ = cpuUsage()
         _ = diskBytesPerSec()
         // First full sample at ~4s so the metrics strip populates quickly
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
-            self?.sample()
-        }
+        let task = DispatchWorkItem { [weak self] in self?.sample() }
+        initialSampleTask = task
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4, execute: task)
         // Regular poll every 10s thereafter
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             self?.sample()
@@ -65,6 +66,8 @@ final class SystemMonitor {
     }
 
     func stop() {
+        initialSampleTask?.cancel()
+        initialSampleTask = nil
         timer?.invalidate()
         timer = nil
     }

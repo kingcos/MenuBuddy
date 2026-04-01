@@ -55,6 +55,8 @@ class CompanionStore: ObservableObject {
 
     /// Latest system metrics snapshot; nil until first poll fires.
     @Published private(set) var systemSnapshot: SystemSnapshot?
+    /// The snapshot before the current one — used to compute trends.
+    private(set) var prevSystemSnapshot: SystemSnapshot?
 
     /// Emoji reflecting the companion's current mood based on system state.
     var mood: String {
@@ -88,6 +90,7 @@ class CompanionStore: ObservableObject {
         }
         systemMonitor.onSnapshot = { [weak self] snapshot in
             DispatchQueue.main.async {
+                self?.prevSystemSnapshot = self?.systemSnapshot
                 self?.systemSnapshot = snapshot
             }
         }
