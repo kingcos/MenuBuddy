@@ -518,15 +518,19 @@ class CompanionStore: ObservableObject {
         logger.info("Species changed to \(newSpecies.rawValue)", source: "store")
     }
 
-    /// Wipes the current soul and creates a fresh one. Companion bones stay the same (machine-tied).
+    /// Wipes the current soul and creates a fresh one. Bones revert to the original machine-tied roll.
     func resetCompanion() {
         UserDefaults.standard.removeObject(forKey: soulKey)
         UserDefaults.standard.removeObject(forKey: petCountKey)
         UserDefaults.standard.removeObject(forKey: "companion.lastGreetedDay")
         UserDefaults.standard.removeObject(forKey: "companion.speciesOverride")
+        UserDefaults.standard.removeObject(forKey: "onboarding.xpSeen")
+        UserDefaults.standard.removeObject(forKey: "onboarding.cosmeticsSeen")
         petCount = 0
+        // Re-roll original bones (no species override since we cleared it)
+        let originalBones = rollCompanion(userId: userId)
         let (soul, _) = CompanionStore.loadOrCreateSoul()
-        companion = Companion(bones: companion.bones, soul: soul)
+        companion = Companion(bones: originalBones, soul: soul)
         pendingResetWelcome = true
         // Reset progression and cosmetics
         progression.reset()
