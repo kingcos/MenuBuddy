@@ -245,6 +245,8 @@ enum Strings {
 
     // Menu bar quips
     static var settingsSectionMenuBar: String    { L("settings.section.menubar") }
+    static var settingsChattyMode: String          { L("settings.chatty") }
+    static var settingsChattyModeDesc: String     { L("settings.chatty.desc") }
     static var settingsMenuBarTwoLine: String     { L("settings.menubar.twoline") }
     static var settingsMenuBarTwoLineDesc: String { L("settings.menubar.twoline.desc") }
     static var settingsMenuBarQuips: String      { L("settings.menubar.quips") }

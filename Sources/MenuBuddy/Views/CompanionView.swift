@@ -66,6 +66,7 @@ final class AnimationEngine: ObservableObject {
     private var mainTimer: Timer?
     private var nextQuipTask: Task<Void, Never>?
     private var isMuted: Bool = false
+    private var chatty: Bool = false
     private var species: Species = .duck
     private var quipDeck: QuipDeck = QuipDeck(source: { Strings.genericQuips })
     private var workspaceObserver: NSObjectProtocol?
@@ -84,8 +85,9 @@ final class AnimationEngine: ObservableObject {
     var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
     var speechFading: Bool { (bubbleShowTicks - speechTick) <= fadeWindowTicks }
 
-    func start(muted: Bool, species: Species, isFirstLaunch: Bool, companionName: String) {
+    func start(muted: Bool, chattyMode: Bool, species: Species, isFirstLaunch: Bool, companionName: String) {
         isMuted = muted
+        chatty = chattyMode
         self.species = species
         quipDeck = QuipDeck(source: { quipsFor(species: species) })
         guard mainTimer == nil else { return } // already running
@@ -176,6 +178,10 @@ final class AnimationEngine: ObservableObject {
         if muted { withAnimation { speechText = nil } }
     }
 
+    func updateChatty(_ on: Bool) {
+        chatty = on
+    }
+
     func triggerPet() {
         petHeartFrame = 0
         // Check for milestone first, otherwise use pet response
@@ -202,7 +208,7 @@ final class AnimationEngine: ObservableObject {
             if speechTick >= bubbleShowTicks {
                 withAnimation { speechText = nil }
                 speechTick = 0
-                scheduleNextQuip(delay: Double.random(in: 15...45))
+                scheduleNextQuip(delay: chatty ? 5 : Double.random(in: 15...45))
             }
         }
     }

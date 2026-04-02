@@ -51,6 +51,7 @@ struct PopoverView: View {
             }
             engine.start(
                 muted: store.muted,
+                chattyMode: store.chattyMode,
                 species: companion.species,
                 isFirstLaunch: store.isFirstLaunch,
                 companionName: companion.name
@@ -91,6 +92,7 @@ struct PopoverView: View {
             engine.stop()
         }
         .onChange(of: store.muted) { _, newValue in engine.updateMuted(newValue) }
+        .onChange(of: store.chattyMode) { _, newValue in engine.updateChatty(newValue) }
         .onReceive(NotificationCenter.default.publisher(for: .triggerPet)) { _ in
             engine.triggerPet()
         }

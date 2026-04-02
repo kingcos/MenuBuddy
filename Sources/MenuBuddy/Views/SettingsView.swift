@@ -94,6 +94,17 @@ struct SettingsView: View {
                 }
                 divider
                 row {
+                    Toggle(isOn: $store.chattyMode) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsChattyMode)
+                            Text(Strings.settingsChattyModeDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                divider
+                row {
                     Toggle(isOn: $store.dndEnabled) {
                         Text(Strings.settingsDNDEnable)
                     }

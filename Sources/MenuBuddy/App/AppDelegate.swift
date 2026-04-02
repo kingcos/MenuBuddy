@@ -122,14 +122,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Two-line layout using custom view for proper vertical centering
             let faceFont = NSFont.monospacedSystemFont(ofSize: 8, weight: .regular)
             let quipFont = NSFont.systemFont(ofSize: 7)
-            let truncated = quip.count > 12 ? String(quip.prefix(11)) + "…" : quip
+
+            // Truncate by rendered width rather than character count
+            let maxQuipWidth: CGFloat = 90
+            let quipAttrs: [NSAttributedString.Key: Any] = [.font: quipFont]
+            var truncated = quip
+            while (truncated as NSString).size(withAttributes: quipAttrs).width > maxQuipWidth && truncated.count > 1 {
+                truncated = String(truncated.dropLast())
+            }
+            if truncated.count < quip.count { truncated += "…" }
 
             let faceAttrs: [NSAttributedString.Key: Any] = [.font: faceFont]
-            let quipAttrs: [NSAttributedString.Key: Any] = [.font: quipFont]
             let faceSize = (faceStr as NSString).size(withAttributes: faceAttrs)
             let quipSize = (truncated as NSString).size(withAttributes: quipAttrs)
 
-            let width = max(faceSize.width, quipSize.width) + 4
+            let width = max(faceSize.width, quipSize.width) + 10
             let barHeight = NSStatusBar.system.thickness
             let totalTextHeight = faceSize.height + quipSize.height
             let topPadding = (barHeight - totalTextHeight) / 2

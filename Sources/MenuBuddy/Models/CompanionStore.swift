@@ -24,6 +24,14 @@ class CompanionStore: ObservableObject {
         didSet { UserDefaults.standard.set(menuBarTwoLine, forKey: "companion.menuBarTwoLine") }
     }
 
+    /// Chatty mode — quips refresh every 15 seconds in both popover and menu bar.
+    @Published var chattyMode: Bool {
+        didSet {
+            UserDefaults.standard.set(chattyMode, forKey: "companion.chattyMode")
+            scheduleMenuBarQuip(delay: chattyMode ? 15 : nil)
+        }
+    }
+
     /// When true, system events fire every poll while condition holds.
     /// When false, events only fire once per state transition (edge-triggered).
     @Published var repeatTriggers: Bool {
@@ -171,6 +179,7 @@ class CompanionStore: ObservableObject {
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
         menuBarTwoLine = UserDefaults.standard.object(forKey: "companion.menuBarTwoLine") as? Bool ?? true
+        chattyMode = UserDefaults.standard.bool(forKey: "companion.chattyMode")
         repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
         loggingEnabled = UserDefaults.standard.bool(forKey: "companion.loggingEnabled")
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
@@ -219,7 +228,7 @@ class CompanionStore: ObservableObject {
 
     private func scheduleMenuBarQuip(delay: TimeInterval? = nil) {
         menuBarQuipTimer?.invalidate()
-        let interval = delay ?? Double.random(in: 120...300)
+        let interval = delay ?? (chattyMode ? 15 : Double.random(in: 120...300))
         menuBarQuipTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
             guard let self else { return }
             if !self.muted {

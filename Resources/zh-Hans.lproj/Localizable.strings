@@ -359,6 +359,8 @@
 
 /* 菜单栏话语 */
 "settings.section.menubar" = "菜单栏";
+"settings.chatty" = "话唠模式";
+"settings.chatty.desc" = "每 15 秒说一句话，而不是每几分钟才说一次。";
 "settings.menubar.twoline" = "双行显示";
 "settings.menubar.twoline.desc" = "上行表情，下行话语。关闭后在单行内显示。";
 "settings.menubar.quips" = "在菜单栏显示话语";

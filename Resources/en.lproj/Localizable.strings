@@ -359,6 +359,8 @@
 
 /* Menu bar quip */
 "settings.section.menubar" = "Menu Bar";
+"settings.chatty" = "Chatty mode";
+"settings.chatty.desc" = "Your buddy talks every 15 seconds instead of every few minutes.";
 "settings.menubar.twoline" = "Two-line display";
 "settings.menubar.twoline.desc" = "Show face on top and speech below. When off, both display in a single line.";
 "settings.menubar.quips" = "Show quips in menu bar";
