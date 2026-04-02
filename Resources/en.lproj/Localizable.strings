@@ -204,7 +204,7 @@
 /* Reset companion */
 "settings.reset" = "Reset Name & Progress…";
 "settings.reset.confirm.title" = "Reset companion?";
-"settings.reset.confirm.body" = "This will give your buddy a new random name and reset the pet counter to zero. The appearance stays the same — it's tied to your Mac.";
+"settings.reset.confirm.body" = "This will give your buddy a new random name and reset the pet counter, level, XP, and cosmetics to zero. The base appearance stays the same — it's tied to your Mac.";
 "settings.reset.confirm.ok" = "Reset";
 "settings.reset.confirm.cancel" = "Keep %@";
 
@@ -399,6 +399,23 @@
 "a11y.sprite.hint" = "Tap to pet";
 "a11y.speech.label" = "Companion says: %@";
 "a11y.stat.label" = "%@: %d out of 100";
+
+/* Tooltip with level */
+"tooltip.companion.level" = "%@ the %@ (Lv.%d)";
+
+/* About — Level */
+"about.level" = "Level: %d (%d XP)";
+
+/* Species Atlas — Change Species */
+"atlas.change.species" = "Change Species";
+"atlas.change.confirm.title" = "Change species?";
+"atlas.change.confirm.body" = "Your buddy will transform into a %@. This can be changed again anytime.";
+"atlas.change.confirm.ok" = "Change";
+"atlas.change.locked" = "Unlocks at Lv.%d";
+
+/* Onboarding */
+"onboarding.xp" = "You earned XP! Pet me, switch apps, and use me daily to level up!";
+"onboarding.cosmetics" = "Welcome to Dress Up! Equip items in each slot to customize your buddy.";
 
 /* Progression System */
 "progression.levelup" = "Level up! Now Lv.%d!";

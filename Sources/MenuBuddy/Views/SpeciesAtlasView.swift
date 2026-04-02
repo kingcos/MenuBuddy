@@ -6,9 +6,11 @@ import SwiftUI
 /// Highlights the user's current companion. Tap a card to see it in each rarity.
 struct SpeciesAtlasView: View {
     let currentSpecies: Species
+    var store: CompanionStore? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSpecies: Species?
     @State private var previewRarity: Rarity = .common
+    @State private var showingChangeConfirm = false
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
@@ -93,6 +95,41 @@ struct SpeciesAtlasView: View {
             Text("\(species.localizedName) · \(previewRarity.localizedName)")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(Color(hex: previewRarity.color))
+
+            // Species change button (level 5+)
+            if let store, species != currentSpecies {
+                if store.level >= 5 {
+                    Button(action: { showingChangeConfirm = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 10))
+                            Text(Strings.atlasChangeSpecies)
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.accentColor.opacity(0.12))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
+                    .alert(Strings.atlasChangeConfirmTitle, isPresented: $showingChangeConfirm) {
+                        Button(Strings.atlasChangeConfirmOK) {
+                            store.changeSpecies(to: species)
+                            dismiss()
+                        }
+                        Button(Strings.renameCancel, role: .cancel) {}
+                    } message: {
+                        Text(Strings.atlasChangeConfirmBody(species.localizedName))
+                    }
+                } else {
+                    Text(Strings.atlasChangeLocked(5))
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+            }
         }
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity)

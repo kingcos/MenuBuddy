@@ -204,7 +204,7 @@
 /* 重置桌宠 */
 "settings.reset" = "重置名字和进度…";
 "settings.reset.confirm.title" = "重置伙伴？";
-"settings.reset.confirm.body" = "这将随机给伙伴取一个新名字，并将抚摸次数归零。外观不会改变——它由你的 Mac 硬件决定。";
+"settings.reset.confirm.body" = "这将随机给伙伴取一个新名字，并将抚摸次数、等级、经验值和装扮全部归零。基础外观不会改变——它由你的 Mac 硬件决定。";
 "settings.reset.confirm.ok" = "重置";
 "settings.reset.confirm.cancel" = "留下 %@";
 
@@ -399,6 +399,23 @@
 "a11y.sprite.hint" = "点击抚摸";
 "a11y.speech.label" = "伙伴说：%@";
 "a11y.stat.label" = "%@：%d / 100";
+
+/* 提示文字（含等级） */
+"tooltip.companion.level" = "%@（%@）Lv.%d";
+
+/* 关于 — 等级 */
+"about.level" = "等级：%d（%d XP）";
+
+/* 物种图鉴 — 更换角色 */
+"atlas.change.species" = "更换角色";
+"atlas.change.confirm.title" = "更换物种？";
+"atlas.change.confirm.body" = "你的伙伴将变身为%@。之后还可以随时再更换。";
+"atlas.change.confirm.ok" = "更换";
+"atlas.change.locked" = "Lv.%d 解锁";
+
+/* 新手引导 */
+"onboarding.xp" = "你获得了经验值！抚摸我、切换应用、每天登录都能升级哦！";
+"onboarding.cosmetics" = "欢迎来到装扮！在每个槽位装备物品来自定义你的伙伴吧。";
 
 /* 成长系统 */
 "progression.levelup" = "升级了！现在 Lv.%d！";

@@ -177,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.length = NSStatusItem.variableLength
         }
 
-        button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
+        button.toolTip = Strings.tooltipWithLevel(store.companion.name, store.companion.species.localizedName, store.level)
     }
 
     // MARK: - Popover
@@ -228,9 +228,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let name = store.companion.name
         let speciesName = store.companion.species.localizedName
 
-        // Companion identity header (not localized — rarity stars + name)
+        // Companion identity header with level
         let headerItem = NSMenuItem(
-            title: "\(store.companion.rarity.stars) \(name)（\(speciesName)）",
+            title: "\(store.companion.rarity.stars) \(name)（\(speciesName)）· Lv.\(store.level)",
             action: nil,
             keyEquivalent: ""
         )
@@ -358,6 +358,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Strings.aboutCompanion(store.companion.name),
             Strings.aboutSpecies(store.companion.species.localizedName),
             Strings.aboutRarity(store.companion.rarity.localizedName, store.companion.rarity.stars + shiny),
+            Strings.aboutLevel(store.level, store.totalXP),
             Strings.aboutHatched(hatchDate),
             "",
             Strings.aboutAuthor,

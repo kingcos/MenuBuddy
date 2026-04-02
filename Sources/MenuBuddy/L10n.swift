@@ -290,6 +290,25 @@ enum Strings {
         L("a11y.stat.label", stat, value)
     }
 
+    // Tooltip with level
+    static func tooltipWithLevel(_ name: String, _ species: String, _ level: Int) -> String {
+        L("tooltip.companion.level", name, species, level)
+    }
+
+    // About dialog — level
+    static func aboutLevel(_ level: Int, _ xp: Int) -> String { L("about.level", level, xp) }
+
+    // Species Atlas — change species
+    static var atlasChangeSpecies: String { L("atlas.change.species") }
+    static var atlasChangeConfirmTitle: String { L("atlas.change.confirm.title") }
+    static func atlasChangeConfirmBody(_ species: String) -> String { L("atlas.change.confirm.body", species) }
+    static var atlasChangeConfirmOK: String { L("atlas.change.confirm.ok") }
+    static func atlasChangeLocked(_ level: Int) -> String { L("atlas.change.locked", level) }
+
+    // Onboarding
+    static var onboardingXP: String { L("onboarding.xp") }
+    static var onboardingCosmetics: String { L("onboarding.cosmetics") }
+
     // Progression
     static func levelUpQuip(_ level: Int) -> String { L("progression.levelup", level) }
     static func levelUpTitle(_ level: Int) -> String { L("progression.levelup.title", level) }

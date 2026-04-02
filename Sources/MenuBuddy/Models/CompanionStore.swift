@@ -202,7 +202,15 @@ class CompanionStore: ObservableObject {
         dndFrom = UserDefaults.standard.object(forKey: "companion.dndFrom") as? Int ?? 22
         dndTo = UserDefaults.standard.object(forKey: "companion.dndTo") as? Int ?? 8
 
-        let bones = rollCompanion(userId: userId)
+        var bones = rollCompanion(userId: userId)
+        // Apply persisted species override (from species change feature)
+        if let overrideRaw = UserDefaults.standard.string(forKey: "companion.speciesOverride"),
+           let overrideSpecies = Species(rawValue: overrideRaw) {
+            bones = CompanionBones(
+                rarity: bones.rarity, species: overrideSpecies, eye: bones.eye,
+                hat: bones.hat, shiny: bones.shiny, stats: bones.stats
+            )
+        }
         let (soul, isNew) = CompanionStore.loadOrCreateSoul()
         isFirstLaunch = isNew
 
@@ -385,6 +393,25 @@ class CompanionStore: ObservableObject {
         Strings.milestone(count)
     }
 
+    // MARK: - Onboarding
+
+    /// Returns an XP onboarding message the first time XP is earned, nil after.
+    func consumeXPOnboarding() -> String? {
+        let key = "onboarding.xpSeen"
+        guard !UserDefaults.standard.bool(forKey: key) else { return nil }
+        guard progression.state.totalXP > 0 else { return nil }
+        UserDefaults.standard.set(true, forKey: key)
+        return Strings.onboardingXP
+    }
+
+    /// Returns a cosmetics onboarding message the first time the panel is opened, nil after.
+    func consumeCosmeticsOnboarding() -> String? {
+        let key = "onboarding.cosmeticsSeen"
+        guard !UserDefaults.standard.bool(forKey: key) else { return nil }
+        UserDefaults.standard.set(true, forKey: key)
+        return Strings.onboardingCosmetics
+    }
+
     // MARK: - Progression Helpers
 
     func refreshProgressionState() {
@@ -472,11 +499,31 @@ class CompanionStore: ObservableObject {
         companion = Companion(bones: companion.bones, soul: newSoul)
     }
 
+    /// Change the companion's species. Keeps rarity, eye, hat, shiny, and stats.
+    /// Requires level 5+.
+    func changeSpecies(to newSpecies: Species) {
+        guard progression.level >= 5 else { return }
+        let oldBones = companion.bones
+        let newBones = CompanionBones(
+            rarity: oldBones.rarity,
+            species: newSpecies,
+            eye: oldBones.eye,
+            hat: oldBones.hat,
+            shiny: oldBones.shiny,
+            stats: oldBones.stats
+        )
+        companion = Companion(bones: newBones, soul: companion.soul)
+        // Persist the species override
+        UserDefaults.standard.set(newSpecies.rawValue, forKey: "companion.speciesOverride")
+        logger.info("Species changed to \(newSpecies.rawValue)", source: "store")
+    }
+
     /// Wipes the current soul and creates a fresh one. Companion bones stay the same (machine-tied).
     func resetCompanion() {
         UserDefaults.standard.removeObject(forKey: soulKey)
         UserDefaults.standard.removeObject(forKey: petCountKey)
         UserDefaults.standard.removeObject(forKey: "companion.lastGreetedDay")
+        UserDefaults.standard.removeObject(forKey: "companion.speciesOverride")
         petCount = 0
         let (soul, _) = CompanionStore.loadOrCreateSoul()
         companion = Companion(bones: companion.bones, soul: soul)

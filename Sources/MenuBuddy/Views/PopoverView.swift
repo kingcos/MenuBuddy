@@ -107,6 +107,12 @@ struct PopoverView: View {
                     engine.showSpeech(greeting)
                 }
             }
+            // Show XP onboarding (first time XP is earned)
+            else if let xpOnboard = store.consumeXPOnboarding() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    engine.showSpeech(xpOnboard)
+                }
+            }
         }
         .onDisappear {
             store.onTriggerEvent = nil
@@ -130,7 +136,7 @@ struct PopoverView: View {
             renameSheet
         }
         .sheet(isPresented: $showingAtlas) {
-            SpeciesAtlasView(currentSpecies: companion.species)
+            SpeciesAtlasView(currentSpecies: companion.species, store: store)
         }
         .sheet(isPresented: $showingHelp) {
             HelpView()

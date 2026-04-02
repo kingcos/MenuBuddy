@@ -9,6 +9,7 @@ struct CosmeticView: View {
     @State private var importText = ""
     @State private var showingImport = false
     @State private var importResult: String?
+    @State private var onboardingMessage: String?
 
     private var cosmetics: CosmeticSystem { store.cosmetics }
     private var progression: ProgressionSystem { store.progression }
@@ -36,6 +37,22 @@ struct CosmeticView: View {
             previewSection
                 .padding(.bottom, 8)
 
+            // Onboarding banner
+            if let msg = onboardingMessage {
+                HStack(spacing: 6) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                    Text(msg)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+                .background(Color.orange.opacity(0.06))
+            }
+
             Divider()
 
             // Slot tabs
@@ -55,6 +72,9 @@ struct CosmeticView: View {
                 .padding(.vertical, 8)
         }
         .frame(width: 320, height: 460)
+        .onAppear {
+            onboardingMessage = store.consumeCosmeticsOnboarding()
+        }
         .sheet(isPresented: $showingImport) {
             importSheet
         }
