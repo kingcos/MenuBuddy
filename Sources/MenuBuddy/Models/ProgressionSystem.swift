@@ -11,7 +11,6 @@ enum XPReward: Int {
     case appContext = 1
     case llmReaction = 8
     case milestone = 15
-    case levelUpBonus = 50
 }
 
 /// A single XP gain event for history tracking.
@@ -34,6 +33,7 @@ struct ProgressionState: Codable {
 }
 
 /// Core progression engine — pure logic, no UI dependencies.
+/// All access goes through CompanionStore which is main-thread-only (ObservableObject).
 final class ProgressionSystem {
     static let shared = ProgressionSystem()
 
@@ -146,10 +146,14 @@ final class ProgressionSystem {
         return grantXP(.dailyLogin, source: "daily")
     }
 
-    private static func dateString(_ date: Date) -> String {
+    private static let dateFmt: DateFormatter = {
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.string(from: date)
+        return fmt
+    }()
+
+    private static func dateString(_ date: Date) -> String {
+        dateFmt.string(from: date)
     }
 
     // MARK: - Attribute Bonuses

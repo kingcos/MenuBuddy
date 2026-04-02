@@ -76,6 +76,8 @@ final class AnimationEngine: ObservableObject {
     var onPet: (() -> String?)? = nil
     /// Called after pet to request an AI reaction (async, replaces speech when ready).
     var onPetLLM: ((@escaping (String) -> Void) -> Void)? = nil
+    /// Called when user switches to a recognized app (grants XP).
+    var onAppContextSwitch: (() -> Void)? = nil
 
     var currentSequenceIndex: Int { tickIndex % idleSequence.count }
     var currentFrame: Int {
@@ -157,6 +159,10 @@ final class AnimationEngine: ObservableObject {
         }()
 
         guard let quip else { return }
+
+        // Grant XP for app context switch
+        onAppContextSwitch?()
+
         // 25% chance so context quips don't get annoying
         guard Double.random(in: 0...1) < 0.25 else { return }
         showSpeech(quip)

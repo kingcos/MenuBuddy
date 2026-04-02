@@ -10,11 +10,12 @@ func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false, co
     let frameIndex = frame % frames.count
 
     // Eye character: cosmetic override > blink > default
+    // Cosmetic eyes always win (no blink flicker for equipped eye styles)
     let eyeChar: String
-    if blink {
-        eyeChar = "-"
-    } else if let cosmeticEye = cosmeticModifier?.eyeChar {
+    if let cosmeticEye = cosmeticModifier?.eyeChar {
         eyeChar = cosmeticEye
+    } else if blink {
+        eyeChar = "-"
     } else {
         eyeChar = bones.eye.character
     }

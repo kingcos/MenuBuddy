@@ -108,6 +108,7 @@ struct CosmeticInventory: Codable {
 
 // MARK: - Cosmetic System
 
+/// All access goes through CompanionStore which is main-thread-only (ObservableObject).
 final class CosmeticSystem {
     static let shared = CosmeticSystem()
 
@@ -130,6 +131,7 @@ final class CosmeticSystem {
             }
             inventory = inv
         }
+        rebuildModifierCache()
     }
 
     // MARK: - Queries
@@ -143,7 +145,14 @@ final class CosmeticSystem {
         return catalog.first { $0.id == id }
     }
 
+    /// Cached combined modifier — invalidated on equip/unequip.
+    private(set) var cachedModifier: SpriteModifier = SpriteModifier()
+
     func allEquippedModifiers() -> SpriteModifier {
+        cachedModifier
+    }
+
+    private func rebuildModifierCache() {
         var combined = SpriteModifier()
         for slot in CosmeticSlot.allCases {
             guard let item = equippedItem(for: slot) else { continue }
@@ -157,7 +166,7 @@ final class CosmeticSystem {
             if let v = m.frameLeft { combined.frameLeft = v }
             if let v = m.frameRight { combined.frameRight = v }
         }
-        return combined
+        cachedModifier = combined
     }
 
     // MARK: - Mutations
@@ -165,11 +174,13 @@ final class CosmeticSystem {
     func equip(_ item: CosmeticItem) {
         guard inventory.ownedItemIds.contains(item.id) else { return }
         inventory.equip(item)
+        rebuildModifierCache()
         save()
     }
 
     func unequip(_ slot: CosmeticSlot) {
         inventory.unequip(slot)
+        rebuildModifierCache()
         save()
     }
 
@@ -216,15 +227,18 @@ final class CosmeticSystem {
         return data.base64EncodedString()
     }
 
-    /// Import an item from a base64 string. Returns the item if valid.
+    /// Import an item from a base64 string. Only accepts items whose ID matches a known catalog entry.
     func importItem(from base64String: String) -> CosmeticItem? {
         guard let data = Data(base64Encoded: base64String),
-              let item = try? JSONDecoder().decode(CosmeticItem.self, from: data) else {
+              let decoded = try? JSONDecoder().decode(CosmeticItem.self, from: data) else {
             return nil
         }
-        // Verify it's not a duplicate by checking ID uniqueness
-        addItem(item)
-        return item
+        // Validate: only accept items that exist in the catalog (prevents injection)
+        guard catalog.contains(where: { $0.id == decoded.id }) else { return nil }
+        // Don't add duplicates
+        guard !inventory.ownedItemIds.contains(decoded.id) else { return nil }
+        addItem(byId: decoded.id)
+        return catalog.first { $0.id == decoded.id }
     }
 
     // MARK: - Persistence
@@ -241,6 +255,7 @@ final class CosmeticSystem {
             inv.ownedItemIds.insert(item.id)
         }
         inventory = inv
+        rebuildModifierCache()
         save()
     }
 }
@@ -300,7 +315,7 @@ enum CosmeticCatalog {
         CosmeticItem(id: "eye_spiral", slot: .eye, name: "cosmetic.eye.spiral", rarity: .rare,
                      spriteModifier: SpriteModifier(eyeChar: "@"), unlockLevel: 2),
         CosmeticItem(id: "eye_fire", slot: .eye, name: "cosmetic.eye.fire", rarity: .legendary,
-                     spriteModifier: SpriteModifier(eyeChar: "🔥"), unlockLevel: 5),
+                     spriteModifier: SpriteModifier(eyeChar: "⚡"), unlockLevel: 5),
         CosmeticItem(id: "eye_moon", slot: .eye, name: "cosmetic.eye.moon", rarity: .epic,
                      spriteModifier: SpriteModifier(eyeChar: "☽"), unlockLevel: 4),
         CosmeticItem(id: "eye_cross", slot: .eye, name: "cosmetic.eye.cross", rarity: .common,
@@ -324,9 +339,9 @@ enum CosmeticCatalog {
         CosmeticItem(id: "acc_flag", slot: .accessory, name: "cosmetic.acc.flag", rarity: .rare,
                      spriteModifier: SpriteModifier(accessoryRight: " ⚑"), unlockLevel: 4),
         CosmeticItem(id: "acc_balloon", slot: .accessory, name: "cosmetic.acc.balloon", rarity: .epic,
-                     spriteModifier: SpriteModifier(accessoryRight: " 🎈"), unlockLevel: 5),
+                     spriteModifier: SpriteModifier(accessoryRight: " o"), unlockLevel: 5),
         CosmeticItem(id: "acc_guitar", slot: .accessory, name: "cosmetic.acc.guitar", rarity: .legendary,
-                     spriteModifier: SpriteModifier(accessoryLeft: "🎸"), unlockLevel: 7),
+                     spriteModifier: SpriteModifier(accessoryLeft: "~ "), unlockLevel: 7),
     ]
 
     // MARK: - Aura Items
@@ -334,7 +349,7 @@ enum CosmeticCatalog {
         CosmeticItem(id: "aura_sparkle", slot: .aura, name: "cosmetic.aura.sparkle", rarity: .uncommon,
                      spriteModifier: SpriteModifier(auraTop: "   ✦ · ✦    ", auraBottom: "   · ✦ ·    "), unlockLevel: 5),
         CosmeticItem(id: "aura_fire", slot: .aura, name: "cosmetic.aura.fire", rarity: .rare,
-                     spriteModifier: SpriteModifier(auraTop: "  ~ 🔥 ~    ", auraBottom: "  ~ ~ ~ ~   "), unlockLevel: 5),
+                     spriteModifier: SpriteModifier(auraTop: "  ~ * ~ *   ", auraBottom: "  ~ ~ ~ ~   "), unlockLevel: 5),
         CosmeticItem(id: "aura_hearts", slot: .aura, name: "cosmetic.aura.hearts", rarity: .rare,
                      spriteModifier: SpriteModifier(auraTop: "  ♥  ♥  ♥   ", auraBottom: "   ♥  ♥     "), unlockLevel: 5),
         CosmeticItem(id: "aura_snow", slot: .aura, name: "cosmetic.aura.snow", rarity: .uncommon,
@@ -342,7 +357,7 @@ enum CosmeticCatalog {
         CosmeticItem(id: "aura_music", slot: .aura, name: "cosmetic.aura.music", rarity: .epic,
                      spriteModifier: SpriteModifier(auraTop: "  ♪ ♫ ♪     ", auraBottom: "    ♫ ♪ ♫   "), unlockLevel: 6),
         CosmeticItem(id: "aura_rainbow", slot: .aura, name: "cosmetic.aura.rainbow", rarity: .legendary,
-                     spriteModifier: SpriteModifier(auraTop: " 🌈 · · ·   ", auraBottom: "  · · · 🌈  "), unlockLevel: 8),
+                     spriteModifier: SpriteModifier(auraTop: " = · = · =  ", auraBottom: "  · = · = · "), unlockLevel: 8),
     ]
 
     // MARK: - Frame Items

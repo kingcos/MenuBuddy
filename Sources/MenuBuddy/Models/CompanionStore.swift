@@ -26,8 +26,8 @@ class CompanionStore: ObservableObject {
 
     /// Pending level-up info for the UI to consume.
     @Published private(set) var pendingLevelUp: LevelUpInfo?
-    /// Pending cosmetic drop for the UI to consume.
-    @Published private(set) var pendingCosmeticDrop: CosmeticItem?
+    /// Pending cosmetic drops for the UI to consume (supports multiple simultaneous drops).
+    @Published private(set) var pendingCosmeticDrops: [CosmeticItem] = []
 
     @Published var muted: Bool {
         didSet {
@@ -367,7 +367,7 @@ class CompanionStore: ObservableObject {
         if Double.random(in: 0...1) < 0.05 {
             if let drop = cosmetics.rollRandomDrop(level: progression.level) {
                 cosmetics.addItem(drop)
-                pendingCosmeticDrop = drop
+                pendingCosmeticDrops.append(drop)
             }
         }
 
@@ -432,7 +432,7 @@ class CompanionStore: ObservableObject {
         pendingLevelUp = info
         // Grant a cosmetic reward on level up
         if let reward = cosmetics.grantLevelUpReward(level: info.newLevel) {
-            pendingCosmeticDrop = reward
+            pendingCosmeticDrops.append(reward)
         }
     }
 
@@ -442,8 +442,8 @@ class CompanionStore: ObservableObject {
     }
 
     func consumeCosmeticDrop() -> CosmeticItem? {
-        defer { pendingCosmeticDrop = nil }
-        return pendingCosmeticDrop
+        guard !pendingCosmeticDrops.isEmpty else { return nil }
+        return pendingCosmeticDrops.removeFirst()
     }
 
     private static func loadOrCreateSoul() -> (CompanionSoul, isNew: Bool) {

@@ -50,6 +50,7 @@ struct PopoverView: View {
         .onAppear {
             engine.onPet = { store.recordPet() }
             engine.onPetLLM = { callback in store.requestLLMPetReaction(completion: callback) }
+            engine.onAppContextSwitch = { store.grantAppContextXP() }
             store.onTriggerEvent = { [weak engine] event in
                 guard let quip = event.quips.randomElement() else { return }
                 engine?.showSpeech(quip)
@@ -212,12 +213,10 @@ struct PopoverView: View {
                     .foregroundColor(.secondary)
                 Spacer()
                 if store.availablePoints > 0 {
-                    Button(action: {}) {
-                        Text("+\(store.availablePoints) pts")
-                            .font(.system(size: 8, weight: .bold, design: .monospaced))
-                            .foregroundColor(Color(hex: companion.rarity.color))
-                    }
-                    .buttonStyle(.plain)
+                    Text("+\(store.availablePoints) pts ↓")
+                        .font(.system(size: 8, weight: .bold, design: .monospaced))
+                        .foregroundColor(Color(hex: companion.rarity.color))
+                        .help(Strings.allocatePoint)
                 }
                 Text("→ Lv.\(store.level + 1)")
                     .font(.system(size: 8, design: .monospaced))

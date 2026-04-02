@@ -183,7 +183,7 @@ struct CosmeticView: View {
                     .font(.system(size: 8, weight: .medium))
                     .lineLimit(1)
                     .foregroundColor(.primary)
-                Text(CosmeticRarity(rawValue: item.rarity.rawValue)?.stars ?? "")
+                Text(item.rarity.stars)
                     .font(.system(size: 7))
                     .foregroundColor(Color(hex: item.rarity.color))
             }
