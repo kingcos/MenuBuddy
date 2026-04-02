@@ -112,7 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let faceStr = "\(sysPrefix)\(shinyPrefix)\(face)"
 
         // Suppress quip text while popover is shown to prevent position flicker
-        let quip = popover.isShown ? nil : store.menuBarQuip
+        let quip = (popover?.isShown == true) ? nil : store.menuBarQuip
 
         if let quip {
             // Two-line layout: face on top, quip on bottom (saves horizontal space)
