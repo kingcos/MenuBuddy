@@ -24,19 +24,25 @@
     <style>
         :root {
             --bg: #0d1117;
+            --bg-alt: #010409;
             --card: #161b22;
+            --card-hover: #1c2129;
             --border: #30363d;
             --text: #e6edf3;
             --text-dim: #8b949e;
             --accent: #f59e0b;
-            --accent-dim: #f59e0b33;
+            --accent-hover: #fbbf24;
+            --accent-dim: rgba(245,158,11,0.15);
             --green: #22c55e;
             --blue: #3b82f6;
             --purple: #a855f7;
             --pink: #ec4899;
+            --red: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
@@ -46,25 +52,99 @@
             overflow-x: hidden;
         }
 
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 0 24px;
+        /* ---- Nav ---- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13,17,23,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
         }
 
-        /* Hero */
+        nav .inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 52px;
+            gap: 24px;
+        }
+
+        nav .logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        nav .links {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
+        nav .links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.15s;
+        }
+
+        nav .links a:hover { color: var(--text); }
+
+        nav .right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        nav .lang-switch {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        nav .lang-switch:hover { border-color: var(--text-dim); color: var(--text); }
+
+        .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+        /* ---- Hero ---- */
         .hero {
             text-align: center;
-            padding: 80px 0 60px;
+            padding: 100px 0 80px;
             position: relative;
         }
 
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
         .hero-sprite {
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+            font-size: 22px;
             line-height: 1.3;
             color: var(--accent);
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             white-space: pre;
             display: inline-block;
             animation: float 3s ease-in-out infinite;
@@ -72,18 +152,19 @@
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-10px); }
         }
 
         .hero h1 {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 12px;
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+            line-height: 1.1;
         }
 
         .hero h1 span {
-            background: linear-gradient(135deg, var(--accent), var(--pink));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -91,190 +172,252 @@
         .hero .tagline {
             font-size: 20px;
             color: var(--text-dim);
-            max-width: 520px;
-            margin: 0 auto 32px;
+            max-width: 560px;
+            margin: 0 auto 36px;
+            line-height: 1.5;
         }
 
-        .hero-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 12px 28px;
+            border-radius: 10px;
             font-size: 15px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: #000;
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.25); }
+        .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-2px); background: var(--card-hover); }
+        .btn svg { width: 18px; height: 18px; }
+
+        .badges { display: flex; gap: 8px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+        .badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); color: var(--text-dim); }
+
+        /* ---- Section common ---- */
+        section { padding: 80px 0; }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
         }
 
-        .btn-primary:hover {
-            background: #fbbf24;
-            transform: translateY(-1px);
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 16px;
+            max-width: 560px;
+            margin: 0 auto 48px;
         }
 
-        .btn-secondary {
-            background: var(--card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
+        /* ---- Demo Mockup ---- */
+        .demo-section { background: var(--bg-alt); }
 
-        .btn-secondary:hover {
-            border-color: var(--text-dim);
-            transform: translateY(-1px);
-        }
-
-        .btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Badge row */
-        .badges {
+        .demo-wrapper {
             display: flex;
-            gap: 8px;
+            gap: 40px;
+            align-items: flex-start;
             justify-content: center;
-            margin-top: 20px;
             flex-wrap: wrap;
         }
 
-        .badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
+        .demo-menubar {
+            background: rgba(30,30,30,0.95);
+            border-radius: 10px;
+            padding: 6px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+        }
+
+        .demo-menubar .face { color: var(--accent); }
+        .demo-menubar .quip { color: var(--text-dim); font-size: 10px; font-family: -apple-system, sans-serif; }
+
+        .demo-popover {
             background: var(--card);
             border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 280px;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        }
+
+        .demo-popover-header {
+            padding: 12px 16px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .demo-popover-header .name { font-size: 14px; font-weight: 600; }
+        .demo-popover-header .meta { font-size: 10px; color: var(--text-dim); }
+        .demo-popover-header .stars { font-size: 11px; color: var(--blue); }
+
+        .demo-speech {
+            margin: 0 14px 4px;
+            padding: 8px;
+            border: 1px solid rgba(59,130,246,0.4);
+            border-radius: 8px;
+            background: rgba(59,130,246,0.06);
+            font-family: 'SF Mono', monospace;
+            font-size: 11px;
+            font-style: italic;
             color: var(--text-dim);
         }
 
-        /* Species showcase */
-        .showcase {
-            padding: 60px 0;
+        .demo-sprite {
+            text-align: center;
+            padding: 10px 0;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.2;
+            white-space: pre;
+            color: var(--blue);
         }
 
-        .showcase h2 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 8px;
+        .demo-stats {
+            padding: 10px 16px;
+            border-top: 1px solid var(--border);
         }
 
-        .showcase .subtitle {
-            text-align: center;
+        .demo-stat-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            font-size: 9px;
+        }
+
+        .demo-stat-row .label {
+            font-family: 'SF Mono', monospace;
             color: var(--text-dim);
-            margin-bottom: 36px;
+            width: 65px;
+            flex-shrink: 0;
         }
 
+        .demo-stat-row .bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .demo-stat-row .bar-fill { height: 100%; border-radius: 2px; }
+        .demo-stat-row .val { font-family: 'SF Mono', monospace; color: var(--text-dim); width: 24px; text-align: right; }
+
+        .demo-metrics {
+            padding: 6px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .demo-metric { text-align: center; }
+        .demo-metric .m-label { font-size: 8px; color: var(--text-dim); font-family: 'SF Mono', monospace; }
+        .demo-metric .m-value { font-size: 9px; font-weight: 600; font-family: 'SF Mono', monospace; }
+        .demo-metric.alert .m-label, .demo-metric.alert .m-value { color: #f97316; }
+
+        .demo-toolbar {
+            padding: 6px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .demo-toolbar .icon { color: var(--text-dim); font-size: 12px; }
+        .demo-toolbar .spacer { flex: 1; }
+
+        .demo-desc {
+            max-width: 320px;
+        }
+
+        .demo-desc h3 { font-size: 18px; margin-bottom: 12px; }
+        .demo-desc p { color: var(--text-dim); font-size: 14px; margin-bottom: 16px; line-height: 1.6; }
+
+        .demo-desc ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .demo-desc ul li {
+            color: var(--text-dim);
+            font-size: 14px;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .demo-desc ul li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-family: 'SF Mono', monospace;
+            font-weight: 700;
+        }
+
+        /* ---- Species ---- */
         .species-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 12px;
         }
 
         .species-card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 8px;
+            border-radius: 10px;
+            padding: 14px 8px 10px;
             text-align: center;
             transition: all 0.2s;
             cursor: default;
         }
 
-        .species-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
+        .species-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
 
         .species-card .sprite {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.2;
             white-space: pre;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .species-card .name {
-            font-size: 11px;
-            color: var(--text-dim);
-        }
-
-        /* Rarity colors for cards */
-        .r-common .sprite { color: #888888; }
-        .r-uncommon .sprite { color: #22c55e; }
-        .r-rare .sprite { color: #3b82f6; }
-        .r-epic .sprite { color: #a855f7; }
-        .r-legendary .sprite { color: #f59e0b; }
-
-        /* Features */
-        .features {
-            padding: 60px 0;
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 36px;
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-        }
-
-        .feature-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-        }
-
-        .feature-card .icon {
-            font-size: 28px;
-            margin-bottom: 12px;
-        }
-
-        .feature-card h3 {
-            font-size: 16px;
             margin-bottom: 8px;
+            display: block;
+            transition: transform 0.2s;
         }
 
-        .feature-card p {
-            font-size: 14px;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
+        .species-card:hover .sprite { transform: scale(1.15); }
+        .species-card .name { font-size: 11px; color: var(--text-dim); font-weight: 500; }
 
-        /* Rarity section */
-        .rarity-section {
-            padding: 60px 0;
-        }
+        .r-common .sprite { color: #888; }
+        .r-uncommon .sprite { color: var(--green); }
+        .r-rare .sprite { color: var(--blue); }
+        .r-epic .sprite { color: var(--purple); }
+        .r-legendary .sprite { color: var(--accent); }
 
-        .rarity-section h2 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 36px;
-        }
-
+        /* ---- Rarity ---- */
         .rarity-bar {
             display: flex;
-            gap: 4px;
-            max-width: 600px;
-            margin: 0 auto 24px;
-            height: 32px;
-            border-radius: 8px;
+            gap: 3px;
+            max-width: 640px;
+            margin: 0 auto 28px;
+            height: 36px;
+            border-radius: 10px;
             overflow: hidden;
         }
 
@@ -282,102 +425,79 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: #000;
+            transition: flex 0.3s;
         }
 
         .rarity-bar .seg-common { background: #888; flex: 60; }
         .rarity-bar .seg-uncommon { background: var(--green); flex: 25; }
         .rarity-bar .seg-rare { background: var(--blue); flex: 10; }
         .rarity-bar .seg-epic { background: var(--purple); flex: 4; }
-        .rarity-bar .seg-legendary { background: var(--accent); flex: 1; min-width: 28px; }
+        .rarity-bar .seg-legendary { background: var(--accent); flex: 1; min-width: 32px; }
 
-        .rarity-list {
+        .rarity-list { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+        .rarity-item { text-align: center; }
+        .rarity-item .stars { font-size: 16px; margin-bottom: 4px; }
+        .rarity-item .label { font-size: 13px; font-weight: 500; }
+        .rarity-item .pct { font-size: 12px; color: var(--text-dim); }
+
+        /* ---- Features ---- */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+        .feature-card .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 24px;
-            flex-wrap: wrap;
+            font-size: 22px;
+            margin-bottom: 16px;
+            background: var(--accent-dim);
         }
 
-        .rarity-item {
-            text-align: center;
+        .feature-card h3 { font-size: 16px; margin-bottom: 8px; font-weight: 600; }
+        .feature-card p { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+        /* ---- Triggers ---- */
+        .trigger-table-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 32px;
         }
 
-        .rarity-item .stars {
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .rarity-item .label {
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-
-        .rarity-item .pct {
-            font-size: 11px;
-            color: var(--text-dim);
-        }
-
-        /* Trigger system */
-        .triggers {
-            padding: 60px 0;
-        }
-
-        .triggers h2 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 12px;
-        }
-
-        .triggers .subtitle {
-            text-align: center;
-            color: var(--text-dim);
-            margin-bottom: 36px;
-            max-width: 560px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .trigger-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-
-        .trigger-table th {
-            text-align: left;
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-dim);
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        .trigger-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .trigger-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .trigger-table .mono {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 13px;
-        }
+        .trigger-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .trigger-table th { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .trigger-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .trigger-table tr:last-child td { border-bottom: none; }
+        .trigger-table .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
 
         .code-block {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px 20px;
+            border-radius: 10px;
+            padding: 20px 24px;
             font-family: 'SF Mono', 'Fira Code', monospace;
             font-size: 13px;
-            line-height: 1.5;
+            line-height: 1.6;
             overflow-x: auto;
             white-space: pre;
             color: var(--text-dim);
@@ -386,278 +506,369 @@
         .code-block .comment { color: #6e7681; }
         .code-block .string { color: #a5d6ff; }
 
-        /* Footer */
-        footer {
-            padding: 40px 0;
+        /* ---- CTA ---- */
+        .cta-section {
             text-align: center;
-            border-top: 1px solid var(--border);
-            margin-top: 40px;
+            background: var(--bg-alt);
         }
 
-        footer p {
-            color: var(--text-dim);
-            font-size: 14px;
-        }
+        .cta-chips { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
 
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .requirements {
-            text-align: center;
-            padding: 40px 0;
-        }
-
-        .requirements .chips {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .requirements .chip {
+        .cta-chip {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 20px;
+            border-radius: 10px;
+            padding: 14px 24px;
             font-size: 14px;
         }
 
-        .requirements .chip strong {
-            color: var(--accent);
-        }
+        .cta-chip strong { color: var(--accent); }
 
-        /* Animations for species cards */
-        .species-card .sprite {
-            transition: transform 0.2s;
-        }
-
-        .species-card:hover .sprite {
-            transform: scale(1.1);
-        }
-
-        /* I18n note */
-        .i18n-note {
+        /* ---- Footer ---- */
+        footer {
+            padding: 48px 0;
             text-align: center;
-            padding: 20px 0 0;
-            color: var(--text-dim);
-            font-size: 14px;
+            border-top: 1px solid var(--border);
         }
 
-        .i18n-note a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        footer p { color: var(--text-dim); font-size: 14px; }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
 
-        /* Responsive */
-        @media (max-width: 640px) {
-            .hero { padding: 48px 0 40px; }
-            .hero h1 { font-size: 32px; }
-            .hero .tagline { font-size: 16px; }
-            .species-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; }
+        /* ---- Responsive ---- */
+        @media (max-width: 768px) {
+            .hero { padding: 64px 0 48px; }
+            .hero h1 { font-size: 36px; letter-spacing: -1px; }
+            .hero .tagline { font-size: 17px; }
+            .hero-sprite { font-size: 18px; }
+            section { padding: 60px 0; }
+            .section-title { font-size: 26px; }
+            .species-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
             .feature-grid { grid-template-columns: 1fr; }
+            .demo-wrapper { flex-direction: column; align-items: center; }
+            .demo-desc { text-align: center; }
+            nav .links { display: none; }
             .rarity-list { gap: 16px; }
         }
     </style>
 </head>
 <body>
 
+<!-- Nav -->
+<nav>
+    <div class="inner">
+        <a class="logo" href="#">MenuBuddy</a>
+        <div class="links">
+            <a href="#demo">Demo</a>
+            <a href="#species">Species</a>
+            <a href="#features">Features</a>
+            <a href="#triggers">Triggers</a>
+        </div>
+        <div class="right">
+            <a class="lang-switch" href="index.zh-CN.html">中文</a>
+            <a class="btn btn-primary" href="https://github.com/kingcos/MenuBuddy/releases/latest" style="padding:8px 16px;font-size:13px;border-radius:8px">Download</a>
+        </div>
+    </div>
+</nav>
+
 <div class="container">
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-sprite" id="hero-sprite">    __
+<!-- Hero -->
+<section class="hero" id="hero">
+    <div class="hero-sprite" id="hero-sprite">    __
   <(· )___
    (  ._>
     `--´</div>
-        <h1><span>MenuBuddy</span></h1>
-        <p class="tagline">A tiny companion pet that lives in your macOS menu bar. Unique to your machine, powered by ASCII art.</p>
-        <div class="hero-buttons">
-            <a href="https://github.com/kingcos/MenuBuddy/releases/latest" class="btn btn-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                Download DMG
-            </a>
-            <a href="https://github.com/kingcos/MenuBuddy" class="btn btn-secondary">
-                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                Source Code
-            </a>
-        </div>
-        <div class="badges">
-            <span class="badge">macOS 14+</span>
-            <span class="badge">Swift</span>
-            <span class="badge">No Dependencies</span>
-            <span class="badge">EN / 中文</span>
-        </div>
-    </section>
+    <h1><span>MenuBuddy</span></h1>
+    <p class="tagline">A tiny ASCII companion pet that lives in your macOS menu bar. Unique to your machine. Personality-driven. Free &amp; open source.</p>
+    <div class="hero-buttons">
+        <a href="https://github.com/kingcos/MenuBuddy/releases/latest" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download DMG
+        </a>
+        <a href="https://github.com/kingcos/MenuBuddy" class="btn btn-secondary">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            Source Code
+        </a>
+    </div>
+    <div class="badges">
+        <span class="badge">macOS 14+</span>
+        <span class="badge">Pure Swift</span>
+        <span class="badge">No Dependencies</span>
+        <span class="badge">~1.3 MB</span>
+        <span class="badge">EN / 中文</span>
+    </div>
+</section>
+</div>
 
-    <!-- Species Showcase -->
-    <section class="showcase">
-        <h2>18 Species to Discover</h2>
-        <p class="subtitle">Your companion is deterministically generated from your Mac's hardware UUID. Same machine, same buddy — always.</p>
-        <div class="species-grid">
-            <div class="species-card r-common"><span class="sprite">(·></span><span class="name">Duck</span></div>
-            <div class="species-card r-uncommon"><span class="sprite">(·></span><span class="name">Goose</span></div>
-            <div class="species-card r-common"><span class="sprite">(··)</span><span class="name">Blob</span></div>
-            <div class="species-card r-rare"><span class="sprite">=·ω·=</span><span class="name">Cat</span></div>
-            <div class="species-card r-epic"><span class="sprite"><·~·></span><span class="name">Dragon</span></div>
-            <div class="species-card r-common"><span class="sprite">~(··)~</span><span class="name">Octopus</span></div>
-            <div class="species-card r-uncommon"><span class="sprite">(·)(·)</span><span class="name">Owl</span></div>
-            <div class="species-card r-common"><span class="sprite">(·>)</span><span class="name">Penguin</span></div>
-            <div class="species-card r-common"><span class="sprite">[·_·]</span><span class="name">Turtle</span></div>
-            <div class="species-card r-uncommon"><span class="sprite">·(@)</span><span class="name">Snail</span></div>
-            <div class="species-card r-rare"><span class="sprite">/··\</span><span class="name">Ghost</span></div>
-            <div class="species-card r-epic"><span class="sprite">}·.·{</span><span class="name">Axolotl</span></div>
-            <div class="species-card r-common"><span class="sprite">(·oo·)</span><span class="name">Capybara</span></div>
-            <div class="species-card r-uncommon"><span class="sprite">|·  ·|</span><span class="name">Cactus</span></div>
-            <div class="species-card r-rare"><span class="sprite">[··]</span><span class="name">Robot</span></div>
-            <div class="species-card r-common"><span class="sprite">(·..·)</span><span class="name">Rabbit</span></div>
-            <div class="species-card r-uncommon"><span class="sprite">|·  ·|</span><span class="name">Mushroom</span></div>
-            <div class="species-card r-legendary"><span class="sprite">(·.·)</span><span class="name">Chonk</span></div>
+<!-- Demo -->
+<section class="demo-section" id="demo">
+    <div class="container">
+        <h2 class="section-title">See It in Action</h2>
+        <p class="section-subtitle">Your buddy lives in the menu bar and pops up with a click. It has stats, speech, metrics, and personality.</p>
+        <div class="demo-wrapper">
+            <!-- Popover mockup -->
+            <div>
+                <div class="demo-menubar" style="margin-bottom:12px;justify-content:center">
+                    <span class="face" id="demo-face">(·></span>
+                    <span class="quip" id="demo-quip">working hard?</span>
+                </div>
+                <div class="demo-popover">
+                    <div class="demo-popover-header">
+                        <div>
+                            <div class="name">Mochi 😊</div>
+                            <div class="meta">Duck · Rare</div>
+                        </div>
+                        <div class="stars">★★★</div>
+                    </div>
+                    <div class="demo-speech" id="demo-speech">code time!</div>
+                    <div class="demo-sprite" id="demo-sprite-area">    __
+  <(· )___
+   (  ._>
+    `--´</div>
+                    <div style="padding:2px 16px;display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim)">
+                        <span>42 days old</span>
+                        <span style="font-family:'SF Mono',monospace">pets: 137</span>
+                    </div>
+                    <div class="demo-stats">
+                        <div class="demo-stat-row"><span class="label">DEBUGGING</span><div class="bar"><div class="bar-fill" style="width:82%;background:var(--green)"></div></div><span class="val">82</span></div>
+                        <div class="demo-stat-row"><span class="label">PATIENCE</span><div class="bar"><div class="bar-fill" style="width:45%;background:var(--blue)"></div></div><span class="val">45</span></div>
+                        <div class="demo-stat-row"><span class="label">CHAOS</span><div class="bar"><div class="bar-fill" style="width:67%;background:var(--blue)"></div></div><span class="val">67</span></div>
+                        <div class="demo-stat-row"><span class="label">WISDOM</span><div class="bar"><div class="bar-fill" style="width:91%;background:var(--green)"></div></div><span class="val">91</span></div>
+                        <div class="demo-stat-row"><span class="label">SNARK</span><div class="bar"><div class="bar-fill" style="width:23%;background:#f97316"></div></div><span class="val">23</span></div>
+                    </div>
+                    <div class="demo-metrics">
+                        <div class="demo-metric"><div class="m-label">CPU</div><div class="m-value">34%</div></div>
+                        <div class="demo-metric alert"><div class="m-label">MEM</div><div class="m-value">88%↑</div></div>
+                        <div class="demo-metric"><div class="m-label">NET</div><div class="m-value">2.1 MB</div></div>
+                        <div class="demo-metric"><div class="m-label">BAT</div><div class="m-value">72%</div></div>
+                    </div>
+                    <div class="demo-toolbar">
+                        <span class="icon">⚙</span>
+                        <span class="icon">⊞</span>
+                        <span class="spacer"></span>
+                        <span class="icon">⏻</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Description -->
+            <div class="demo-desc">
+                <h3>Your Buddy, Your Mac</h3>
+                <p>Generated deterministically from your Mac's hardware UUID. Same machine, same buddy &mdash; always. Personality stats drive how it talks, reacts, and behaves.</p>
+                <ul>
+                    <li>5 personality stats shape every reaction</li>
+                    <li>AI-powered speech via any OpenAI-compatible API</li>
+                    <li>Real-time system metrics in the popover</li>
+                    <li>Two-line menu bar: face + speech</li>
+                    <li>Click to pet, right-click for menu</li>
+                    <li>Context-aware &mdash; knows what app you're using</li>
+                </ul>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Rarity System -->
-    <section class="rarity-section">
-        <h2>Rarity System</h2>
-        <div class="rarity-bar">
-            <div class="seg seg-common">60%</div>
-            <div class="seg seg-uncommon">25%</div>
-            <div class="seg seg-rare">10%</div>
-            <div class="seg seg-epic">4%</div>
-            <div class="seg seg-legendary"></div>
-        </div>
-        <div class="rarity-list">
-            <div class="rarity-item"><div class="stars" style="color:#888">&#9733;</div><div class="label">Common</div><div class="pct">60%</div></div>
-            <div class="rarity-item"><div class="stars" style="color:#22c55e">&#9733;&#9733;</div><div class="label">Uncommon</div><div class="pct">25%</div></div>
-            <div class="rarity-item"><div class="stars" style="color:#3b82f6">&#9733;&#9733;&#9733;</div><div class="label">Rare</div><div class="pct">10%</div></div>
-            <div class="rarity-item"><div class="stars" style="color:#a855f7">&#9733;&#9733;&#9733;&#9733;</div><div class="label">Epic</div><div class="pct">4%</div></div>
-            <div class="rarity-item"><div class="stars" style="color:#f59e0b">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="label">Legendary</div><div class="pct">1%</div></div>
-        </div>
-        <p style="text-align:center;color:var(--text-dim);font-size:13px;margin-top:16px">
-            Plus a <span style="color:var(--accent)">&#10024; 1% shiny</span> variant with golden glow. Higher rarity = stronger base stats + hats.
-        </p>
-    </section>
+<div class="container">
 
-    <!-- Features -->
-    <section class="features">
-        <h2>Features</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="icon">&#129302;</div>
-                <h3>AI Reactions</h3>
-                <p>Connect any OpenAI-compatible API (DeepSeek, OpenAI, Ollama) for personality-driven reactions. Your buddy's stats shape how it talks.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon">&#128202;</div>
-                <h3>System Monitor</h3>
-                <p>Reacts to CPU, memory, network, disk I/O, and battery. See live metrics in the popover status strip.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon">&#9889;</div>
-                <h3>Script Triggers</h3>
-                <p>Drop any executable into ~/.menubuddy/triggers/ — stock prices, weather, CI status. No coding framework needed.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon">&#127912;</div>
-                <h3>Animated Sprites</h3>
-                <p>3-frame idle animation, blink cycles, heart burst on pet. Each species has unique ASCII art.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon">&#128172;</div>
-                <h3>Context-Aware Quips</h3>
-                <p>Detects which app you're using (IDE, browser, terminal) and comments on it. Do Not Disturb mode for quiet hours.</p>
-            </div>
-            <div class="feature-card">
-                <div class="icon">&#127760;</div>
-                <h3>Bilingual</h3>
-                <p>Full English and Simplified Chinese support. 300+ localized strings with in-app language switcher.</p>
-            </div>
-        </div>
-    </section>
+<!-- Species -->
+<section id="species">
+    <h2 class="section-title">18 Species to Discover</h2>
+    <p class="section-subtitle">Each species has unique ASCII art, animations, and personality quips. Which one will your Mac generate?</p>
+    <div class="species-grid">
+        <div class="species-card r-common"><span class="sprite">(·></span><span class="name">Duck</span></div>
+        <div class="species-card r-uncommon"><span class="sprite">(·></span><span class="name">Goose</span></div>
+        <div class="species-card r-common"><span class="sprite">(··)</span><span class="name">Blob</span></div>
+        <div class="species-card r-rare"><span class="sprite">=·ω·=</span><span class="name">Cat</span></div>
+        <div class="species-card r-epic"><span class="sprite">&lt;·~·&gt;</span><span class="name">Dragon</span></div>
+        <div class="species-card r-common"><span class="sprite">~(··)~</span><span class="name">Octopus</span></div>
+        <div class="species-card r-uncommon"><span class="sprite">(·)(·)</span><span class="name">Owl</span></div>
+        <div class="species-card r-common"><span class="sprite">(·>)</span><span class="name">Penguin</span></div>
+        <div class="species-card r-common"><span class="sprite">[·_·]</span><span class="name">Turtle</span></div>
+        <div class="species-card r-uncommon"><span class="sprite">·(@)</span><span class="name">Snail</span></div>
+        <div class="species-card r-rare"><span class="sprite">/··\</span><span class="name">Ghost</span></div>
+        <div class="species-card r-epic"><span class="sprite">}·.·{</span><span class="name">Axolotl</span></div>
+        <div class="species-card r-common"><span class="sprite">(·oo·)</span><span class="name">Capybara</span></div>
+        <div class="species-card r-uncommon"><span class="sprite">|·  ·|</span><span class="name">Cactus</span></div>
+        <div class="species-card r-rare"><span class="sprite">[··]</span><span class="name">Robot</span></div>
+        <div class="species-card r-common"><span class="sprite">(·..·)</span><span class="name">Rabbit</span></div>
+        <div class="species-card r-uncommon"><span class="sprite">|·  ·|</span><span class="name">Mushroom</span></div>
+        <div class="species-card r-legendary"><span class="sprite">(·.·)</span><span class="name">Chonk</span></div>
+    </div>
+</section>
 
-    <!-- Built-in Triggers -->
-    <section class="triggers">
-        <h2>Built-in System Triggers</h2>
-        <p class="subtitle">Your buddy monitors your Mac and reacts in real time.</p>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-            <table class="trigger-table">
-                <thead>
-                    <tr><th>Metric</th><th>Threshold</th><th>Indicator</th><th>Reaction</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>CPU</td><td class="mono">&gt;70%</td><td>&#128293;</td><td>Stress eyes (x)</td></tr>
-                    <tr><td>Memory</td><td class="mono">&gt;85% used</td><td>&#129504;</td><td>Squiggly eyes (~)</td></tr>
-                    <tr><td>Network</td><td class="mono">&gt;5 MB/s</td><td>&#9889;</td><td>Rocket mood</td></tr>
-                    <tr><td>Disk I/O</td><td class="mono">&gt;50 MB/s</td><td>&#128190;</td><td>Wide eyes (o)</td></tr>
-                    <tr><td>Battery</td><td class="mono">&lt;20%</td><td>&#129707;</td><td>Tiny dot eyes (.)</td></tr>
-                </tbody>
-            </table>
-        </div>
+<!-- Rarity -->
+<section>
+    <h2 class="section-title">Rarity System</h2>
+    <p class="section-subtitle">Higher rarity means stronger base stats, hats, and a 1% chance of a ✨ shiny golden variant.</p>
+    <div class="rarity-bar">
+        <div class="seg seg-common">60%</div>
+        <div class="seg seg-uncommon">25%</div>
+        <div class="seg seg-rare">10%</div>
+        <div class="seg seg-epic">4%</div>
+        <div class="seg seg-legendary"></div>
+    </div>
+    <div class="rarity-list">
+        <div class="rarity-item"><div class="stars" style="color:#888">★</div><div class="label">Common</div><div class="pct">60%</div></div>
+        <div class="rarity-item"><div class="stars" style="color:var(--green)">★★</div><div class="label">Uncommon</div><div class="pct">25%</div></div>
+        <div class="rarity-item"><div class="stars" style="color:var(--blue)">★★★</div><div class="label">Rare</div><div class="pct">10%</div></div>
+        <div class="rarity-item"><div class="stars" style="color:var(--purple)">★★★★</div><div class="label">Epic</div><div class="pct">4%</div></div>
+        <div class="rarity-item"><div class="stars" style="color:var(--accent)">★★★★★</div><div class="label">Legendary</div><div class="pct">1%</div></div>
+    </div>
+</section>
 
-        <h3 style="margin-top:36px;margin-bottom:12px;font-size:18px">Custom Script Triggers</h3>
-        <p style="color:var(--text-dim);font-size:14px;margin-bottom:16px">Drop an executable into <code style="background:var(--card);padding:2px 6px;border-radius:4px;font-size:13px">~/.menubuddy/triggers/</code> and it just works:</p>
-        <div class="code-block"><span class="comment">#!/bin/bash</span>
+<!-- Features -->
+<section id="features">
+    <h2 class="section-title">Features</h2>
+    <p class="section-subtitle">Everything you need for a companion that feels alive.</p>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="icon">🤖</div>
+            <h3>AI Reactions</h3>
+            <p>Connect any OpenAI-compatible API &mdash; DeepSeek, OpenAI, Ollama, and more. Your buddy's personality stats shape every AI-generated response.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">✨</div>
+            <h3>AI-Enhanced Triggers</h3>
+            <p>Toggle AI rephrasing of system event messages. CPU high? Your buddy won't just say &ldquo;hot&rdquo; &mdash; it'll say something in character.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📊</div>
+            <h3>System Monitor</h3>
+            <p>Real-time reactions to CPU, memory, network, disk I/O, and battery. Live metric strip in the popover with trend arrows.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">⚡</div>
+            <h3>Script Triggers</h3>
+            <p>Drop any executable into <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">~/.menubuddy/triggers/</code> &mdash; stock prices, weather, CI builds. JSON output, zero framework.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🎨</div>
+            <h3>Animated Sprites</h3>
+            <p>3-frame idle animation with blink cycles. Heart burst on pet. Each species has unique ASCII art and menu bar face.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">💬</div>
+            <h3>Context-Aware</h3>
+            <p>Detects which app you're using &mdash; IDE, browser, terminal, music &mdash; and comments on it. Do Not Disturb for quiet hours.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📏</div>
+            <h3>Compact Menu Bar</h3>
+            <p>Two-line display: face on top, speech below. Saves horizontal space. Auto-hides speech text when the popover is open.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🌏</div>
+            <h3>Bilingual</h3>
+            <p>Full English and Simplified Chinese. 300+ localized strings with in-app language switcher. AI replies match context language.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🔒</div>
+            <h3>Privacy-First</h3>
+            <p>No account, no telemetry, no network unless you enable AI. Everything stays on your Mac. Signed &amp; notarized.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Triggers -->
+<section id="triggers">
+    <h2 class="section-title">Trigger System</h2>
+    <p class="section-subtitle">Built-in system monitor plus pluggable scripts. Your buddy reacts to your Mac in real time.</p>
+    <div class="trigger-table-wrap">
+        <table class="trigger-table">
+            <thead><tr><th>Metric</th><th>Threshold</th><th>Indicator</th><th>Reaction</th></tr></thead>
+            <tbody>
+                <tr><td>CPU</td><td class="mono">&gt; 70%</td><td>🔥</td><td>Stress eyes <code>(x)</code></td></tr>
+                <tr><td>Memory</td><td class="mono">&gt; 85% used</td><td>🧠</td><td>Swirl eyes <code>(~)</code></td></tr>
+                <tr><td>Network</td><td class="mono">&gt; 5 MB/s</td><td>⚡</td><td>Rocket mood 🚀</td></tr>
+                <tr><td>Disk I/O</td><td class="mono">&gt; 50 MB/s</td><td>💾</td><td>Wide eyes <code>(o)</code></td></tr>
+                <tr><td>Battery</td><td class="mono">&lt; 20%</td><td>🪫</td><td>Tiny eyes <code>(.)</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 style="font-size:20px;margin-bottom:12px">Custom Script Triggers</h3>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:16px">Drop an executable into <code style="background:var(--card);padding:2px 8px;border-radius:4px;font-size:13px">~/.menubuddy/triggers/</code> and it just works:</p>
+    <div class="code-block"><span class="comment">#!/bin/bash</span>
 <span class="comment"># ~/.menubuddy/triggers/stock.sh</span>
-echo <span class="string">'{"interval":60,"trigger":{"indicator":"&#128200;","quips":["AAPL is up!"]},"metrics":[{"label":"AAPL","value":"$254","trend":"&#8593;"}]}'</span></div>
-    </section>
-
-    <!-- Requirements -->
-    <section class="requirements">
-        <h2 style="margin-bottom:20px">Get Started</h2>
-        <div class="chips">
-            <div class="chip"><strong>macOS 14+</strong> required</div>
-            <div class="chip"><strong>Zero</strong> dependencies</div>
-            <div class="chip"><strong>~1.3 MB</strong> binary</div>
-            <div class="chip">No Dock icon</div>
-        </div>
-        <div style="margin-top:24px">
-            <a href="https://github.com/kingcos/MenuBuddy/releases/latest" class="btn btn-primary" style="font-size:16px;padding:14px 32px">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                Download MenuBuddy.dmg
-            </a>
-        </div>
-        <p style="color:var(--text-dim);font-size:13px;margin-top:12px">Or build from source: <code style="background:var(--card);padding:2px 6px;border-radius:4px;font-size:12px">make build</code></p>
-    </section>
-
-    <p class="i18n-note">
-        <a href="index.zh-CN.html">&#127464;&#127475; &#20013;&#25991;&#29256;</a>
-    </p>
+echo <span class="string">'{"interval":60,"trigger":{"indicator":"📈","quips":["AAPL is up!"]},"metrics":[{"label":"AAPL","value":"$254","trend":"↑"}]}'</span></div>
+</section>
 
 </div>
 
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="section-title">Get Started</h2>
+        <p class="section-subtitle">Download, open, done. No setup wizard, no account, no fuss.</p>
+        <div class="cta-chips">
+            <div class="cta-chip"><strong>macOS 14+</strong> Sonoma or later</div>
+            <div class="cta-chip"><strong>Zero</strong> dependencies</div>
+            <div class="cta-chip"><strong>~1.3 MB</strong> universal binary</div>
+            <div class="cta-chip">No Dock icon</div>
+        </div>
+        <a href="https://github.com/kingcos/MenuBuddy/releases/latest" class="btn btn-primary" style="font-size:16px;padding:14px 36px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download MenuBuddy.dmg
+        </a>
+        <p style="color:var(--text-dim);font-size:13px;margin-top:16px">Or build from source: <code style="background:var(--card);padding:2px 8px;border-radius:4px;font-size:12px">make build</code></p>
+    </div>
+</section>
+
 <footer>
     <div class="container">
-        <p>Made by <a href="https://github.com/kingcos">kingcos</a> &middot; <a href="https://github.com/kingcos/MenuBuddy">GitHub</a> &middot; MIT License</p>
+        <p>Made by <a href="https://github.com/kingcos">kingcos</a> · <a href="https://github.com/kingcos/MenuBuddy">GitHub</a> · MIT License</p>
     </div>
 </footer>
 
 <script>
-// Animate the hero sprite between frames
-const frames = [
+// Hero sprite animation
+const heroFrames = [
     '    __\n  <(\xb7 )___\n   (  ._>\n    `--\xb4',
     '    __\n  <(\xb7 )___\n   (  ._>\n    `--\xb4~',
     '    __\n  <(\xb7 )___\n   (  .__>\n    `--\xb4',
 ];
-const blinkFrame = '    __\n  <(- )___\n   (  ._>\n    `--\xb4';
-
-let fi = 0;
-let ticks = 0;
-const el = document.getElementById('hero-sprite');
-
+const heroBlink = '    __\n  <(- )___\n   (  ._>\n    `--\xb4';
+let fi = 0, ticks = 0;
+const heroEl = document.getElementById('hero-sprite');
 setInterval(() => {
     ticks++;
-    // Blink every ~8 ticks
-    if (ticks % 8 === 0) {
-        el.textContent = blinkFrame;
-    } else {
-        el.textContent = frames[fi % frames.length];
-        if (ticks % 3 === 0) fi++;
-    }
+    if (ticks % 8 === 0) heroEl.textContent = heroBlink;
+    else { heroEl.textContent = heroFrames[fi % heroFrames.length]; if (ticks % 3 === 0) fi++; }
+}, 500);
+
+// Demo speech cycling
+const demoQuips = [
+    'code time!', '*yawns*', 'working hard?', 'did you pet me yet',
+    'proud of u :)', '*wiggles*', 'quack.', 'almost done?'
+];
+let qi = 0;
+const speechEl = document.getElementById('demo-speech');
+const quipEl = document.getElementById('demo-quip');
+setInterval(() => {
+    qi = (qi + 1) % demoQuips.length;
+    speechEl.textContent = demoQuips[qi];
+    quipEl.textContent = demoQuips[qi];
+}, 4000);
+
+// Demo sprite animation
+const demoFrames = [
+    '    __\n  <(\xb7 )___\n   (  ._>\n    `--\xb4',
+    '    __\n  <(\xb7 )___\n   (  ._>\n    `--\xb4~',
+    '    __\n  <(- )___\n   (  ._>\n    `--\xb4',
+];
+let di = 0;
+const demoSpriteEl = document.getElementById('demo-sprite-area');
+setInterval(() => {
+    di = (di + 1) % demoFrames.length;
+    demoSpriteEl.textContent = demoFrames[di];
+}, 800);
+
+// Demo face blink
+const faceEl = document.getElementById('demo-face');
+let ft = 0;
+setInterval(() => {
+    ft++;
+    faceEl.textContent = ft % 6 === 0 ? '(->' : '(\xb7>';
 }, 500);
 </script>
 
