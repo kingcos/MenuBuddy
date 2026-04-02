@@ -64,9 +64,17 @@ func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false, co
 }
 
 /// Returns a compact face string for use in menu bar status button.
-/// - eyeOverride: if non-nil, replaces the eye character (e.g. "x" for stressed state)
+/// - eyeOverride: if non-nil, replaces the eye character (e.g. "x" for stressed state, or cosmetic eye)
+///   When eyeOverride is set, blink is suppressed (cosmetic/trigger eyes don't flicker).
 func renderFace(bones: CompanionBones, blink: Bool = false, eyeOverride: String? = nil) -> String {
-    let e = eyeOverride ?? (blink ? "-" : bones.eye.character)
+    let e: String
+    if let override = eyeOverride {
+        e = override  // cosmetic or trigger eye — no blink flicker
+    } else if blink {
+        e = "-"
+    } else {
+        e = bones.eye.character
+    }
     switch bones.species {
     case .duck, .goose:
         return "(\(e)>"

@@ -109,7 +109,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let seqIdx = barTickIndex % idleSequence.count
         let isBlink = idleSequence[seqIdx] < 0
 
-        let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: store.triggerEyeOverride)
+        // Trigger eye override takes priority, then cosmetic eye, then default
+        let cosmeticEye = store.cosmetics.allEquippedModifiers().eyeChar
+        let effectiveEyeOverride = store.triggerEyeOverride ?? cosmeticEye
+        let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: effectiveEyeOverride)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
 
