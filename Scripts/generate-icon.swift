@@ -28,18 +28,26 @@ for (px, filename) in sizes {
     let image = NSImage(size: size)
     image.lockFocus()
 
-    // Background: dark rounded rect
+    // macOS icon guidelines: content at ~80% of canvas, with transparent padding
+    let padding = CGFloat(px) * 0.10
+    let contentRect = NSRect(
+        x: padding, y: padding,
+        width: CGFloat(px) - padding * 2,
+        height: CGFloat(px) - padding * 2
+    )
+
+    // Background: dark rounded rect (inset to match macOS icon grid)
     let bg = NSBezierPath(
-        roundedRect: NSRect(origin: .zero, size: size),
-        xRadius: CGFloat(px) * 0.18,
-        yRadius: CGFloat(px) * 0.18
+        roundedRect: contentRect,
+        xRadius: contentRect.width * 0.20,
+        yRadius: contentRect.height * 0.20
     )
     NSColor(red: 0.10, green: 0.10, blue: 0.16, alpha: 1.0).setFill()
     bg.fill()
 
     // Companion face: "(·>" in warm yellow, monospaced
     let face = "(·>" as NSString
-    let fontSize = CGFloat(px) * 0.30
+    let fontSize = contentRect.width * 0.30
     let font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .semibold)
     let attrs: [NSAttributedString.Key: Any] = [
         .font: font,
@@ -47,8 +55,8 @@ for (px, filename) in sizes {
     ]
     let faceSize = face.size(withAttributes: attrs)
     let faceRect = NSRect(
-        x: (size.width  - faceSize.width)  / 2,
-        y: (size.height - faceSize.height) / 2,
+        x: contentRect.midX - faceSize.width / 2,
+        y: contentRect.midY - faceSize.height / 2,
         width: faceSize.width,
         height: faceSize.height
     )
@@ -56,15 +64,15 @@ for (px, filename) in sizes {
 
     // Small star below (rarity indicator)
     let star = "★" as NSString
-    let starFont = NSFont.systemFont(ofSize: CGFloat(px) * 0.12)
+    let starFont = NSFont.systemFont(ofSize: contentRect.width * 0.12)
     let starAttrs: [NSAttributedString.Key: Any] = [
         .font: starFont,
         .foregroundColor: NSColor(red: 0.98, green: 0.70, blue: 0.20, alpha: 0.7),
     ]
     let starSize = star.size(withAttributes: starAttrs)
     let starRect = NSRect(
-        x: (size.width  - starSize.width)  / 2,
-        y: faceRect.minY - starSize.height - CGFloat(px) * 0.04,
+        x: contentRect.midX - starSize.width / 2,
+        y: faceRect.minY - starSize.height - contentRect.width * 0.04,
         width: starSize.width,
         height: starSize.height
     )

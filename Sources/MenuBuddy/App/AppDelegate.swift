@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         logger.info("MenuBuddy launched", source: "app")
         store = CompanionStore.shared
 
+        setupMainMenu()
         setupStatusItem()
         setupPopover()
         setupEventMonitor()
@@ -61,6 +62,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         barTimer?.invalidate()
     }
 
+    // MARK: - Main Menu (enables Cmd+C/V/X in text fields for LSUIElement apps)
+
+    private func setupMainMenu() {
+        let mainMenu = NSMenu()
+
+        // App menu (required first item)
+        let appMenuItem = NSMenuItem()
+        appMenuItem.submenu = NSMenu()
+        mainMenu.addItem(appMenuItem)
+
+        // Edit menu — enables standard clipboard shortcuts in text fields
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        editMenu.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        editMenu.addItem(.separator())
+        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let editMenuItem = NSMenuItem()
+        editMenuItem.submenu = editMenu
+        mainMenu.addItem(editMenuItem)
+
+        NSApp.mainMenu = mainMenu
+    }
+
     // MARK: - Status Item
 
     private func setupStatusItem() {
@@ -81,21 +108,49 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: store.triggerEyeOverride)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
         let sysPrefix = store.systemIndicator.isEmpty ? "" : "\(store.systemIndicator) "
-        let quipSuffix = store.menuBarQuip.map { " \($0)" } ?? ""
 
-        // Use attributed string: small monospace face + smaller quip
         let faceStr = "\(sysPrefix)\(shinyPrefix)\(face)"
-        let full = NSMutableAttributedString(
-            string: faceStr,
-            attributes: [.font: NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)]
-        )
-        if !quipSuffix.isEmpty {
+
+        // Suppress quip text while popover is shown to prevent position flicker
+        let quip = popover.isShown ? nil : store.menuBarQuip
+
+        if let quip {
+            // Two-line layout: face on top, quip on bottom (saves horizontal space)
+            let facePara = NSMutableParagraphStyle()
+            facePara.alignment = .center
+            facePara.maximumLineHeight = 11
+            facePara.minimumLineHeight = 11
+
+            let full = NSMutableAttributedString(
+                string: faceStr,
+                attributes: [
+                    .font: NSFont.monospacedSystemFont(ofSize: 8, weight: .regular),
+                    .paragraphStyle: facePara,
+                ]
+            )
+
+            let quipPara = NSMutableParagraphStyle()
+            quipPara.alignment = .center
+            quipPara.maximumLineHeight = 10
+            quipPara.minimumLineHeight = 10
+
+            let truncated = quip.count > 12 ? String(quip.prefix(11)) + "…" : quip
             full.append(NSAttributedString(
-                string: quipSuffix,
-                attributes: [.font: NSFont.systemFont(ofSize: 9)]
+                string: "\n" + truncated,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 7),
+                    .paragraphStyle: quipPara,
+                ]
             ))
+            button.attributedTitle = full
+        } else {
+            // Single line: just the face
+            button.attributedTitle = NSAttributedString(
+                string: faceStr,
+                attributes: [.font: NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)]
+            )
         }
-        button.attributedTitle = full
+
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
     }
 

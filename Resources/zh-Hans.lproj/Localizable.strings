@@ -240,6 +240,8 @@
 "settings.llm.maxtokens" = "最大 Token";
 "settings.llm.usage" = "已用：%d 次请求 · %d tokens";
 "settings.llm.usage.reset" = "重置";
+"settings.llm.enhance.triggers" = "优化触发语句";
+"settings.llm.enhance.triggers.desc" = "使用 AI 改写系统事件消息，让语句更自然。";
 "settings.llm.test" = "测试";
 "settings.llm.testing" = "测试中…";
 "settings.llm.test.ok" = "成功：%@";
@@ -308,7 +310,8 @@
 "settings.title" = "MenuBuddy 设置";
 "settings.section.general" = "通用";
 "settings.launchAtLogin" = "开机自启动";
-"settings.mute" = "静音桌宠";
+"settings.mute" = "静音";
+"settings.mute.desc" = "关闭后桌宠不会在面板和菜单栏中说话。";
 "settings.section.monitor" = "系统监控";
 "settings.repeat.triggers" = "条件持续时重复提醒";
 "settings.repeat.triggers.desc" = "关闭后，每次状态变化只提醒一次，不会反复触发。";

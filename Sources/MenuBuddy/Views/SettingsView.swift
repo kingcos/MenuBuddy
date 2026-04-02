@@ -48,7 +48,14 @@ struct SettingsView: View {
                 }
                 divider
                 row {
-                    Toggle(Strings.settingsMute, isOn: $store.muted)
+                    Toggle(isOn: $store.muted) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsMute)
+                            Text(Strings.settingsMuteDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
                 divider
                 row {
@@ -75,17 +82,6 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 6) {
             sectionLabel(Strings.settingsSectionMenuBar)
             card {
-                row {
-                    Toggle(isOn: $store.menuBarQuips) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(Strings.settingsMenuBarQuips)
-                            Text(Strings.settingsMenuBarQuipsDesc)
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                divider
                 row {
                     Toggle(isOn: $store.dndEnabled) {
                         Text(Strings.settingsDNDEnable)
@@ -185,6 +181,17 @@ struct SettingsView: View {
                     }
                 }
                 if llmEnabled {
+                    divider
+                    row {
+                        Toggle(isOn: $store.llmEnhanceTriggers) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Strings.settingsLLMEnhanceTriggers)
+                                Text(Strings.settingsLLMEnhanceTriggersDesc)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
                     divider
                     row {
                         VStack(alignment: .leading, spacing: 8) {

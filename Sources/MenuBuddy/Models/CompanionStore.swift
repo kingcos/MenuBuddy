@@ -19,9 +19,9 @@ class CompanionStore: ObservableObject {
         }
     }
 
-    /// Show quips in the menu bar alongside the companion face.
-    @Published var menuBarQuips: Bool {
-        didSet { UserDefaults.standard.set(menuBarQuips, forKey: "companion.menuBarQuips") }
+    /// When true and LLM is enabled, trigger messages are rephrased by AI for more natural language.
+    @Published var llmEnhanceTriggers: Bool {
+        didSet { UserDefaults.standard.set(llmEnhanceTriggers, forKey: "llm.enhanceTriggers") }
     }
 
     /// When true, system events fire every poll while condition holds.
@@ -65,7 +65,7 @@ class CompanionStore: ObservableObject {
     }
 
     func showMenuBarQuip(_ text: String) {
-        guard menuBarQuips, !isDND else { return }
+        guard !muted, !isDND else { return }
         menuBarQuip = text
         DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
             if self?.menuBarQuip == text { self?.menuBarQuip = nil }
@@ -163,12 +163,14 @@ class CompanionStore: ObservableObject {
     }
 
     private var menuBarQuipTimer: Timer?
+    private var lastLLMTriggerTime: Date?
+    private let llmTriggerCooldown: TimeInterval = 60
 
     private init() {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
-        menuBarQuips = UserDefaults.standard.object(forKey: "companion.menuBarQuips") as? Bool ?? true
+        llmEnhanceTriggers = UserDefaults.standard.object(forKey: "llm.enhanceTriggers") as? Bool ?? true
         repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
         loggingEnabled = UserDefaults.standard.bool(forKey: "companion.loggingEnabled")
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
@@ -251,21 +253,26 @@ class CompanionStore: ObservableObject {
     private func handleTriggerEvent(_ event: TriggerEvent) {
         logger.debug("Trigger event: [\(event.sourceId)] \(event.indicator) quips=\(event.quips.count)", source: "trigger")
 
-        let llmEnabled = LLMService.shared.config.enabled
+        let shouldUseLLM = LLMService.shared.config.enabled && llmEnhanceTriggers
+        var llmRequestFired = false
 
-        // Try LLM-generated reaction if enabled
-        if !event.quips.isEmpty, llmEnabled {
-            let context = "System event: \(event.indicator) \(event.quips.first ?? "")"
-            LLMService.shared.generateReaction(companion: companion, context: context) { [weak self] reaction in
-                guard let self, let reaction, !reaction.isEmpty else { return }
-                logger.info("LLM reaction for [\(event.sourceId)]: \(reaction)", source: "llm")
-                // Show immediately if popover is open, otherwise store as pending
-                if self.onTriggerEvent != nil {
-                    self.onTriggerEvent?(TriggerEvent(sourceId: "llm", indicator: "", quips: [reaction]))
-                } else {
-                    self.pendingLLMReaction = reaction
+        // Try LLM-generated reaction if enabled and not in cooldown
+        if !event.quips.isEmpty, shouldUseLLM {
+            let now = Date()
+            if lastLLMTriggerTime == nil || now.timeIntervalSince(lastLLMTriggerTime!) >= llmTriggerCooldown {
+                lastLLMTriggerTime = now
+                llmRequestFired = true
+                let context = "System event: \(event.indicator) \(event.quips.first ?? "")"
+                LLMService.shared.generateReaction(companion: companion, context: context) { [weak self] reaction in
+                    guard let self, let reaction, !reaction.isEmpty else { return }
+                    logger.info("LLM reaction for [\(event.sourceId)]: \(reaction)", source: "llm")
+                    if self.onTriggerEvent != nil {
+                        self.onTriggerEvent?(TriggerEvent(sourceId: "llm", indicator: "", quips: [reaction]))
+                    } else {
+                        self.pendingLLMReaction = reaction
+                    }
+                    self.showMenuBarQuip(reaction)
                 }
-                self.showMenuBarQuip(reaction)
             }
         }
 
@@ -274,8 +281,8 @@ class CompanionStore: ObservableObject {
         triggerEyeOverride = event.eyeOverride
         triggerMood = event.mood
 
-        // Show preset quip in popover only when LLM is disabled
-        if !llmEnabled {
+        // Show preset quip in popover when LLM was not fired (disabled, off, or cooldown)
+        if !llmRequestFired {
             onTriggerEvent?(event)
         }
 
@@ -288,7 +295,6 @@ class CompanionStore: ObservableObject {
         let indicator = event.indicator
         DispatchQueue.main.asyncAfter(deadline: .now() + event.duration) { [weak self] in
             guard let self else { return }
-            // Only clear if it hasn't been replaced by a newer event
             if self.systemIndicator == indicator {
                 self.systemIndicator = ""
                 self.triggerEyeOverride = nil

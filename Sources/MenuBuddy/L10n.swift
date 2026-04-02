@@ -128,6 +128,8 @@ enum Strings {
     static var settingsLLMMaxTokens: String       { L("settings.llm.maxtokens") }
     static func settingsLLMUsage(_ r: Int, _ t: Int) -> String { L("settings.llm.usage", r, t) }
     static var settingsLLMUsageReset: String      { L("settings.llm.usage.reset") }
+    static var settingsLLMEnhanceTriggers: String   { L("settings.llm.enhance.triggers") }
+    static var settingsLLMEnhanceTriggersDesc: String { L("settings.llm.enhance.triggers.desc") }
     static var settingsLLMTest: String            { L("settings.llm.test") }
     static var settingsLLMTesting: String         { L("settings.llm.testing") }
     static func settingsLLMTestOK(_ s: String) -> String { L("settings.llm.test.ok", s) }
@@ -191,6 +193,7 @@ enum Strings {
     static var settingsSectionGeneral: String  { L("settings.section.general") }
     static var settingsLaunchAtLogin: String   { L("settings.launchAtLogin") }
     static var settingsMute: String            { L("settings.mute") }
+    static var settingsMuteDesc: String        { L("settings.mute.desc") }
     static var settingsSectionMonitor: String  { L("settings.section.monitor") }
     static var settingsMonitorDesc: String     { L("settings.monitor.desc") }
     static var settingsSectionHelp: String     { L("settings.section.help") }

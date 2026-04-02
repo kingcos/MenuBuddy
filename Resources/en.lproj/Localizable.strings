@@ -240,6 +240,8 @@
 "settings.llm.maxtokens" = "Max Tokens";
 "settings.llm.usage" = "Usage: %d requests · %d tokens";
 "settings.llm.usage.reset" = "Reset";
+"settings.llm.enhance.triggers" = "Enhance trigger messages";
+"settings.llm.enhance.triggers.desc" = "Use AI to rephrase system event messages for more natural language.";
 "settings.llm.test" = "Test";
 "settings.llm.testing" = "Testing...";
 "settings.llm.test.ok" = "OK: %@";
@@ -308,7 +310,8 @@
 "settings.title" = "MenuBuddy Settings";
 "settings.section.general" = "General";
 "settings.launchAtLogin" = "Launch at Login";
-"settings.mute" = "Mute buddy sounds";
+"settings.mute" = "Mute";
+"settings.mute.desc" = "Silence all buddy speech in popover and menu bar.";
 "settings.section.monitor" = "System Monitor";
 "settings.repeat.triggers" = "Repeat alerts while condition holds";
 "settings.repeat.triggers.desc" = "When off, alerts fire once per state change instead of every poll.";
