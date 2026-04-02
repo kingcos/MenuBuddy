@@ -119,34 +119,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let quip = (popover?.isShown == true) ? nil : store.menuBarQuip
 
         if let quip, store.menuBarTwoLine {
-            // Two-line layout: face on top, quip on bottom (saves horizontal space)
-            let barHeight = NSStatusBar.system.thickness
+            // Two-line layout using custom view for proper vertical centering
             let faceFont = NSFont.monospacedSystemFont(ofSize: 8, weight: .regular)
             let quipFont = NSFont.systemFont(ofSize: 7)
-            let lineH = barHeight / 2
-
-            let facePara = NSMutableParagraphStyle()
-            facePara.alignment = .center
-            facePara.maximumLineHeight = lineH
-            facePara.minimumLineHeight = lineH
-
-            let quipPara = NSMutableParagraphStyle()
-            quipPara.alignment = .center
-            quipPara.maximumLineHeight = lineH
-            quipPara.minimumLineHeight = lineH
-
             let truncated = quip.count > 12 ? String(quip.prefix(11)) + "…" : quip
-            let full = NSMutableAttributedString(
-                string: faceStr,
-                attributes: [.font: faceFont, .paragraphStyle: facePara]
-            )
-            full.append(NSAttributedString(
-                string: "\n" + truncated,
-                attributes: [.font: quipFont, .paragraphStyle: quipPara]
-            ))
-            button.attributedTitle = full
+
+            let faceAttrs: [NSAttributedString.Key: Any] = [.font: faceFont]
+            let quipAttrs: [NSAttributedString.Key: Any] = [.font: quipFont]
+            let faceSize = (faceStr as NSString).size(withAttributes: faceAttrs)
+            let quipSize = (truncated as NSString).size(withAttributes: quipAttrs)
+
+            let width = max(faceSize.width, quipSize.width) + 4
+            let barHeight = NSStatusBar.system.thickness
+            let totalTextHeight = faceSize.height + quipSize.height
+            let topPadding = (barHeight - totalTextHeight) / 2
+
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: barHeight))
+
+            let faceField = NSTextField(labelWithAttributedString: NSAttributedString(string: faceStr, attributes: faceAttrs))
+            faceField.alignment = .center
+            faceField.frame = NSRect(x: 0, y: topPadding + quipSize.height, width: width, height: faceSize.height)
+            container.addSubview(faceField)
+
+            let quipField = NSTextField(labelWithAttributedString: NSAttributedString(string: truncated, attributes: quipAttrs))
+            quipField.alignment = .center
+            quipField.frame = NSRect(x: 0, y: topPadding, width: width, height: quipSize.height)
+            container.addSubview(quipField)
+
+            // Clear attributed title when using custom subviews
+            button.attributedTitle = NSAttributedString(string: "")
+            // Remove old custom subviews
+            button.subviews.forEach { $0.removeFromSuperview() }
+            button.addSubview(container)
+            button.frame = NSRect(x: button.frame.origin.x, y: button.frame.origin.y, width: width, height: barHeight)
+            statusItem.length = width
         } else {
             // Single line: face + optional quip inline
+            button.subviews.forEach { $0.removeFromSuperview() }
             let full = NSMutableAttributedString(
                 string: faceStr,
                 attributes: [.font: NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)]
@@ -158,6 +167,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 ))
             }
             button.attributedTitle = full
+            statusItem.length = NSStatusItem.variableLength
         }
 
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)

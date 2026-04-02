@@ -183,6 +183,7 @@ final class LLMService {
         let body: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
+            "temperature": 1.2,
             "messages": [
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": userPrompt]

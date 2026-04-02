@@ -272,7 +272,9 @@ class CompanionStore: ObservableObject {
             if lastLLMTriggerTime == nil || now.timeIntervalSince(lastLLMTriggerTime!) >= llmTriggerCooldown {
                 lastLLMTriggerTime = now
                 llmRequestFired = true
-                let context = "System event: \(event.indicator) \(event.quips.first ?? "")"
+                let hour = Calendar.current.component(.hour, from: Date())
+                let randomQuip = event.quips.randomElement() ?? ""
+                let context = "System event: \(event.indicator) \(randomQuip) (time: \(hour):00, say something different each time)"
                 LLMService.shared.generateReaction(companion: companion, context: context) { [weak self] reaction in
                     guard let self, let reaction, !reaction.isEmpty else { return }
                     logger.info("LLM reaction for [\(event.sourceId)]: \(reaction)", source: "llm")
