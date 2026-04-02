@@ -4,26 +4,59 @@ import Foundation
 
 /// Renders a companion sprite for a given animation frame.
 /// Returns an array of text lines.
-func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false) -> [String] {
+func renderSprite(bones: CompanionBones, frame: Int = 0, blink: Bool = false, cosmeticModifier: SpriteModifier? = nil) -> [String] {
     guard let frames = spriteFrames[bones.species] else { return [] }
 
     let frameIndex = frame % frames.count
-    // Blink uses "-" (single dash, same width as eye char) to keep ASCII art aligned.
-    let eyeChar = blink ? "-" : bones.eye.character
+
+    // Eye character: cosmetic override > blink > default
+    let eyeChar: String
+    if blink {
+        eyeChar = "-"
+    } else if let cosmeticEye = cosmeticModifier?.eyeChar {
+        eyeChar = cosmeticEye
+    } else {
+        eyeChar = bones.eye.character
+    }
 
     var lines = frames[frameIndex].map { line in
         line.replacingOccurrences(of: "{E}", with: eyeChar)
     }
 
-    // Insert hat on line 0 if line 0 is blank
-    if bones.hat != .none && lines.first?.trimmingCharacters(in: .whitespaces).isEmpty == true {
-        lines[0] = bones.hat.line
+    // Hat: cosmetic hat > bones hat > none
+    let hatLine = cosmeticModifier?.hatLine ?? (bones.hat != .none ? bones.hat.line : nil)
+    if let hatLine, lines.first?.trimmingCharacters(in: .whitespaces).isEmpty == true {
+        lines[0] = hatLine
     }
 
     // Drop blank hat slot if ALL frames have blank line 0
     let allFramesHaveBlankLine0 = frames.allSatisfy { $0.first?.trimmingCharacters(in: .whitespaces).isEmpty == true }
     if lines.first?.trimmingCharacters(in: .whitespaces).isEmpty == true && allFramesHaveBlankLine0 {
         lines.removeFirst()
+    }
+
+    // Apply accessory modifiers (left/right decorations on middle line)
+    if let mod = cosmeticModifier {
+        let midIndex = lines.count / 2
+        if let left = mod.accessoryLeft {
+            lines[midIndex] = left + lines[midIndex]
+        }
+        if let right = mod.accessoryRight {
+            lines[midIndex] = lines[midIndex] + right
+        }
+
+        // Apply aura (top/bottom decorations)
+        if let auraTop = mod.auraTop {
+            lines.insert(auraTop, at: 0)
+        }
+        if let auraBottom = mod.auraBottom {
+            lines.append(auraBottom)
+        }
+
+        // Apply frame (left/right on all lines)
+        if let frameLeft = mod.frameLeft, let frameRight = mod.frameRight {
+            lines = lines.map { frameLeft + $0 + frameRight }
+        }
     }
 
     return lines

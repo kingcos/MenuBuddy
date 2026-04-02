@@ -399,3 +399,87 @@
 "a11y.sprite.hint" = "点击抚摸";
 "a11y.speech.label" = "伙伴说：%@";
 "a11y.stat.label" = "%@：%d / 100";
+
+/* 成长系统 */
+"progression.levelup" = "升级了！现在 Lv.%d！";
+"progression.levelup.title" = "等级 %d！";
+"progression.levelup.points" = "获得 +%d 属性点";
+"progression.levelup.ok" = "太棒了！";
+"progression.slot.unlocked" = "%@ 槽位已解锁！";
+"progression.allocate" = "加点";
+
+/* 装扮系统 */
+"cosmetics.title" = "装扮";
+"cosmetics.empty" = "还没有物品——继续升级吧！";
+"cosmetics.import" = "导入";
+"cosmetics.export" = "导出";
+"cosmetics.import.title" = "导入物品";
+"cosmetics.import.placeholder" = "粘贴分享码…";
+"cosmetics.import.confirm" = "导入";
+"cosmetics.import.fail" = "分享码无效";
+"cosmetics.owned" = "已收集 %d / %d";
+"cosmetics.reward" = "获得新物品：%@！";
+"cosmetics.drop" = "你发现了：%@！";
+
+/* 装扮槽位名称 */
+"slot.hat" = "帽子";
+"slot.eye" = "眼睛";
+"slot.accessory" = "配饰";
+"slot.aura" = "光环";
+"slot.frame" = "边框";
+
+/* 装扮物品名称 — 帽子 */
+"cosmetic.hat.none" = "无";
+"cosmetic.hat.crown" = "皇冠";
+"cosmetic.hat.tophat" = "高礼帽";
+"cosmetic.hat.propeller" = "螺旋桨帽";
+"cosmetic.hat.halo" = "光圈";
+"cosmetic.hat.wizard" = "巫师帽";
+"cosmetic.hat.beanie" = "毛线帽";
+"cosmetic.hat.tinyduck" = "小鸭子";
+"cosmetic.hat.pirate" = "海盗帽";
+"cosmetic.hat.antenna" = "天线";
+"cosmetic.hat.flower" = "小花";
+"cosmetic.hat.chef" = "厨师帽";
+"cosmetic.hat.party" = "派对帽";
+"cosmetic.hat.ninja" = "忍者头带";
+
+/* 装扮物品名称 — 眼睛 */
+"cosmetic.eye.default" = "默认";
+"cosmetic.eye.star" = "星星眼";
+"cosmetic.eye.heart" = "爱心眼";
+"cosmetic.eye.diamond" = "钻石眼";
+"cosmetic.eye.spiral" = "螺旋眼";
+"cosmetic.eye.fire" = "火焰眼";
+"cosmetic.eye.moon" = "月亮眼";
+"cosmetic.eye.cross" = "叉叉眼";
+"cosmetic.eye.ring" = "圆环眼";
+
+/* 装扮物品名称 — 配饰 */
+"cosmetic.acc.bow" = "蝴蝶结";
+"cosmetic.acc.sword" = "宝剑";
+"cosmetic.acc.shield" = "盾牌";
+"cosmetic.acc.wand" = "魔法棒";
+"cosmetic.acc.scarf" = "围巾";
+"cosmetic.acc.flag" = "小旗";
+"cosmetic.acc.balloon" = "气球";
+"cosmetic.acc.guitar" = "吉他";
+
+/* 装扮物品名称 — 光环 */
+"cosmetic.aura.sparkle" = "闪闪发光";
+"cosmetic.aura.fire" = "火焰";
+"cosmetic.aura.hearts" = "爱心";
+"cosmetic.aura.snow" = "飘雪";
+"cosmetic.aura.music" = "音乐";
+"cosmetic.aura.rainbow" = "彩虹";
+
+/* 装扮物品名称 — 边框 */
+"cosmetic.frame.bracket" = "方括号";
+"cosmetic.frame.pipe" = "竖线";
+"cosmetic.frame.stars" = "星星框";
+"cosmetic.frame.arrows" = "箭头框";
+"cosmetic.frame.diamond" = "钻石框";
+
+/* 帮助 — 成长与装扮 */
+"help.tip.level" = "通过抚摸、每日登录和系统事件获得经验值。升级后可以解锁新槽位和装扮物品！";
+"help.tip.cosmetics" = "打开装扮面板（闪光图标）可以装备帽子、眼睛、配饰、光环和边框。";

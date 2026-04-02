@@ -399,3 +399,87 @@
 "a11y.sprite.hint" = "Tap to pet";
 "a11y.speech.label" = "Companion says: %@";
 "a11y.stat.label" = "%@: %d out of 100";
+
+/* Progression System */
+"progression.levelup" = "Level up! Now Lv.%d!";
+"progression.levelup.title" = "Level %d!";
+"progression.levelup.points" = "+%d attribute points earned";
+"progression.levelup.ok" = "Awesome!";
+"progression.slot.unlocked" = "%@ slot unlocked!";
+"progression.allocate" = "Add point";
+
+/* Cosmetic System */
+"cosmetics.title" = "Dress Up";
+"cosmetics.empty" = "No items yet — keep leveling up!";
+"cosmetics.import" = "Import";
+"cosmetics.export" = "Export";
+"cosmetics.import.title" = "Import Item";
+"cosmetics.import.placeholder" = "Paste share code…";
+"cosmetics.import.confirm" = "Import";
+"cosmetics.import.fail" = "Invalid share code";
+"cosmetics.owned" = "%d / %d collected";
+"cosmetics.reward" = "New item: %@!";
+"cosmetics.drop" = "You found: %@!";
+
+/* Cosmetic Slot Names */
+"slot.hat" = "Hat";
+"slot.eye" = "Eyes";
+"slot.accessory" = "Accessory";
+"slot.aura" = "Aura";
+"slot.frame" = "Frame";
+
+/* Cosmetic Item Names — Hats */
+"cosmetic.hat.none" = "None";
+"cosmetic.hat.crown" = "Crown";
+"cosmetic.hat.tophat" = "Top Hat";
+"cosmetic.hat.propeller" = "Propeller";
+"cosmetic.hat.halo" = "Halo";
+"cosmetic.hat.wizard" = "Wizard Hat";
+"cosmetic.hat.beanie" = "Beanie";
+"cosmetic.hat.tinyduck" = "Tiny Duck";
+"cosmetic.hat.pirate" = "Pirate Hat";
+"cosmetic.hat.antenna" = "Antenna";
+"cosmetic.hat.flower" = "Flower";
+"cosmetic.hat.chef" = "Chef Hat";
+"cosmetic.hat.party" = "Party Hat";
+"cosmetic.hat.ninja" = "Ninja Band";
+
+/* Cosmetic Item Names — Eyes */
+"cosmetic.eye.default" = "Default";
+"cosmetic.eye.star" = "Star Eyes";
+"cosmetic.eye.heart" = "Heart Eyes";
+"cosmetic.eye.diamond" = "Diamond Eyes";
+"cosmetic.eye.spiral" = "Spiral Eyes";
+"cosmetic.eye.fire" = "Fire Eyes";
+"cosmetic.eye.moon" = "Moon Eyes";
+"cosmetic.eye.cross" = "Cross Eyes";
+"cosmetic.eye.ring" = "Ring Eyes";
+
+/* Cosmetic Item Names — Accessories */
+"cosmetic.acc.bow" = "Bow";
+"cosmetic.acc.sword" = "Sword";
+"cosmetic.acc.shield" = "Shield";
+"cosmetic.acc.wand" = "Magic Wand";
+"cosmetic.acc.scarf" = "Scarf";
+"cosmetic.acc.flag" = "Flag";
+"cosmetic.acc.balloon" = "Balloon";
+"cosmetic.acc.guitar" = "Guitar";
+
+/* Cosmetic Item Names — Auras */
+"cosmetic.aura.sparkle" = "Sparkle";
+"cosmetic.aura.fire" = "Fire";
+"cosmetic.aura.hearts" = "Hearts";
+"cosmetic.aura.snow" = "Snowfall";
+"cosmetic.aura.music" = "Music";
+"cosmetic.aura.rainbow" = "Rainbow";
+
+/* Cosmetic Item Names — Frames */
+"cosmetic.frame.bracket" = "Brackets";
+"cosmetic.frame.pipe" = "Pipes";
+"cosmetic.frame.stars" = "Star Frame";
+"cosmetic.frame.arrows" = "Arrow Frame";
+"cosmetic.frame.diamond" = "Diamond Frame";
+
+/* Help — Progression & Cosmetics */
+"help.tip.level" = "Earn XP by petting, daily login, and system events. Level up to unlock new slots and cosmetic items!";
+"help.tip.cosmetics" = "Open the Dress Up panel (sparkles icon) to equip hats, eyes, accessories, auras, and frames.";

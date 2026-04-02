@@ -290,11 +290,15 @@ struct SpeechBubbleView: View {
 
 struct StatsView: View {
     let stats: [StatName: Int]
+    var store: CompanionStore? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(StatName.allCases, id: \.self) { stat in
-                let value = stats[stat] ?? 0
+                let baseValue = stats[stat] ?? 0
+                let effectiveValue = store?.effectiveStat(stat) ?? baseValue
+                let bonus = store?.progression.bonus(for: stat) ?? 0
+                let hasAvailablePoints = (store?.availablePoints ?? 0) > 0
                 HStack(spacing: 6) {
                     Text(Strings.statName(stat))
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
@@ -305,19 +309,39 @@ struct StatsView: View {
                             RoundedRectangle(cornerRadius: 2)
                                 .fill(Color.secondary.opacity(0.2))
                                 .frame(height: 4)
+                            // Base value bar
                             RoundedRectangle(cornerRadius: 2)
-                                .fill(statColor(value))
-                                .frame(width: geo.size.width * CGFloat(value) / 100, height: 4)
+                                .fill(statColor(effectiveValue))
+                                .frame(width: geo.size.width * CGFloat(min(effectiveValue, 100)) / 100, height: 4)
+                                .animation(.easeInOut(duration: 0.3), value: effectiveValue)
                         }
                     }
                     .frame(height: 4)
-                    Text("\(value)")
-                        .font(.system(size: 9, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .frame(width: 24, alignment: .trailing)
+                    HStack(spacing: 2) {
+                        Text("\(effectiveValue)")
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        if bonus > 0 {
+                            Text("+\(bonus)")
+                                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                .foregroundColor(.green)
+                        }
+                    }
+                    .frame(width: 40, alignment: .trailing)
+                    if hasAvailablePoints {
+                        Button(action: {
+                            _ = store?.allocateAttributePoint(to: stat)
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 9))
+                                .foregroundColor(.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                        .help(Strings.allocatePoint)
+                    }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Strings.a11yStatLabel(Strings.statName(stat), value))
+                .accessibilityLabel(Strings.a11yStatLabel(Strings.statName(stat), effectiveValue))
                 .help(Strings.statDesc(stat))
             }
         }

@@ -10,6 +10,11 @@ struct PopoverView: View {
 
     @State private var showingAtlas = false
     @State private var showingHelp = false
+    @State private var showingCosmetics = false
+    @State private var showingLevelUp = false
+    @State private var showingCosmeticDrop = false
+    @State private var levelUpInfo: LevelUpInfo?
+    @State private var cosmeticDropItem: CosmeticItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +32,7 @@ struct PopoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 4)
             Divider()
-            StatsView(stats: companion.stats)
+            StatsView(stats: companion.stats, store: store)
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
@@ -56,6 +61,21 @@ struct PopoverView: View {
                 isFirstLaunch: store.isFirstLaunch,
                 companionName: companion.name
             )
+            // Check for pending level-up
+            if let info = store.consumeLevelUp() {
+                levelUpInfo = info
+                cosmeticDropItem = store.consumeCosmeticDrop()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    engine.showSpeech(Strings.levelUpQuip(info.newLevel))
+                    showingLevelUp = true
+                }
+            } else if let drop = store.consumeCosmeticDrop() {
+                cosmeticDropItem = drop
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    engine.showSpeech(Strings.cosmeticDropQuip(L(drop.name)))
+                }
+            }
+
             // Show pending wake quip if Mac woke while popover was closed
             if let quip = store.consumeWakeQuip() {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -114,44 +134,96 @@ struct PopoverView: View {
         .sheet(isPresented: $showingHelp) {
             HelpView()
         }
+        .sheet(isPresented: $showingCosmetics) {
+            CosmeticView(store: store)
+        }
+        .sheet(isPresented: $showingLevelUp) {
+            if let info = levelUpInfo {
+                LevelUpSheet(info: info, cosmeticDrop: cosmeticDropItem)
+            }
+        }
     }
 
     // MARK: - Header
 
     private var headerView: some View {
-        HStack(spacing: 6) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text(companion.name)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    Text(store.mood)
-                        .font(.system(size: 12))
-                    if companion.shiny {
-                        Text("✨")
-                            .font(.system(size: 11))
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Text(companion.name)
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        Text(store.mood)
+                            .font(.system(size: 12))
+                        if companion.shiny {
+                            Text("✨")
+                                .font(.system(size: 11))
+                        }
                     }
-                }
-                Text("\(companion.species.localizedName) · \(companion.rarity.localizedName)")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(companion.rarity.stars)
-                    .font(.system(size: 11))
-                    .foregroundColor(Color(hex: companion.rarity.color))
-                Button(action: startRename) {
-                    Image(systemName: "pencil.circle")
-                        .font(.system(size: 13))
+                    Text("\(companion.species.localizedName) · \(companion.rarity.localizedName)")
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
-                .buttonStyle(.plain)
-                .help(Strings.menuRename(companion.name))
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    // Level badge
+                    HStack(spacing: 3) {
+                        Text("Lv.\(store.level)")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(hex: companion.rarity.color))
+                        Text(companion.rarity.stars)
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(hex: companion.rarity.color))
+                    }
+                    Button(action: startRename) {
+                        Image(systemName: "pencil.circle")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help(Strings.menuRename(companion.name))
+                }
             }
+            // XP progress bar
+            xpProgressBar
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 8)
+    }
+
+    private var xpProgressBar: some View {
+        VStack(spacing: 2) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.secondary.opacity(0.15))
+                        .frame(height: 5)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(hex: companion.rarity.color).opacity(0.8))
+                        .frame(width: geo.size.width * CGFloat(store.levelProgress), height: 5)
+                        .animation(.easeInOut(duration: 0.3), value: store.levelProgress)
+                }
+            }
+            .frame(height: 5)
+            HStack {
+                Text("\(store.totalXP) XP")
+                    .font(.system(size: 8, design: .monospaced))
+                    .foregroundColor(.secondary)
+                Spacer()
+                if store.availablePoints > 0 {
+                    Button(action: {}) {
+                        Text("+\(store.availablePoints) pts")
+                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                            .foregroundColor(Color(hex: companion.rarity.color))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Text("→ Lv.\(store.level + 1)")
+                    .font(.system(size: 8, design: .monospaced))
+                    .foregroundColor(.secondary)
+            }
+        }
     }
 
     // MARK: - Sprite Area
@@ -167,7 +239,8 @@ struct PopoverView: View {
             let lines = renderSprite(
                 bones: companion.bones,
                 frame: engine.currentFrame,
-                blink: engine.isBlink
+                blink: engine.isBlink,
+                cosmeticModifier: store.cosmetics.allEquippedModifiers()
             )
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
@@ -214,6 +287,14 @@ struct PopoverView: View {
             }
             .buttonStyle(.plain)
             .help(Strings.menuSettings)
+
+            Button(action: { showingCosmetics = true }) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.cosmeticsTitle)
 
             Button(action: { showingAtlas = true }) {
                 Image(systemName: "square.grid.2x2")
@@ -300,10 +381,11 @@ struct HelpView: View {
                 helpRow("cursorarrow.click.2", Strings.helpTipClick)
                 helpRow("pencil", Strings.helpTipRename)
                 helpRow("face.smiling", Strings.helpTipQuips)
+                helpRow("arrow.up.circle", Strings.helpTipLevel)
+                helpRow("sparkles", Strings.helpTipCosmetics)
                 helpRow("brain", Strings.helpTipAI)
                 helpRow("bolt.fill", Strings.helpTipTriggers)
                 helpRow("moon.fill", Strings.helpTipDND)
-                helpRow("sparkles", Strings.helpTipShiny)
             }
 
             Divider()

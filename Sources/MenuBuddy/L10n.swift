@@ -289,4 +289,34 @@ enum Strings {
     static func a11yStatLabel(_ stat: String, _ value: Int) -> String {
         L("a11y.stat.label", stat, value)
     }
+
+    // Progression
+    static func levelUpQuip(_ level: Int) -> String { L("progression.levelup", level) }
+    static func levelUpTitle(_ level: Int) -> String { L("progression.levelup.title", level) }
+    static func levelUpPoints(_ points: Int) -> String { L("progression.levelup.points", points) }
+    static var levelUpOK: String { L("progression.levelup.ok") }
+    static func slotUnlocked(_ slot: String) -> String { L("progression.slot.unlocked", slot) }
+    static var allocatePoint: String { L("progression.allocate") }
+
+    // Cosmetics
+    static var cosmeticsTitle: String { L("cosmetics.title") }
+    static var cosmeticsEmpty: String { L("cosmetics.empty") }
+    static var cosmeticsImport: String { L("cosmetics.import") }
+    static var cosmeticsExport: String { L("cosmetics.export") }
+    static var cosmeticsImportTitle: String { L("cosmetics.import.title") }
+    static var cosmeticsImportPlaceholder: String { L("cosmetics.import.placeholder") }
+    static var cosmeticsImportConfirm: String { L("cosmetics.import.confirm") }
+    static var cosmeticsImportFail: String { L("cosmetics.import.fail") }
+    static func cosmeticsOwned(_ owned: Int, _ total: Int) -> String { L("cosmetics.owned", owned, total) }
+    static func cosmeticReward(_ name: String) -> String { L("cosmetics.reward", name) }
+    static func cosmeticDropQuip(_ name: String) -> String { L("cosmetics.drop", name) }
+
+    // Slot names
+    static func slotName(_ slot: CosmeticSlot) -> String {
+        L("slot.\(slot.rawValue)")
+    }
+
+    // Help — Progression & Cosmetics
+    static var helpTipLevel: String { L("help.tip.level") }
+    static var helpTipCosmetics: String { L("help.tip.cosmetics") }
 }
