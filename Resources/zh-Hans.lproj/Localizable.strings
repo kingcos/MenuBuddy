@@ -434,6 +434,15 @@
 "cosmetics.import.placeholder" = "粘贴分享码…";
 "cosmetics.import.confirm" = "导入";
 "cosmetics.import.fail" = "分享码无效";
+"cosmetics.create" = "创建";
+"cosmetics.create.title" = "创建自定义帽子";
+"cosmetics.create.name.label" = "名称";
+"cosmetics.create.name.placeholder" = "我的帽子";
+"cosmetics.create.line.label" = "ASCII 图案（最多 12 字符）";
+"cosmetics.create.hint" = "用 ASCII 字符设计帽子图案。它会显示在伙伴头顶。";
+"cosmetics.create.preview" = "预览";
+"cosmetics.create.confirm" = "创建";
+"cosmetics.delete" = "删除";
 "cosmetics.owned" = "已收集 %d / %d";
 "cosmetics.reward" = "获得新物品：%@！";
 "cosmetics.drop" = "你发现了：%@！";
@@ -496,6 +505,11 @@
 "cosmetic.frame.stars" = "星星框";
 "cosmetic.frame.arrows" = "箭头框";
 "cosmetic.frame.diamond" = "钻石框";
+
+/* 设置 — 成长 */
+"settings.section.progression" = "成长";
+"settings.progression.points" = "可用点数";
+"settings.progression.slots" = "装扮槽位";
 
 /* 帮助 — 成长与装扮 */
 "help.tip.level" = "通过抚摸、每日登录和系统事件获得经验值。升级后可以解锁新槽位和装扮物品！";

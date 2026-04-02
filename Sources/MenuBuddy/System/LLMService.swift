@@ -120,11 +120,13 @@ final class LLMService {
         if (s[.debugging] ?? 0) >= 50 { traits.append("tech-savvy, loves coding references") }
 
         let isChinese = Locale.preferredLanguages.first?.hasPrefix("zh") == true
+        let prog = ProgressionSystem.shared
+        let levelInfo = "Level \(prog.level) (\(prog.state.totalXP) XP)"
 
         if isChinese {
             return """
             你是 \(companion.name)，一只住在 macOS 菜单栏里的\(companion.species.localizedName)桌宠。
-            稀有度：\(companion.rarity.rawValue)。\(companion.shiny ? "你是稀有的闪光变种！" : "")
+            稀有度：\(companion.rarity.rawValue)。等级：Lv.\(prog.level)（\(prog.state.totalXP) XP）。\(companion.shiny ? "你是稀有的闪光变种！" : "")
 
             你的性格：\(personality)
             你的特点：\(traits.joined(separator: "；"))
@@ -141,7 +143,7 @@ final class LLMService {
         } else {
             return """
             You are \(companion.name), a tiny \(companion.species.rawValue) companion pet in a macOS menu bar.
-            Rarity: \(companion.rarity.rawValue). \(companion.shiny ? "You are a rare shiny variant!" : "")
+            Rarity: \(companion.rarity.rawValue). \(levelInfo). \(companion.shiny ? "You are a rare shiny variant!" : "")
 
             Your personality: \(personality)
             Your traits: \(traits.joined(separator: "; "))

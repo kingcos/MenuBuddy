@@ -23,6 +23,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 generalSection
+                progressionSection
                 menuBarSection
                 triggerSection
                 llmSection
@@ -70,6 +71,73 @@ struct SettingsView: View {
                         .pickerStyle(.segmented)
                         .frame(width: 180)
                         .onChange(of: selectedLanguage) { _, lang in changeLanguage(lang) }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Progression
+
+    private var progressionSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionLabel(Strings.settingsSectionProgression)
+            card {
+                row {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text("Lv.\(store.level)")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(hex: store.companion.rarity.color))
+                                Text("\(store.totalXP) XP")
+                                    .font(.system(size: 11, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                            }
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(Color.secondary.opacity(0.15))
+                                        .frame(height: 6)
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(Color(hex: store.companion.rarity.color).opacity(0.8))
+                                        .frame(width: geo.size.width * CGFloat(store.levelProgress), height: 6)
+                                }
+                            }
+                            .frame(height: 6)
+                        }
+                        Spacer()
+                        if store.availablePoints > 0 {
+                            VStack(spacing: 2) {
+                                Text("+\(store.availablePoints)")
+                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                    .foregroundColor(Color(hex: store.companion.rarity.color))
+                                Text(Strings.settingsProgressionPoints)
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                divider
+                row {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(Strings.settingsProgressionSlots)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 8) {
+                            ForEach(CosmeticSlot.allCases, id: \.self) { slot in
+                                let unlocked = store.progression.isSlotUnlocked(slot)
+                                HStack(spacing: 3) {
+                                    Image(systemName: unlocked ? "checkmark.circle.fill" : "lock.fill")
+                                        .font(.system(size: 9))
+                                        .foregroundColor(unlocked ? .green : .secondary)
+                                    Text(Strings.slotName(slot))
+                                        .font(.system(size: 9))
+                                        .foregroundColor(unlocked ? .primary : .secondary)
+                                }
+                            }
+                        }
                     }
                 }
             }

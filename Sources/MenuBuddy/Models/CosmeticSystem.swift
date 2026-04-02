@@ -88,6 +88,7 @@ struct SpriteModifier: Codable, Equatable {
 struct CosmeticInventory: Codable {
     var ownedItemIds: Set<String> = []
     var equipped: [String: String] = [:]  // CosmeticSlot.rawValue -> item id
+    var customItems: [CosmeticItem] = []  // user-created items
 
     mutating func equip(_ item: CosmeticItem) {
         equipped[item.slot.rawValue] = item.id
@@ -136,13 +137,20 @@ final class CosmeticSystem {
 
     // MARK: - Queries
 
+    /// All items: catalog + custom.
+    var allItems: [CosmeticItem] {
+        catalog + inventory.customItems
+    }
+
     func ownedItems(for slot: CosmeticSlot) -> [CosmeticItem] {
-        catalog.filter { $0.slot == slot && inventory.ownedItemIds.contains($0.id) }
+        let catalogOwned = catalog.filter { $0.slot == slot && inventory.ownedItemIds.contains($0.id) }
+        let customOwned = inventory.customItems.filter { $0.slot == slot }
+        return catalogOwned + customOwned
     }
 
     func equippedItem(for slot: CosmeticSlot) -> CosmeticItem? {
         guard let id = inventory.equippedItem(for: slot) else { return nil }
-        return catalog.first { $0.id == id }
+        return allItems.first { $0.id == id }
     }
 
     /// Cached combined modifier — invalidated on equip/unequip.
@@ -172,7 +180,9 @@ final class CosmeticSystem {
     // MARK: - Mutations
 
     func equip(_ item: CosmeticItem) {
-        guard inventory.ownedItemIds.contains(item.id) else { return }
+        let owned = inventory.ownedItemIds.contains(item.id)
+        let custom = inventory.customItems.contains { $0.id == item.id }
+        guard owned || custom else { return }
         inventory.equip(item)
         rebuildModifierCache()
         save()
@@ -192,6 +202,42 @@ final class CosmeticSystem {
     func addItem(byId id: String) {
         inventory.ownedItemIds.insert(id)
         save()
+    }
+
+    // MARK: - Custom Item Creation
+
+    /// Create a custom hat item from a user-provided ASCII line.
+    /// The line should be 12 characters (padded if shorter).
+    func createCustomHat(name: String, hatLine: String) -> CosmeticItem {
+        let padded = hatLine.padding(toLength: 12, withPad: " ", startingAt: 0)
+        let id = "custom_hat_\(UUID().uuidString.prefix(8))"
+        let item = CosmeticItem(
+            id: id,
+            slot: .hat,
+            name: name,  // user-provided name (stored directly, not a L10n key)
+            rarity: .uncommon,
+            spriteModifier: SpriteModifier(hatLine: padded),
+            unlockLevel: 0
+        )
+        inventory.customItems.append(item)
+        save()
+        return item
+    }
+
+    /// Delete a custom item by ID. Cannot delete catalog items.
+    func deleteCustomItem(id: String) {
+        inventory.customItems.removeAll { $0.id == id }
+        // Unequip if currently equipped
+        for (slot, equippedId) in inventory.equipped where equippedId == id {
+            inventory.equipped.removeValue(forKey: slot)
+        }
+        rebuildModifierCache()
+        save()
+    }
+
+    /// Check if an item is custom (not from catalog).
+    func isCustomItem(_ id: String) -> Bool {
+        inventory.customItems.contains { $0.id == id }
     }
 
     // MARK: - Random Drop

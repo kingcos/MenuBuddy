@@ -326,6 +326,15 @@ enum Strings {
     static var cosmeticsImportPlaceholder: String { L("cosmetics.import.placeholder") }
     static var cosmeticsImportConfirm: String { L("cosmetics.import.confirm") }
     static var cosmeticsImportFail: String { L("cosmetics.import.fail") }
+    static var cosmeticsCreate: String { L("cosmetics.create") }
+    static var cosmeticsCreateTitle: String { L("cosmetics.create.title") }
+    static var cosmeticsCreateNameLabel: String { L("cosmetics.create.name.label") }
+    static var cosmeticsCreateNamePlaceholder: String { L("cosmetics.create.name.placeholder") }
+    static var cosmeticsCreateLineLabel: String { L("cosmetics.create.line.label") }
+    static var cosmeticsCreateHint: String { L("cosmetics.create.hint") }
+    static var cosmeticsCreatePreview: String { L("cosmetics.create.preview") }
+    static var cosmeticsCreateConfirm: String { L("cosmetics.create.confirm") }
+    static var cosmeticsDelete: String { L("cosmetics.delete") }
     static func cosmeticsOwned(_ owned: Int, _ total: Int) -> String { L("cosmetics.owned", owned, total) }
     static func cosmeticReward(_ name: String) -> String { L("cosmetics.reward", name) }
     static func cosmeticDropQuip(_ name: String) -> String { L("cosmetics.drop", name) }
@@ -338,4 +347,9 @@ enum Strings {
     // Help — Progression & Cosmetics
     static var helpTipLevel: String { L("help.tip.level") }
     static var helpTipCosmetics: String { L("help.tip.cosmetics") }
+
+    // Settings — Progression
+    static var settingsSectionProgression: String { L("settings.section.progression") }
+    static var settingsProgressionPoints: String { L("settings.progression.points") }
+    static var settingsProgressionSlots: String { L("settings.progression.slots") }
 }

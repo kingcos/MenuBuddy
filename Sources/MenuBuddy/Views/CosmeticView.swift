@@ -8,8 +8,11 @@ struct CosmeticView: View {
     @State private var selectedSlot: CosmeticSlot = .hat
     @State private var importText = ""
     @State private var showingImport = false
+    @State private var showingCreator = false
     @State private var importResult: String?
     @State private var onboardingMessage: String?
+    @State private var customHatName = ""
+    @State private var customHatLine = ""
 
     private var cosmetics: CosmeticSystem { store.cosmetics }
     private var progression: ProgressionSystem { store.progression }
@@ -77,6 +80,9 @@ struct CosmeticView: View {
         }
         .sheet(isPresented: $showingImport) {
             importSheet
+        }
+        .sheet(isPresented: $showingCreator) {
+            creatorSheet
         }
     }
 
@@ -187,7 +193,8 @@ struct CosmeticView: View {
     }
 
     private func itemCard(_ item: CosmeticItem, isEquipped: Bool) -> some View {
-        Button(action: {
+        let isCustom = cosmetics.isCustomItem(item.id)
+        return Button(action: {
             if isEquipped {
                 cosmetics.unequip(item.slot)
             } else {
@@ -199,13 +206,21 @@ struct CosmeticView: View {
                 // Item icon/preview
                 itemPreview(item)
                     .frame(height: 24)
-                Text(L(item.name))
+                // Custom items show the name directly; catalog items use L10n
+                Text(isCustom ? item.name : L(item.name))
                     .font(.system(size: 8, weight: .medium))
                     .lineLimit(1)
                     .foregroundColor(.primary)
-                Text(item.rarity.stars)
-                    .font(.system(size: 7))
-                    .foregroundColor(Color(hex: item.rarity.color))
+                HStack(spacing: 2) {
+                    Text(item.rarity.stars)
+                        .font(.system(size: 7))
+                        .foregroundColor(Color(hex: item.rarity.color))
+                    if isCustom {
+                        Image(systemName: "paintbrush.fill")
+                            .font(.system(size: 6))
+                            .foregroundColor(.orange)
+                    }
+                }
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 6)
@@ -220,6 +235,16 @@ struct CosmeticView: View {
             )
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            if isCustom {
+                Button(role: .destructive, action: {
+                    cosmetics.deleteCustomItem(id: item.id)
+                    store.objectWillChange.send()
+                }) {
+                    Label(Strings.cosmeticsDelete, systemImage: "trash")
+                }
+            }
+        }
     }
 
     private func itemPreview(_ item: CosmeticItem) -> some View {
@@ -254,7 +279,25 @@ struct CosmeticView: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
+            // Create custom hat
+            if selectedSlot == .hat {
+                Button(action: {
+                    customHatName = ""
+                    customHatLine = ""
+                    showingCreator = true
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 11))
+                        Text(Strings.cosmeticsCreate)
+                            .font(.system(size: 12))
+                    }
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.accentColor)
+            }
+
             Button(action: { showingImport = true }) {
                 HStack(spacing: 4) {
                     Image(systemName: "square.and.arrow.down")
@@ -286,7 +329,9 @@ struct CosmeticView: View {
 
             Spacer()
 
-            Text(Strings.cosmeticsOwned(cosmetics.inventory.ownedItemIds.count, cosmetics.catalog.count))
+            let totalOwned = cosmetics.inventory.ownedItemIds.count + cosmetics.inventory.customItems.count
+            let totalItems = cosmetics.catalog.count + cosmetics.inventory.customItems.count
+            Text(Strings.cosmeticsOwned(totalOwned, totalItems))
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
         }
@@ -321,6 +366,86 @@ struct CosmeticView: View {
                 }
                 .keyboardShortcut(.defaultAction)
                 .disabled(importText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+        .padding(24)
+        .frame(width: 300)
+    }
+
+    // MARK: - Creator Sheet
+
+    private var creatorSheet: some View {
+        VStack(spacing: 16) {
+            Text(Strings.cosmeticsCreateTitle)
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(Strings.cosmeticsCreateNameLabel)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                TextField(Strings.cosmeticsCreateNamePlaceholder, text: $customHatName)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 240)
+
+                Text(Strings.cosmeticsCreateLineLabel)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                TextField("   \\^^^/    ", text: $customHatLine)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12, design: .monospaced))
+                    .frame(width: 240)
+                    .onChange(of: customHatLine) { _, newValue in
+                        // Limit to 12 characters
+                        if newValue.count > 12 {
+                            customHatLine = String(newValue.prefix(12))
+                        }
+                    }
+
+                Text(Strings.cosmeticsCreateHint)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+
+            // Live preview
+            if !customHatLine.isEmpty {
+                VStack(spacing: 2) {
+                    Text(Strings.cosmeticsCreatePreview)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.secondary)
+                    let padded = customHatLine.padding(toLength: 12, withPad: " ", startingAt: 0)
+                    let previewMod = SpriteModifier(hatLine: padded)
+                    let lines = renderSprite(
+                        bones: companion.bones,
+                        frame: 0,
+                        blink: false,
+                        cosmeticModifier: previewMod
+                    )
+                    VStack(alignment: .center, spacing: 0) {
+                        ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                            Text(line)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundColor(Color(hex: companion.rarity.color))
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            HStack(spacing: 12) {
+                Button(Strings.renameCancel) { showingCreator = false }
+                    .keyboardShortcut(.cancelAction)
+                Button(Strings.cosmeticsCreateConfirm) {
+                    let name = customHatName.trimmingCharacters(in: .whitespaces)
+                    let item = cosmetics.createCustomHat(
+                        name: name.isEmpty ? "Custom Hat" : name,
+                        hatLine: customHatLine
+                    )
+                    cosmetics.equip(item)
+                    store.objectWillChange.send()
+                    showingCreator = false
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(customHatLine.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }
         .padding(24)

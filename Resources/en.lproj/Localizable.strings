@@ -434,6 +434,15 @@
 "cosmetics.import.placeholder" = "Paste share code…";
 "cosmetics.import.confirm" = "Import";
 "cosmetics.import.fail" = "Invalid share code";
+"cosmetics.create" = "Create";
+"cosmetics.create.title" = "Create Custom Hat";
+"cosmetics.create.name.label" = "Name";
+"cosmetics.create.name.placeholder" = "My Hat";
+"cosmetics.create.line.label" = "ASCII Art (12 chars max)";
+"cosmetics.create.hint" = "Use ASCII characters to design a hat line. It appears above your buddy's head.";
+"cosmetics.create.preview" = "PREVIEW";
+"cosmetics.create.confirm" = "Create";
+"cosmetics.delete" = "Delete";
 "cosmetics.owned" = "%d / %d collected";
 "cosmetics.reward" = "New item: %@!";
 "cosmetics.drop" = "You found: %@!";
@@ -496,6 +505,11 @@
 "cosmetic.frame.stars" = "Star Frame";
 "cosmetic.frame.arrows" = "Arrow Frame";
 "cosmetic.frame.diamond" = "Diamond Frame";
+
+/* Settings — Progression */
+"settings.section.progression" = "Progression";
+"settings.progression.points" = "points";
+"settings.progression.slots" = "Cosmetic Slots";
 
 /* Help — Progression & Cosmetics */
 "help.tip.level" = "Earn XP by petting, daily login, and system events. Level up to unlock new slots and cosmetic items!";
