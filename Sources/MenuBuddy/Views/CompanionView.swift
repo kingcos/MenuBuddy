@@ -73,6 +73,8 @@ final class AnimationEngine: ObservableObject {
 
     /// Called when a pet is triggered; returns optional milestone message.
     var onPet: (() -> String?)? = nil
+    /// Called after pet to request an AI reaction (async, replaces speech when ready).
+    var onPetLLM: ((@escaping (String) -> Void) -> Void)? = nil
 
     var currentSequenceIndex: Int { tickIndex % idleSequence.count }
     var currentFrame: Int {
@@ -179,6 +181,10 @@ final class AnimationEngine: ObservableObject {
         // Check for milestone first, otherwise use pet response
         let message = onPet?() ?? Strings.petResponses.randomElement() ?? "♥"
         showSpeech(message)
+        // If LLM is available, generate an AI pet reaction to replace the preset
+        onPetLLM? { [weak self] reaction in
+            self?.showSpeech(reaction)
+        }
     }
 
     private func tick() {

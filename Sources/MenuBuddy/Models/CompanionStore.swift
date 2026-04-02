@@ -19,9 +19,9 @@ class CompanionStore: ObservableObject {
         }
     }
 
-    /// When true and LLM is enabled, trigger messages are rephrased by AI for more natural language.
-    @Published var llmEnhanceTriggers: Bool {
-        didSet { UserDefaults.standard.set(llmEnhanceTriggers, forKey: "llm.enhanceTriggers") }
+    /// When true, menu bar shows face + quip on two lines instead of one line.
+    @Published var menuBarTwoLine: Bool {
+        didSet { UserDefaults.standard.set(menuBarTwoLine, forKey: "companion.menuBarTwoLine") }
     }
 
     /// When true, system events fire every poll while condition holds.
@@ -170,7 +170,7 @@ class CompanionStore: ObservableObject {
         userId = getMachineId()
         muted = UserDefaults.standard.bool(forKey: "companion.muted")
         petCount = UserDefaults.standard.integer(forKey: "companion.petCount")
-        llmEnhanceTriggers = UserDefaults.standard.object(forKey: "llm.enhanceTriggers") as? Bool ?? true
+        menuBarTwoLine = UserDefaults.standard.object(forKey: "companion.menuBarTwoLine") as? Bool ?? true
         repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
         loggingEnabled = UserDefaults.standard.bool(forKey: "companion.loggingEnabled")
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
@@ -232,6 +232,16 @@ class CompanionStore: ObservableObject {
         }
     }
 
+    /// Generates an AI pet reaction if LLM is enabled.
+    func requestLLMPetReaction(completion: @escaping (String) -> Void) {
+        let llm = LLMService.shared
+        guard llm.config.enabled else { return }
+        llm.generateReaction(companion: companion, context: "The user just petted you! React with delight.") { reaction in
+            guard let reaction, !reaction.isEmpty else { return }
+            completion(reaction)
+        }
+    }
+
     /// Tries to generate an LLM reaction for the given context.
     /// Falls back to the provided quips if LLM is disabled or fails.
     func requestLLMReaction(context: String, fallbackQuips: [String]) {
@@ -253,7 +263,7 @@ class CompanionStore: ObservableObject {
     private func handleTriggerEvent(_ event: TriggerEvent) {
         logger.debug("Trigger event: [\(event.sourceId)] \(event.indicator) quips=\(event.quips.count)", source: "trigger")
 
-        let shouldUseLLM = LLMService.shared.config.enabled && llmEnhanceTriggers
+        let shouldUseLLM = LLMService.shared.config.enabled
         var llmRequestFired = false
 
         // Try LLM-generated reaction if enabled and not in cooldown

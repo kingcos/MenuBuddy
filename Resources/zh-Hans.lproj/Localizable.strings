@@ -359,6 +359,8 @@
 
 /* 菜单栏话语 */
 "settings.section.menubar" = "菜单栏";
+"settings.menubar.twoline" = "双行显示";
+"settings.menubar.twoline.desc" = "上行表情，下行话语。关闭后在单行内显示。";
 "settings.menubar.quips" = "在菜单栏显示话语";
 "settings.menubar.quips.desc" = "伙伴偶尔会在菜单栏表情旁边说两句。";
 
@@ -377,6 +379,18 @@
 "atlas.title" = "物种图鉴";
 "atlas.yours" = "你的";
 "atlas.close" = "关闭";
+
+/* 帮助 */
+"help.title" = "使用指南";
+"help.tip.pet" = "点击桌宠可以抚摸它。每次抚摸都会计数，达到里程碑会有特别消息！";
+"help.tip.click" = "左键点击菜单栏图标打开面板，右键点击可以看到更多选项。";
+"help.tip.rename" = "点铅笔图标或右键 → 重命名，可以给你的伙伴起新名字。";
+"help.tip.quips" = "伙伴会自己说话——闲聊、对你正在用的 App 发表评论、对系统状态做出反应。";
+"help.tip.ai" = "在设置中开启 AI，接入任意 OpenAI 兼容 API，伙伴会根据自己的性格生成回复。";
+"help.tip.triggers" = "把脚本放入 ~/.menubuddy/triggers/ 即可添加自定义数据源（股票、天气、CI 状态等）。";
+"help.tip.dnd" = "在设置 → 菜单栏中设定勿扰时段，让伙伴在专注时保持安静。";
+"help.tip.shiny" = "伙伴的物种和外观由你的 Mac 硬件决定，独一无二且不会改变。有 1% 几率是闪光版！";
+"help.more" = "了解更多：";
 
 /* 无障碍 */
 "a11y.sprite.label" = "%@（%@）";

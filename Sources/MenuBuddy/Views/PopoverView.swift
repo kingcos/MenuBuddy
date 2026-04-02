@@ -9,6 +9,7 @@ struct PopoverView: View {
     var companion: Companion { store.companion }
 
     @State private var showingAtlas = false
+    @State private var showingHelp = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +44,7 @@ struct PopoverView: View {
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             engine.onPet = { store.recordPet() }
+            engine.onPetLLM = { callback in store.requestLLMPetReaction(completion: callback) }
             store.onTriggerEvent = { [weak engine] event in
                 guard let quip = event.quips.randomElement() else { return }
                 engine?.showSpeech(quip)
@@ -106,6 +108,9 @@ struct PopoverView: View {
         }
         .sheet(isPresented: $showingAtlas) {
             SpeciesAtlasView(currentSpecies: companion.species)
+        }
+        .sheet(isPresented: $showingHelp) {
+            HelpView()
         }
     }
 
@@ -216,6 +221,14 @@ struct PopoverView: View {
             .buttonStyle(.plain)
             .help(Strings.atlasTitle)
 
+            Button(action: { showingHelp = true }) {
+                Image(systemName: "questionmark.circle")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(Strings.helpTitle)
+
             Spacer()
 
             Button(action: { NSApp.terminate(nil) }) {
@@ -258,6 +271,72 @@ struct PopoverView: View {
     private func commitRename() {
         store.rename(to: renameText)
         isRenaming = false
+    }
+}
+
+// MARK: - Help View
+
+struct HelpView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text(Strings.helpTitle)
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                Spacer()
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                helpRow("hand.tap", Strings.helpTipPet)
+                helpRow("cursorarrow.click.2", Strings.helpTipClick)
+                helpRow("pencil", Strings.helpTipRename)
+                helpRow("face.smiling", Strings.helpTipQuips)
+                helpRow("brain", Strings.helpTipAI)
+                helpRow("bolt.fill", Strings.helpTipTriggers)
+                helpRow("moon.fill", Strings.helpTipDND)
+                helpRow("sparkles", Strings.helpTipShiny)
+            }
+
+            Divider()
+
+            HStack(spacing: 4) {
+                Text(Strings.helpMore)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                Button(action: {
+                    if let url = URL(string: "https://kingcos.github.io/MenuBuddy/") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }) {
+                    Text("kingcos.github.io/MenuBuddy")
+                        .font(.system(size: 11))
+                        .foregroundColor(.accentColor)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(20)
+        .frame(width: 300)
+    }
+
+    private func helpRow(_ icon: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundColor(.accentColor)
+                .frame(width: 16)
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

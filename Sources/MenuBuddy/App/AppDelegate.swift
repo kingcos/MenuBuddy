@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var sysIndicatorObserver: AnyCancellable?
     private var eyeOverrideObserver: AnyCancellable?
     private var menuBarQuipObserver: AnyCancellable?
+    private var menuBarTwoLineObserver: AnyCancellable?
     private var barTimer: Timer?
     private var barTickIndex = 0
     private var settingsWindow: NSWindow?
@@ -44,6 +45,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
         menuBarQuipObserver = store.$menuBarQuip
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateStatusButton() }
+        menuBarTwoLineObserver = store.$menuBarTwoLine
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateStatusButton() }
 
@@ -114,41 +118,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Suppress quip text while popover is shown to prevent position flicker
         let quip = (popover?.isShown == true) ? nil : store.menuBarQuip
 
-        if let quip {
+        if let quip, store.menuBarTwoLine {
             // Two-line layout: face on top, quip on bottom (saves horizontal space)
+            let barHeight = NSStatusBar.system.thickness
+            let faceFont = NSFont.monospacedSystemFont(ofSize: 8, weight: .regular)
+            let quipFont = NSFont.systemFont(ofSize: 7)
+            let lineH = barHeight / 2
+
             let facePara = NSMutableParagraphStyle()
             facePara.alignment = .center
-            facePara.maximumLineHeight = 11
-            facePara.minimumLineHeight = 11
-
-            let full = NSMutableAttributedString(
-                string: faceStr,
-                attributes: [
-                    .font: NSFont.monospacedSystemFont(ofSize: 8, weight: .regular),
-                    .paragraphStyle: facePara,
-                ]
-            )
+            facePara.maximumLineHeight = lineH
+            facePara.minimumLineHeight = lineH
 
             let quipPara = NSMutableParagraphStyle()
             quipPara.alignment = .center
-            quipPara.maximumLineHeight = 10
-            quipPara.minimumLineHeight = 10
+            quipPara.maximumLineHeight = lineH
+            quipPara.minimumLineHeight = lineH
 
             let truncated = quip.count > 12 ? String(quip.prefix(11)) + "…" : quip
+            let full = NSMutableAttributedString(
+                string: faceStr,
+                attributes: [.font: faceFont, .paragraphStyle: facePara]
+            )
             full.append(NSAttributedString(
                 string: "\n" + truncated,
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 7),
-                    .paragraphStyle: quipPara,
-                ]
+                attributes: [.font: quipFont, .paragraphStyle: quipPara]
             ))
             button.attributedTitle = full
         } else {
-            // Single line: just the face
-            button.attributedTitle = NSAttributedString(
+            // Single line: face + optional quip inline
+            let full = NSMutableAttributedString(
                 string: faceStr,
                 attributes: [.font: NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)]
             )
+            if let quip {
+                full.append(NSAttributedString(
+                    string: " " + quip,
+                    attributes: [.font: NSFont.systemFont(ofSize: 9)]
+                ))
+            }
+            button.attributedTitle = full
         }
 
         button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
@@ -184,6 +193,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard let button = statusItem.button else { return }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
+            // Treat opening the popover as a pet interaction
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                NotificationCenter.default.post(name: .triggerPet, object: nil)
+            }
         }
     }
 

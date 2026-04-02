@@ -359,6 +359,8 @@
 
 /* Menu bar quip */
 "settings.section.menubar" = "Menu Bar";
+"settings.menubar.twoline" = "Two-line display";
+"settings.menubar.twoline.desc" = "Show face on top and speech below. When off, both display in a single line.";
 "settings.menubar.quips" = "Show quips in menu bar";
 "settings.menubar.quips.desc" = "Your buddy occasionally says something next to its face in the menu bar.";
 
@@ -377,6 +379,18 @@
 "atlas.title" = "Species Atlas";
 "atlas.yours" = "YOURS";
 "atlas.close" = "Close";
+
+/* Help */
+"help.title" = "How to Use";
+"help.tip.pet" = "Click the buddy to pet it. Each pet is counted — reach milestones for special messages!";
+"help.tip.click" = "Left-click the menu bar icon to open this panel. Right-click for more options.";
+"help.tip.rename" = "Tap the pencil icon or right-click → Rename to give your buddy a new name.";
+"help.tip.quips" = "Your buddy talks on its own — idle quips, app reactions, system event commentary.";
+"help.tip.ai" = "Enable AI in Settings to get personality-driven responses from any OpenAI-compatible API.";
+"help.tip.triggers" = "Drop scripts into ~/.menubuddy/triggers/ for custom data (stocks, weather, CI status).";
+"help.tip.dnd" = "Set quiet hours in Settings → Menu Bar to silence your buddy during focus time.";
+"help.tip.shiny" = "Your buddy's species and appearance are tied to your Mac — unique and permanent. 1% chance of shiny!";
+"help.more" = "More info:";
 
 /* Accessibility */
 "a11y.sprite.label" = "%@ the %@";

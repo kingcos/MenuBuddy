@@ -83,6 +83,17 @@ struct SettingsView: View {
             sectionLabel(Strings.settingsSectionMenuBar)
             card {
                 row {
+                    Toggle(isOn: $store.menuBarTwoLine) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsMenuBarTwoLine)
+                            Text(Strings.settingsMenuBarTwoLineDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                divider
+                row {
                     Toggle(isOn: $store.dndEnabled) {
                         Text(Strings.settingsDNDEnable)
                     }
@@ -183,17 +194,6 @@ struct SettingsView: View {
                 if llmEnabled {
                     divider
                     row {
-                        Toggle(isOn: $store.llmEnhanceTriggers) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(Strings.settingsLLMEnhanceTriggers)
-                                Text(Strings.settingsLLMEnhanceTriggersDesc)
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    divider
-                    row {
                         VStack(alignment: .leading, spacing: 8) {
                             llmField(Strings.settingsLLMEndpoint, text: $llmEndpoint)
                             llmField(Strings.settingsLLMApiKey, text: $llmApiKey, secure: true)
@@ -252,11 +252,11 @@ struct SettingsView: View {
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
             if secure {
-                SecureField("", text: text)
+                SecureField(text: text, prompt: Text(label).foregroundColor(.secondary.opacity(0.5))) { }
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 11, design: .monospaced))
             } else {
-                TextField("", text: text)
+                TextField(text: text, prompt: Text(label).foregroundColor(.secondary.opacity(0.5))) { }
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 11, design: .monospaced))
             }
@@ -312,7 +312,8 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
-                divider
+            }
+            card {
                 row {
                     Button(action: confirmReset) {
                         HStack {

@@ -245,6 +245,8 @@ enum Strings {
 
     // Menu bar quips
     static var settingsSectionMenuBar: String    { L("settings.section.menubar") }
+    static var settingsMenuBarTwoLine: String     { L("settings.menubar.twoline") }
+    static var settingsMenuBarTwoLineDesc: String { L("settings.menubar.twoline.desc") }
     static var settingsMenuBarQuips: String      { L("settings.menubar.quips") }
     static var settingsMenuBarQuipsDesc: String  { L("settings.menubar.quips.desc") }
 
@@ -263,6 +265,18 @@ enum Strings {
     static var atlasTitle: String  { L("atlas.title") }
     static var atlasYours: String  { L("atlas.yours") }
     static var atlasClose: String  { L("atlas.close") }
+
+    // Help
+    static var helpTitle: String        { L("help.title") }
+    static var helpTipPet: String       { L("help.tip.pet") }
+    static var helpTipClick: String     { L("help.tip.click") }
+    static var helpTipRename: String    { L("help.tip.rename") }
+    static var helpTipQuips: String     { L("help.tip.quips") }
+    static var helpTipAI: String        { L("help.tip.ai") }
+    static var helpTipTriggers: String  { L("help.tip.triggers") }
+    static var helpTipDND: String       { L("help.tip.dnd") }
+    static var helpTipShiny: String     { L("help.tip.shiny") }
+    static var helpMore: String         { L("help.more") }
 
     // Accessibility
     static func a11ySpriteLabel(_ name: String, _ species: String) -> String {
