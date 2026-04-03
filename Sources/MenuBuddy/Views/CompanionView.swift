@@ -345,9 +345,17 @@ struct StatsView: View {
                         Button(action: {
                             _ = store?.allocateAttributePoint(to: stat)
                         }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 9))
-                                .foregroundColor(.accentColor)
+                            HStack(spacing: 2) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 11))
+                                Text("+1")
+                                    .font(.system(size: 8, weight: .bold, design: .monospaced))
+                            }
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.accentColor.opacity(0.1))
+                            .cornerRadius(4)
                         }
                         .buttonStyle(.plain)
                         .help(Strings.allocatePoint)

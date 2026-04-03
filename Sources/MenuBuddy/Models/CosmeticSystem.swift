@@ -428,9 +428,13 @@ enum CosmeticCatalog {
         CosmeticItem(id: "acc_flag", slot: .accessory, name: "cosmetic.acc.flag", rarity: .rare,
                      spriteModifier: SpriteModifier(accessoryRight: " ⚑"), unlockLevel: 4),
         CosmeticItem(id: "acc_balloon", slot: .accessory, name: "cosmetic.acc.balloon", rarity: .epic,
-                     spriteModifier: SpriteModifier(accessoryRight: " o"), unlockLevel: 5),
+                     spriteModifier: SpriteModifier(accessoryRight: " O)",
+                        exclusiveQuips: ["*floats gently*", "don't let go!", "lighter than air."],
+                        equipAnnouncement: "*grabs balloon string* wheee!"), unlockLevel: 5),
         CosmeticItem(id: "acc_guitar", slot: .accessory, name: "cosmetic.acc.guitar", rarity: .legendary,
-                     spriteModifier: SpriteModifier(accessoryLeft: "~ "), unlockLevel: 7),
+                     spriteModifier: SpriteModifier(accessoryRight: " }~",
+                        exclusiveQuips: ["*strums a chord*", "rock on.", "*plays a riff*"],
+                        equipAnnouncement: "*picks up guitar* let's jam."), unlockLevel: 7),
     ]
 
     // MARK: - Aura Items

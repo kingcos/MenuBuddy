@@ -412,6 +412,7 @@
 "atlas.change.confirm.body" = "你的伙伴将变身为%@。之后还可以随时再更换。";
 "atlas.change.confirm.ok" = "更换";
 "atlas.change.locked" = "Lv.%d 解锁";
+"atlas.change.hint" = "点击物种可预览并更换角色";
 
 /* 新手引导 */
 "onboarding.xp" = "你获得了经验值！抚摸我、切换应用、每天登录都能升级哦！";
@@ -528,3 +529,4 @@
 /* 帮助 — 成长与装扮 */
 "help.tip.level" = "通过抚摸、每日登录和系统事件获得经验值。升级后可以解锁新槽位和装扮物品！";
 "help.tip.cosmetics" = "打开装扮面板（闪光图标）可以装备帽子、眼睛、配饰、光环和边框。";
+"help.tip.rarity" = "稀有度（星级）由你的 Mac 硬件决定，无法通过升级改变。升级会解锁装扮和属性点。";

@@ -304,6 +304,7 @@ enum Strings {
     static func atlasChangeConfirmBody(_ species: String) -> String { L("atlas.change.confirm.body", species) }
     static var atlasChangeConfirmOK: String { L("atlas.change.confirm.ok") }
     static func atlasChangeLocked(_ level: Int) -> String { L("atlas.change.locked", level) }
+    static var atlasChangeHint: String { L("atlas.change.hint") }
 
     // Onboarding
     static var onboardingXP: String { L("onboarding.xp") }
@@ -347,6 +348,7 @@ enum Strings {
     // Help — Progression & Cosmetics
     static var helpTipLevel: String { L("help.tip.level") }
     static var helpTipCosmetics: String { L("help.tip.cosmetics") }
+    static var helpTipRarity: String { L("help.tip.rarity") }
 
     // Settings — Update
     static var settingsSectionUpdate: String { L("settings.section.update") }

@@ -412,6 +412,7 @@
 "atlas.change.confirm.body" = "Your buddy will transform into a %@. This can be changed again anytime.";
 "atlas.change.confirm.ok" = "Change";
 "atlas.change.locked" = "Unlocks at Lv.%d";
+"atlas.change.hint" = "Tap a species to preview and change to it";
 
 /* Onboarding */
 "onboarding.xp" = "You earned XP! Pet me, switch apps, and use me daily to level up!";
@@ -528,3 +529,4 @@
 /* Help — Progression & Cosmetics */
 "help.tip.level" = "Earn XP by petting, daily login, and system events. Level up to unlock new slots and cosmetic items!";
 "help.tip.cosmetics" = "Open the Dress Up panel (sparkles icon) to equip hats, eyes, accessories, auras, and frames.";
+"help.tip.rarity" = "Rarity (stars) is determined by your Mac hardware and cannot be changed by leveling up. Leveling unlocks cosmetics and attribute points instead.";

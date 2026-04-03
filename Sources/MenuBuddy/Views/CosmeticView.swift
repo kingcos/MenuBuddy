@@ -14,12 +14,14 @@ struct CosmeticView: View {
     @State private var equipMessage: String?
     @State private var customHatName = ""
     @State private var customHatLine = ""
+    @State private var refreshTick = 0  // incremented to force local re-render
 
     private var cosmetics: CosmeticSystem { store.cosmetics }
     private var progression: ProgressionSystem { store.progression }
     private var companion: Companion { store.companion }
 
     var body: some View {
+        let _ = refreshTick  // force re-evaluation when items change
         VStack(spacing: 0) {
             // Header
             HStack {
@@ -90,28 +92,27 @@ struct CosmeticView: View {
     // MARK: - Preview
 
     private var previewSection: some View {
-        VStack(spacing: 4) {
-            let lines = renderSprite(
-                bones: companion.bones,
-                frame: 0,
-                blink: false,
-                cosmeticModifier: cosmetics.allEquippedModifiers()
-            )
+        let lines = renderSprite(
+            bones: companion.bones,
+            frame: 0,
+            blink: false,
+            cosmeticModifier: cosmetics.allEquippedModifiers()
+        )
+        return VStack(spacing: 4) {
             VStack(alignment: .center, spacing: 0) {
-                ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                // Use line content as id to avoid unnecessary diffs
+                ForEach(Array(lines.enumerated()), id: \.element) { _, line in
                     Text(line)
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : Color(hex: companion.rarity.color))
                 }
             }
-            // Equip announcement speech bubble
             if let msg = equipMessage {
                 Text(msg)
                     .font(.system(size: 10, design: .monospaced))
                     .italic()
                     .foregroundColor(.secondary)
                     .padding(.top, 4)
-                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity)
@@ -215,7 +216,7 @@ struct CosmeticView: View {
                     equipMessage = announcement
                 }
             }
-            store.objectWillChange.send()
+            refreshTick += 1  // trigger local re-render
         }) {
             VStack(spacing: 3) {
                 // Item icon/preview
@@ -254,7 +255,7 @@ struct CosmeticView: View {
             if isCustom {
                 Button(role: .destructive, action: {
                     cosmetics.deleteCustomItem(id: item.id)
-                    store.objectWillChange.send()
+                    refreshTick += 1  // trigger local re-render
                 }) {
                     Label(Strings.cosmeticsDelete, systemImage: "trash")
                 }
@@ -374,7 +375,7 @@ struct CosmeticView: View {
                     let text = importText.trimmingCharacters(in: .whitespacesAndNewlines)
                     if let item = cosmetics.importItem(from: text) {
                         importResult = "✓ \(L(item.name))"
-                        store.objectWillChange.send()
+                        refreshTick += 1  // trigger local re-render
                     } else {
                         importResult = Strings.cosmeticsImportFail
                     }
@@ -456,7 +457,7 @@ struct CosmeticView: View {
                         hatLine: customHatLine
                     )
                     cosmetics.equip(item)
-                    store.objectWillChange.send()
+                    refreshTick += 1  // trigger local re-render
                     showingCreator = false
                 }
                 .keyboardShortcut(.defaultAction)

@@ -405,6 +405,7 @@ struct HelpView: View {
                     helpRow("face.smiling", Strings.helpTipQuips)
                     helpRow("arrow.up.circle", Strings.helpTipLevel)
                     helpRow("sparkles", Strings.helpTipCosmetics)
+                    helpRow("star", Strings.helpTipRarity)
                     helpRow("brain", Strings.helpTipAI)
                     helpRow("bolt.fill", Strings.helpTipTriggers)
                     helpRow("moon.fill", Strings.helpTipDND)

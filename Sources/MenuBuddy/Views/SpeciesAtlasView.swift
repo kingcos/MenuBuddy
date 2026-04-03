@@ -34,6 +34,22 @@ struct SpeciesAtlasView: View {
 
             Divider()
 
+            // Species change hint (when progression enabled and no species selected)
+            if let store, store.progressionEnabled, selectedSpecies == nil {
+                HStack(spacing: 6) {
+                    Image(systemName: store.level >= 5 ? "arrow.triangle.2.circlepath" : "lock.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(store.level >= 5 ? .accentColor : .secondary)
+                    Text(store.level >= 5 ? Strings.atlasChangeHint : Strings.atlasChangeLocked(5))
+                        .font(.system(size: 10))
+                        .foregroundColor(store.level >= 5 ? .accentColor : .secondary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.accentColor.opacity(0.04))
+            }
+
             // Rarity preview bar
             if let species = selectedSpecies {
                 rarityPreview(species)
