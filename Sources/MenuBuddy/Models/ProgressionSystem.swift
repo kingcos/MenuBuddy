@@ -28,8 +28,27 @@ struct ProgressionState: Codable {
     var lastDailyXPDate: String?               // "yyyy-MM-dd" of last daily XP claim
     var levelUpsSeen: Int = 0                  // highest level the user has been notified about
 
+    // Anti-cheat: daily XP tracking
+    var dailyXPDate: String?                   // "yyyy-MM-dd" of current daily tracking
+    var dailyXPEarned: Int = 0                 // XP earned today (resets at midnight)
+
     // Recent XP events (keep last 50 for display)
     var recentEvents: [XPEvent] = []
+}
+
+// MARK: - Anti-Cheat Configuration
+
+enum AntiCheat {
+    /// Maximum XP earnable per calendar day (excludes daily login bonus).
+    static let dailyXPCap: Int = 200
+
+    /// Minimum seconds between XP grants from the same source.
+    static let cooldowns: [String: TimeInterval] = [
+        "pet": 2,           // can't spam-pet faster than 2s
+        "trigger": 10,      // system events at most every 10s
+        "appContext": 30,    // app switch XP at most every 30s
+        "llm": 15,          // LLM reactions at most every 15s
+    ]
 }
 
 /// Core progression engine — pure logic, no UI dependencies.
@@ -39,6 +58,9 @@ final class ProgressionSystem {
 
     private let stateKey = "progression.state"
     private(set) var state: ProgressionState
+
+    /// Last grant timestamp per source (in-memory only, resets on app launch).
+    private var lastGrantTime: [String: Date] = [:]
 
     private init() {
         if let data = UserDefaults.standard.data(forKey: stateKey),
@@ -103,19 +125,54 @@ final class ProgressionSystem {
     // MARK: - XP Granting
 
     /// Grants XP and returns a level-up message if the level changed.
+    /// Enforces per-source cooldown and daily cap.
     @discardableResult
     func grantXP(_ reward: XPReward, source: String) -> LevelUpInfo? {
         return grantXP(reward.rawValue, source: source)
     }
 
-    /// Grants arbitrary XP amount.
+    /// Grants arbitrary XP amount with anti-cheat enforcement.
     @discardableResult
     func grantXP(_ amount: Int, source: String) -> LevelUpInfo? {
+        let now = Date()
+
+        // Per-source cooldown check
+        if let cooldown = AntiCheat.cooldowns[source],
+           let lastTime = lastGrantTime[source],
+           now.timeIntervalSince(lastTime) < cooldown {
+            return nil  // too soon, reject
+        }
+
+        // Reset daily tracking at midnight
+        let today = Self.dateString(now)
+        if state.dailyXPDate != today {
+            state.dailyXPDate = today
+            state.dailyXPEarned = 0
+        }
+
+        // Daily cap check (daily login bonus is exempt)
+        if source != "daily" && state.dailyXPEarned >= AntiCheat.dailyXPCap {
+            return nil  // daily cap reached
+        }
+
+        // Clamp amount to remaining daily allowance (daily login exempt)
+        let effectiveAmount: Int
+        if source == "daily" {
+            effectiveAmount = amount
+        } else {
+            effectiveAmount = min(amount, AntiCheat.dailyXPCap - state.dailyXPEarned)
+        }
+        guard effectiveAmount > 0 else { return nil }
+
+        // Record cooldown
+        lastGrantTime[source] = now
+
         let oldLevel = level
-        state.totalXP += amount
+        state.totalXP += effectiveAmount
+        state.dailyXPEarned += effectiveAmount
 
         // Track event
-        let event = XPEvent(amount: amount, source: source, timestamp: Date().timeIntervalSince1970)
+        let event = XPEvent(amount: effectiveAmount, source: source, timestamp: now.timeIntervalSince1970)
         state.recentEvents.append(event)
         if state.recentEvents.count > 50 {
             state.recentEvents.removeFirst(state.recentEvents.count - 50)
@@ -136,6 +193,13 @@ final class ProgressionSystem {
             return info
         }
         return nil
+    }
+
+    /// How much daily XP remains before hitting the cap.
+    var dailyXPRemaining: Int {
+        let today = Self.dateString(Date())
+        guard state.dailyXPDate == today else { return AntiCheat.dailyXPCap }
+        return max(0, AntiCheat.dailyXPCap - state.dailyXPEarned)
     }
 
     /// Claim daily login XP. Returns nil if already claimed today.
