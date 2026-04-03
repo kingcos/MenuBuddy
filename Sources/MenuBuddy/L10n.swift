@@ -348,6 +348,18 @@ enum Strings {
     static var helpTipLevel: String { L("help.tip.level") }
     static var helpTipCosmetics: String { L("help.tip.cosmetics") }
 
+    // Settings — Update
+    static var settingsSectionUpdate: String { L("settings.section.update") }
+    static var settingsUpdateBeta: String { L("settings.update.beta") }
+    static var settingsUpdateBetaDesc: String { L("settings.update.beta.desc") }
+    static func settingsUpdateCurrent(_ v: String) -> String { L("settings.update.current", v) }
+    static var settingsUpdateCheck: String { L("settings.update.check") }
+    static var settingsUpdateUpToDate: String { L("settings.update.uptodate") }
+    static func settingsUpdateAvailable(_ v: String) -> String { L("settings.update.available", v) }
+    static var settingsUpdateDownload: String { L("settings.update.download") }
+    static var settingsUpdateViewRelease: String { L("settings.update.viewrelease") }
+    static var menuCheckUpdate: String { L("menu.checkupdate") }
+
     // Settings — Progression
     static var settingsSectionProgression: String { L("settings.section.progression") }
     static var settingsProgressionEnable: String { L("settings.progression.enable") }

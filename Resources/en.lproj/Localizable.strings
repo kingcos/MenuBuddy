@@ -506,6 +506,18 @@
 "cosmetic.frame.arrows" = "Arrow Frame";
 "cosmetic.frame.diamond" = "Diamond Frame";
 
+/* Update */
+"settings.section.update" = "Updates";
+"settings.update.beta" = "Include pre-release (beta) versions";
+"settings.update.beta.desc" = "Check for beta releases in addition to stable versions.";
+"settings.update.current" = "Current: v%@";
+"settings.update.check" = "Check for Updates";
+"settings.update.uptodate" = "You're up to date!";
+"settings.update.available" = "v%@ available";
+"settings.update.download" = "Download & Install";
+"settings.update.viewrelease" = "View Release";
+"menu.checkupdate" = "Check for Updates…";
+
 /* Settings — Progression */
 "settings.section.progression" = "Progression";
 "settings.progression.enable" = "Enable Progression & Cosmetics";

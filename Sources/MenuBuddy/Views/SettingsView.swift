@@ -11,6 +11,11 @@ struct SettingsView: View {
     @State private var llmMaxTokens: String = "\(LLMService.shared.config.maxTokens)"
     @State private var llmTestResult: String?
     @State private var llmTesting = false
+    @State private var updateResult: UpdateResult?
+    @State private var updateChecking = false
+    @State private var updateDownloading = false
+    @State private var updateProgress: Double = 0
+    @State private var includeBeta: Bool = UserDefaults.standard.bool(forKey: "update.includeBeta")
     @State private var selectedLanguage: String = {
         if let langs = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String] {
             if langs.first?.hasPrefix("zh-Hans") == true { return "zh-Hans" }
@@ -28,6 +33,7 @@ struct SettingsView: View {
                 triggerSection
                 llmSection
                 advancedSection
+                updateSection
                 footerView
             }
             .padding(20)
@@ -376,6 +382,165 @@ struct SettingsView: View {
                 llmTestResult = Strings.settingsLLMTestOK(reaction)
             } else {
                 llmTestResult = Strings.settingsLLMTestFail("No response")
+            }
+        }
+    }
+
+    // MARK: - Update
+
+    private var updateSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionLabel(Strings.settingsSectionUpdate)
+            card {
+                row {
+                    Toggle(isOn: $includeBeta) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsUpdateBeta)
+                            Text(Strings.settingsUpdateBetaDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: includeBeta) { _, v in
+                        UserDefaults.standard.set(v, forKey: "update.includeBeta")
+                    }
+                }
+                divider
+                row {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(Strings.settingsUpdateCurrent(UpdateChecker.shared.currentVersion))
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Button(action: checkForUpdate) {
+                                if updateChecking {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Text(Strings.settingsUpdateCheck)
+                                        .font(.system(size: 12))
+                                }
+                            }
+                            .disabled(updateChecking || updateDownloading)
+                        }
+
+                        // Update result
+                        if let result = updateResult {
+                            updateResultView(result)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func updateResultView(_ result: UpdateResult) -> some View {
+        switch result {
+        case .upToDate:
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .font(.system(size: 12))
+                Text(Strings.settingsUpdateUpToDate)
+                    .font(.system(size: 11))
+                    .foregroundColor(.green)
+            }
+        case .available(let info):
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundColor(.accentColor)
+                        .font(.system(size: 12))
+                    Text(Strings.settingsUpdateAvailable(info.version))
+                        .font(.system(size: 11, weight: .medium))
+                    if info.isPrerelease {
+                        Text("BETA")
+                            .font(.system(size: 8, weight: .bold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color.orange.opacity(0.2))
+                            .foregroundColor(.orange)
+                            .cornerRadius(3)
+                    }
+                }
+                if !info.releaseNotes.isEmpty {
+                    Text(info.releaseNotes.prefix(200) + (info.releaseNotes.count > 200 ? "…" : ""))
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineLimit(4)
+                }
+                HStack(spacing: 12) {
+                    if info.dmgDownloadURL != nil {
+                        if updateDownloading {
+                            HStack(spacing: 6) {
+                                ProgressView(value: updateProgress)
+                                    .frame(width: 80)
+                                Text("\(Int(updateProgress * 100))%")
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            Button(action: { downloadUpdate(info) }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "arrow.down.to.line")
+                                        .font(.system(size: 10))
+                                    Text(Strings.settingsUpdateDownload)
+                                        .font(.system(size: 12))
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.accentColor)
+                        }
+                    }
+                    Button(action: {
+                        if let url = URL(string: info.htmlURL) {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "safari")
+                                .font(.system(size: 10))
+                            Text(Strings.settingsUpdateViewRelease)
+                                .font(.system(size: 12))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
+                }
+            }
+        case .error(let msg):
+            HStack(spacing: 4) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.red)
+                    .font(.system(size: 12))
+                Text(msg)
+                    .font(.system(size: 11))
+                    .foregroundColor(.red)
+                    .lineLimit(2)
+            }
+        }
+    }
+
+    private func checkForUpdate() {
+        updateChecking = true
+        updateResult = nil
+        UpdateChecker.shared.checkForUpdate(includeBeta: includeBeta) { result in
+            updateResult = result
+            updateChecking = false
+        }
+    }
+
+    private func downloadUpdate(_ info: UpdateInfo) {
+        updateDownloading = true
+        updateProgress = 0
+        UpdateChecker.shared.downloadAndInstall(info: info, progress: { p in
+            updateProgress = p
+        }) { success, error in
+            updateDownloading = false
+            if !success, let error {
+                updateResult = .error(error)
             }
         }
     }

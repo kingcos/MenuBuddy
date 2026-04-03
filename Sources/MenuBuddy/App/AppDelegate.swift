@@ -278,6 +278,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         settingsItem.target = self
         menu.addItem(settingsItem)
 
+        let updateItem = NSMenuItem(title: Strings.menuCheckUpdate, action: #selector(checkForUpdateFromMenu), keyEquivalent: "")
+        updateItem.target = self
+        menu.addItem(updateItem)
+
         let aboutItem = NSMenuItem(title: Strings.menuAbout, action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
@@ -374,6 +378,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ].joined(separator: "\n")
         alert.addButton(withTitle: Strings.aboutOK)
         alert.runModal()
+    }
+
+    @objc private func checkForUpdateFromMenu() {
+        let includeBeta = UserDefaults.standard.bool(forKey: "update.includeBeta")
+        UpdateChecker.shared.checkForUpdate(includeBeta: includeBeta) { result in
+            switch result {
+            case .upToDate:
+                let alert = NSAlert()
+                alert.messageText = Strings.settingsUpdateUpToDate
+                alert.informativeText = "MenuBuddy v\(UpdateChecker.shared.currentVersion)"
+                alert.addButton(withTitle: Strings.aboutOK)
+                alert.runModal()
+            case .available(let info):
+                let alert = NSAlert()
+                let beta = info.isPrerelease ? " (Beta)" : ""
+                alert.messageText = Strings.settingsUpdateAvailable(info.version) + beta
+                alert.informativeText = String(info.releaseNotes.prefix(300))
+                if info.dmgDownloadURL != nil {
+                    alert.addButton(withTitle: Strings.settingsUpdateDownload)
+                }
+                alert.addButton(withTitle: Strings.settingsUpdateViewRelease)
+                alert.addButton(withTitle: Strings.renameCancel)
+                let response = alert.runModal()
+                if response == .alertFirstButtonReturn, info.dmgDownloadURL != nil {
+                    UpdateChecker.shared.downloadAndInstall(info: info, progress: { _ in }) { _, _ in }
+                } else if (response == .alertFirstButtonReturn && info.dmgDownloadURL == nil) || response == .alertSecondButtonReturn {
+                    if let url = URL(string: info.htmlURL) {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+            case .error(let msg):
+                let alert = NSAlert()
+                alert.messageText = "Update Check Failed"
+                alert.informativeText = msg
+                alert.addButton(withTitle: Strings.aboutOK)
+                alert.alertStyle = .warning
+                alert.runModal()
+            }
+        }
     }
 
     // MARK: - Sleep / Wake

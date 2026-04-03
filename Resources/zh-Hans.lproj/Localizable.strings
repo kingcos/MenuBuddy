@@ -506,6 +506,18 @@
 "cosmetic.frame.arrows" = "箭头框";
 "cosmetic.frame.diamond" = "钻石框";
 
+/* 检查更新 */
+"settings.section.update" = "更新";
+"settings.update.beta" = "包含预发布（Beta）版本";
+"settings.update.beta.desc" = "除了稳定版之外，同时检查 Beta 测试版。";
+"settings.update.current" = "当前版本：v%@";
+"settings.update.check" = "检查更新";
+"settings.update.uptodate" = "已是最新版本！";
+"settings.update.available" = "v%@ 可用";
+"settings.update.download" = "下载并安装";
+"settings.update.viewrelease" = "查看发布";
+"menu.checkupdate" = "检查更新…";
+
 /* 设置 — 成长 */
 "settings.section.progression" = "成长";
 "settings.progression.enable" = "启用成长与装扮系统";
