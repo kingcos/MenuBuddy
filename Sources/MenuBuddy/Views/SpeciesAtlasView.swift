@@ -18,13 +18,19 @@ struct SpeciesAtlasView: View {
         VStack(spacing: 0) {
             HStack {
                 Text(Strings.atlasTitle)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
                 Spacer()
-                Button(Strings.atlasClose) { dismiss() }
-                    .keyboardShortcut(.cancelAction)
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
 
             Divider()
 

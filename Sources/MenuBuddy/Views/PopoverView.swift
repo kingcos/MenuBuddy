@@ -379,7 +379,7 @@ struct HelpView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(spacing: 0) {
             HStack {
                 Text(Strings.helpTitle)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -391,17 +391,26 @@ struct HelpView: View {
                 }
                 .buttonStyle(.plain)
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
 
-            VStack(alignment: .leading, spacing: 12) {
-                helpRow("hand.tap", Strings.helpTipPet)
-                helpRow("cursorarrow.click.2", Strings.helpTipClick)
-                helpRow("pencil", Strings.helpTipRename)
-                helpRow("face.smiling", Strings.helpTipQuips)
-                helpRow("arrow.up.circle", Strings.helpTipLevel)
-                helpRow("sparkles", Strings.helpTipCosmetics)
-                helpRow("brain", Strings.helpTipAI)
-                helpRow("bolt.fill", Strings.helpTipTriggers)
-                helpRow("moon.fill", Strings.helpTipDND)
+            Divider()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    helpRow("hand.tap", Strings.helpTipPet)
+                    helpRow("cursorarrow.click.2", Strings.helpTipClick)
+                    helpRow("pencil", Strings.helpTipRename)
+                    helpRow("face.smiling", Strings.helpTipQuips)
+                    helpRow("arrow.up.circle", Strings.helpTipLevel)
+                    helpRow("sparkles", Strings.helpTipCosmetics)
+                    helpRow("brain", Strings.helpTipAI)
+                    helpRow("bolt.fill", Strings.helpTipTriggers)
+                    helpRow("moon.fill", Strings.helpTipDND)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
 
             Divider()
@@ -421,8 +430,9 @@ struct HelpView: View {
                 }
                 .buttonStyle(.plain)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
         }
-        .padding(20)
         .frame(width: 300)
     }
 
