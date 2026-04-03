@@ -19,6 +19,29 @@ A tiny companion pet that lives in your macOS menu bar. Click the icon to open t
 - **Species Atlas**: grid view of all 18 species with rarity preview (tap to see any species in each rarity tier)
 - **Rarity colors**: sprites render in their rarity color (gray/green/blue/purple/gold)
 
+### Progression System (v2)
+
+Earn XP through interactions and level up your companion:
+
+- **5 XP sources**: petting (5 XP), daily login (20 XP), system events (3 XP), app switching (1 XP), AI reactions (8 XP)
+- **Level formula**: `Level = floor(sqrt(XP / 10))` — smooth curve from Lv.1 (10 XP) to Lv.10 (1000 XP)
+- **Attribute points**: +2 per level, allocate to any stat (DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK)
+- **Species change**: at Lv.5+, switch species freely via the Species Atlas
+- **Level-up celebrations**: notification sheet with new slot unlocks and cosmetic rewards
+
+### Cosmetic Dress-Up System (v2)
+
+Customize your companion's appearance with a pluggable item system:
+
+- **5 cosmetic slots**: Hat, Eye, Accessory, Aura, Frame — unlock progressively (Lv.0 → Lv.8)
+- **40+ items** across 5 rarities (Common → Legendary), each with ASCII sprite modifiers
+- **Random drops**: 5% chance per pet + guaranteed reward on level-up
+- **Custom hat creator**: design your own 12-character ASCII hat with live preview
+- **Import / Export**: share items between users via base64 share codes
+- **Dress-up UI**: slot tabs, item grid, equip/unequip, live sprite preview
+
+> See [docs/v2-progression-and-cosmetics.md](docs/v2-progression-and-cosmetics.md) for the full design document.
+
 ### AI Reactions (LLM-Powered)
 
 When configured with an LLM API, your companion generates contextual reactions based on its personality stats:
