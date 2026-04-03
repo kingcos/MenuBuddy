@@ -39,9 +39,11 @@ struct CosmeticView: View {
             .padding(.top, 14)
             .padding(.bottom, 10)
 
+            Divider()
+
             // Preview
             previewSection
-                .padding(.bottom, 8)
+                .padding(.bottom, 4)
 
             // Onboarding banner
             if let msg = onboardingMessage {

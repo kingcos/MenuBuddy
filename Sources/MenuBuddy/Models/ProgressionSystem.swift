@@ -57,7 +57,7 @@ final class ProgressionSystem {
     static let shared = ProgressionSystem()
 
     private let stateKey = "progression.state"
-    private(set) var state: ProgressionState
+    internal private(set) var state: ProgressionState
 
     /// Last grant timestamp per source (in-memory only, resets on app launch).
     private var lastGrantTime: [String: Date] = [:]
@@ -232,6 +232,21 @@ final class ProgressionSystem {
         return true
     }
 
+    /// Deduct XP (used for species change cost). Returns false if insufficient XP.
+    @discardableResult
+    func deductXP(_ amount: Int) -> Bool {
+        guard state.totalXP >= amount else { return false }
+        state.totalXP -= amount
+        save()
+        return true
+    }
+
+    /// Reset all allocated attribute points (refunds them).
+    func resetAttributePoints() {
+        state.attributeBonuses = [:]
+        save()
+    }
+
     /// Get bonus for a specific stat.
     func bonus(for stat: StatName) -> Int {
         state.attributeBonuses[stat.rawValue, default: 0]
@@ -270,7 +285,7 @@ final class ProgressionSystem {
 
     // MARK: - Persistence
 
-    private func save() {
+    func save() {
         if let data = try? JSONEncoder().encode(state) {
             UserDefaults.standard.set(data, forKey: stateKey)
         }

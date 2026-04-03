@@ -32,7 +32,15 @@ struct PopoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 4)
             Divider()
-            StatsView(stats: companion.stats, store: store.progressionEnabled ? store : nil)
+            StatsView(
+                stats: companion.stats,
+                effectiveStats: store.progressionEnabled ? Dictionary(uniqueKeysWithValues: StatName.allCases.map { ($0, store.effectiveStat($0)) }) : nil,
+                bonuses: store.progressionEnabled ? Dictionary(uniqueKeysWithValues: StatName.allCases.map { ($0, store.progression.bonus(for: $0)) }) : nil,
+                availablePoints: store.progressionEnabled ? store.availablePoints : 0,
+                allocatedPoints: store.progressionEnabled ? store.progression.allocatedAttributePoints : 0,
+                onAllocate: store.progressionEnabled ? { stat in _ = store.allocateAttributePoint(to: stat) } : nil,
+                onResetPoints: store.progressionEnabled ? { store.resetAttributePoints() } : nil
+            )
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 6)

@@ -413,6 +413,10 @@
 "atlas.change.confirm.ok" = "Change";
 "atlas.change.locked" = "Unlocks at Lv.%d";
 "atlas.change.hint" = "Tap a species to preview and change to it";
+"atlas.change.confirm.cost.body" = "Transform into a %@? This costs %d XP and has a 24-hour cooldown.";
+"atlas.change.cost" = "Cost: %d XP";
+"atlas.change.cooldown" = "Cooldown: %dh left";
+"progression.reset.points" = "Reset Points";
 
 /* Onboarding */
 "onboarding.xp" = "You earned XP! Pet me, switch apps, and use me daily to level up!";

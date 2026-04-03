@@ -303,15 +303,26 @@ struct SpeechBubbleView: View {
 
 struct StatsView: View {
     let stats: [StatName: Int]
-    var store: CompanionStore? = nil
+    /// Effective stat values (base + bonus). Nil = use base stats only.
+    var effectiveStats: [StatName: Int]?
+    /// Bonus points per stat. Nil = no bonuses.
+    var bonuses: [StatName: Int]?
+    /// Available points to allocate. 0 = hide buttons.
+    var availablePoints: Int = 0
+    /// Total allocated points (for reset display).
+    var allocatedPoints: Int = 0
+    /// Called when user taps +1 on a stat.
+    var onAllocate: ((StatName) -> Void)?
+    /// Called when user taps "Reset Points".
+    var onResetPoints: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(StatName.allCases, id: \.self) { stat in
                 let baseValue = stats[stat] ?? 0
-                let effectiveValue = store?.effectiveStat(stat) ?? baseValue
-                let bonus = store?.progression.bonus(for: stat) ?? 0
-                let hasAvailablePoints = (store?.availablePoints ?? 0) > 0
+                let effectiveValue = effectiveStats?[stat] ?? baseValue
+                let bonus = bonuses?[stat] ?? 0
+                let hasAvailablePoints = availablePoints > 0
                 HStack(spacing: 6) {
                     Text(Strings.statName(stat))
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
@@ -343,7 +354,7 @@ struct StatsView: View {
                     .frame(width: 40, alignment: .trailing)
                     if hasAvailablePoints {
                         Button(action: {
-                            _ = store?.allocateAttributePoint(to: stat)
+                            onAllocate?(stat)
                         }) {
                             HStack(spacing: 2) {
                                 Image(systemName: "plus.circle.fill")
@@ -364,6 +375,23 @@ struct StatsView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Strings.a11yStatLabel(Strings.statName(stat), effectiveValue))
                 .help(Strings.statDesc(stat))
+            }
+            // Reset points row
+            if allocatedPoints > 0, let onReset = onResetPoints {
+                HStack {
+                    Spacer()
+                    Button(action: onReset) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 9))
+                            Text(Strings.resetPoints)
+                                .font(.system(size: 9))
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 2)
             }
         }
     }

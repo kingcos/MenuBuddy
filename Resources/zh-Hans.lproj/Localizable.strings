@@ -413,6 +413,10 @@
 "atlas.change.confirm.ok" = "更换";
 "atlas.change.locked" = "Lv.%d 解锁";
 "atlas.change.hint" = "点击物种可预览并更换角色";
+"atlas.change.confirm.cost.body" = "变身为%@？需要消耗 %d XP，且有 24 小时冷却。";
+"atlas.change.cost" = "消耗：%d XP";
+"atlas.change.cooldown" = "冷却中：剩余 %d 小时";
+"progression.reset.points" = "重置加点";
 
 /* 新手引导 */
 "onboarding.xp" = "你获得了经验值！抚摸我、切换应用、每天登录都能升级哦！";

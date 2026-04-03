@@ -461,6 +461,12 @@ class CompanionStore: ObservableObject {
         return result
     }
 
+    /// Reset all allocated attribute points (refund them).
+    func resetAttributePoints() {
+        progression.resetAttributePoints()
+        refreshProgressionState()
+    }
+
     /// Get effective stat value including bonuses.
     func effectiveStat(_ stat: StatName) -> Int {
         let base = companion.stats[stat] ?? 0
@@ -511,10 +517,59 @@ class CompanionStore: ObservableObject {
         companion = Companion(bones: companion.bones, soul: newSoul)
     }
 
-    /// Change the companion's species. Keeps rarity, eye, hat, shiny, and stats.
-    /// Requires level 5+.
-    func changeSpecies(to newSpecies: Species) {
-        guard progression.level >= 5 else { return }
+    /// XP cost to change species. Increases with each change.
+    static let speciesChangeCostBase = 100
+    static let speciesChangeCostPerUse = 50
+    static let speciesChangeCooldownHours = 24
+
+    /// Number of times species has been changed.
+    var speciesChangeCount: Int {
+        UserDefaults.standard.integer(forKey: "companion.speciesChangeCount")
+    }
+
+    /// XP cost for the next species change.
+    var speciesChangeCost: Int {
+        Self.speciesChangeCostBase + speciesChangeCount * Self.speciesChangeCostPerUse
+    }
+
+    /// Whether species change is on cooldown.
+    var speciesChangeOnCooldown: Bool {
+        guard let lastChange = UserDefaults.standard.object(forKey: "companion.lastSpeciesChange") as? Date else {
+            return false
+        }
+        return Date().timeIntervalSince(lastChange) < TimeInterval(Self.speciesChangeCooldownHours * 3600)
+    }
+
+    /// Time remaining on cooldown (seconds), 0 if not on cooldown.
+    var speciesChangeCooldownRemaining: TimeInterval {
+        guard let lastChange = UserDefaults.standard.object(forKey: "companion.lastSpeciesChange") as? Date else {
+            return 0
+        }
+        let elapsed = Date().timeIntervalSince(lastChange)
+        let total = TimeInterval(Self.speciesChangeCooldownHours * 3600)
+        return max(0, total - elapsed)
+    }
+
+    /// Whether the user can afford and is allowed to change species right now.
+    var canChangeSpecies: Bool {
+        progression.level >= 5 && !speciesChangeOnCooldown && progression.state.totalXP >= speciesChangeCost
+    }
+
+    /// Change the companion's species. Costs XP and has a 24h cooldown.
+    /// Returns true if successful.
+    @discardableResult
+    func changeSpecies(to newSpecies: Species) -> Bool {
+        guard canChangeSpecies else { return false }
+
+        // Deduct XP cost
+        let cost = speciesChangeCost
+        guard progression.deductXP(cost) else { return false }
+
+        // Record change
+        let count = speciesChangeCount + 1
+        UserDefaults.standard.set(count, forKey: "companion.speciesChangeCount")
+        UserDefaults.standard.set(Date(), forKey: "companion.lastSpeciesChange")
+
         let oldBones = companion.bones
         let newBones = CompanionBones(
             rarity: oldBones.rarity,
@@ -525,9 +580,10 @@ class CompanionStore: ObservableObject {
             stats: oldBones.stats
         )
         companion = Companion(bones: newBones, soul: companion.soul)
-        // Persist the species override
         UserDefaults.standard.set(newSpecies.rawValue, forKey: "companion.speciesOverride")
-        logger.info("Species changed to \(newSpecies.rawValue)", source: "store")
+        refreshProgressionState()
+        logger.info("Species changed to \(newSpecies.rawValue) (cost: \(cost) XP, change #\(count))", source: "store")
+        return true
     }
 
     /// Wipes the current soul and creates a fresh one. Bones revert to the original machine-tied roll.
@@ -536,6 +592,8 @@ class CompanionStore: ObservableObject {
         UserDefaults.standard.removeObject(forKey: petCountKey)
         UserDefaults.standard.removeObject(forKey: "companion.lastGreetedDay")
         UserDefaults.standard.removeObject(forKey: "companion.speciesOverride")
+        UserDefaults.standard.removeObject(forKey: "companion.speciesChangeCount")
+        UserDefaults.standard.removeObject(forKey: "companion.lastSpeciesChange")
         UserDefaults.standard.removeObject(forKey: "onboarding.xpSeen")
         UserDefaults.standard.removeObject(forKey: "onboarding.cosmeticsSeen")
         petCount = 0

@@ -305,6 +305,10 @@ enum Strings {
     static var atlasChangeConfirmOK: String { L("atlas.change.confirm.ok") }
     static func atlasChangeLocked(_ level: Int) -> String { L("atlas.change.locked", level) }
     static var atlasChangeHint: String { L("atlas.change.hint") }
+    static func atlasChangeConfirmCostBody(_ species: String, _ cost: Int) -> String { L("atlas.change.confirm.cost.body", species, cost) }
+    static func atlasChangeCost(_ cost: Int) -> String { L("atlas.change.cost", cost) }
+    static func atlasChangeCooldown(_ hours: Int) -> String { L("atlas.change.cooldown", hours) }
+    static var resetPoints: String { L("progression.reset.points") }
 
     // Onboarding
     static var onboardingXP: String { L("onboarding.xp") }

@@ -118,33 +118,49 @@ struct SpeciesAtlasView: View {
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(Color(hex: previewRarity.color))
 
-            // Species change button (level 5+)
+            // Species change button (level 5+, costs XP, 24h cooldown)
             if let store, species != currentSpecies {
                 if store.level >= 5 {
-                    Button(action: { showingChangeConfirm = true }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(.system(size: 10))
-                            Text(Strings.atlasChangeSpecies)
-                                .font(.system(size: 11, weight: .medium))
+                    VStack(spacing: 4) {
+                        Button(action: { showingChangeConfirm = true }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 10))
+                                Text(Strings.atlasChangeSpecies)
+                                    .font(.system(size: 11, weight: .medium))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(store.canChangeSpecies ? Color.accentColor.opacity(0.12) : Color.secondary.opacity(0.08))
+                            )
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.accentColor.opacity(0.12))
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.accentColor)
-                    .alert(Strings.atlasChangeConfirmTitle, isPresented: $showingChangeConfirm) {
-                        Button(Strings.atlasChangeConfirmOK) {
-                            store.changeSpecies(to: species)
-                            dismiss()
+                        .buttonStyle(.plain)
+                        .foregroundColor(store.canChangeSpecies ? .accentColor : .secondary)
+                        .disabled(!store.canChangeSpecies)
+                        .alert(Strings.atlasChangeConfirmTitle, isPresented: $showingChangeConfirm) {
+                            Button(Strings.atlasChangeConfirmOK) {
+                                store.changeSpecies(to: species)
+                                dismiss()
+                            }
+                            Button(Strings.renameCancel, role: .cancel) {}
+                        } message: {
+                            Text(Strings.atlasChangeConfirmCostBody(species.localizedName, store.speciesChangeCost))
                         }
-                        Button(Strings.renameCancel, role: .cancel) {}
-                    } message: {
-                        Text(Strings.atlasChangeConfirmBody(species.localizedName))
+
+                        // Cost and cooldown info
+                        HStack(spacing: 8) {
+                            Text(Strings.atlasChangeCost(store.speciesChangeCost))
+                                .font(.system(size: 8, design: .monospaced))
+                                .foregroundColor(store.totalXP >= store.speciesChangeCost ? .secondary : .red)
+                            if store.speciesChangeOnCooldown {
+                                let hours = Int(store.speciesChangeCooldownRemaining / 3600)
+                                Text(Strings.atlasChangeCooldown(hours))
+                                    .font(.system(size: 8, design: .monospaced))
+                                    .foregroundColor(.orange)
+                            }
+                        }
                     }
                 } else {
                     Text(Strings.atlasChangeLocked(5))
