@@ -66,7 +66,7 @@ enum CosmeticRarity: String, CaseIterable, Codable {
 
 // MARK: - Sprite Modifier
 
-/// Describes how a cosmetic item modifies the ASCII sprite.
+/// Describes how a cosmetic item modifies the ASCII sprite and behavior.
 struct SpriteModifier: Codable, Equatable {
     /// For hats: the hat line (12 chars). For others: decoration strings.
     var hatLine: String?
@@ -81,6 +81,15 @@ struct SpriteModifier: Codable, Equatable {
     /// Frame: characters placed around the sprite.
     var frameLeft: String?
     var frameRight: String?
+
+    // MARK: - Behavioral modifiers (enriched cosmetics)
+
+    /// Exclusive quips that become available when this item is equipped.
+    var exclusiveQuips: [String]?
+    /// Speech line shown when the item is first equipped.
+    var equipAnnouncement: String?
+    /// Custom idle animation sequence (overrides default). -1 = blink.
+    var idleSequenceOverride: [Int]?
 }
 
 // MARK: - Cosmetic Inventory
@@ -158,6 +167,28 @@ final class CosmeticSystem {
 
     func allEquippedModifiers() -> SpriteModifier {
         cachedModifier
+    }
+
+    /// All exclusive quips from currently equipped items.
+    func equippedExclusiveQuips() -> [String] {
+        CosmeticSlot.allCases.compactMap { equippedItem(for: $0) }
+            .flatMap { $0.spriteModifier.exclusiveQuips ?? [] }
+    }
+
+    /// Equip announcement from the most recently equipped item (if any).
+    func equipAnnouncement(for item: CosmeticItem) -> String? {
+        item.spriteModifier.equipAnnouncement
+    }
+
+    /// Custom idle sequence from equipped items (first one found wins).
+    func equippedIdleSequence() -> [Int]? {
+        for slot in CosmeticSlot.allCases {
+            if let item = equippedItem(for: slot),
+               let seq = item.spriteModifier.idleSequenceOverride {
+                return seq
+            }
+        }
+        return nil
     }
 
     private func rebuildModifierCache() {
@@ -331,23 +362,35 @@ enum CosmeticCatalog {
         CosmeticItem(id: "hat_halo", slot: .hat, name: "cosmetic.hat.halo", rarity: .rare,
                      spriteModifier: SpriteModifier(hatLine: "   (   )    "), unlockLevel: 0),
         CosmeticItem(id: "hat_wizard", slot: .hat, name: "cosmetic.hat.wizard", rarity: .epic,
-                     spriteModifier: SpriteModifier(hatLine: "    /^\\     "), unlockLevel: 1),
+                     spriteModifier: SpriteModifier(hatLine: "    /^\\     ",
+                        exclusiveQuips: ["*casts a tiny spell*", "*adjusts wizard hat*", "magic is real."],
+                        equipAnnouncement: "*puts on wizard hat* I feel powerful."), unlockLevel: 1),
         CosmeticItem(id: "hat_beanie", slot: .hat, name: "cosmetic.hat.beanie", rarity: .common,
                      spriteModifier: SpriteModifier(hatLine: "   (___)    "), unlockLevel: 0),
         CosmeticItem(id: "hat_tinyduck", slot: .hat, name: "cosmetic.hat.tinyduck", rarity: .legendary,
-                     spriteModifier: SpriteModifier(hatLine: "    ,>      "), unlockLevel: 2),
+                     spriteModifier: SpriteModifier(hatLine: "    ,>      ",
+                        exclusiveQuips: ["quack says my hat.", "*the tiny duck quacks*", "two of us now.", "the duck judges you."],
+                        equipAnnouncement: "*a tiny duck lands on my head* we are one.",
+                        idleSequenceOverride: [0, 0, 1, 0, 0, -1, 0, 2, 0, 1, 0, 0, -1, 0, 0, 2, 0, 0]), unlockLevel: 2),
         CosmeticItem(id: "hat_pirate", slot: .hat, name: "cosmetic.hat.pirate", rarity: .epic,
-                     spriteModifier: SpriteModifier(hatLine: "  ~[===]~   "), unlockLevel: 3),
+                     spriteModifier: SpriteModifier(hatLine: "  ~[===]~   ",
+                        exclusiveQuips: ["arr!", "*scans the horizon*", "treasure somewhere…"],
+                        equipAnnouncement: "arr! pirate mode activated."), unlockLevel: 3),
         CosmeticItem(id: "hat_antenna", slot: .hat, name: "cosmetic.hat.antenna", rarity: .uncommon,
                      spriteModifier: SpriteModifier(hatLine: "     !      "), unlockLevel: 1),
         CosmeticItem(id: "hat_flower", slot: .hat, name: "cosmetic.hat.flower", rarity: .rare,
                      spriteModifier: SpriteModifier(hatLine: "    @}      "), unlockLevel: 2),
         CosmeticItem(id: "hat_chef", slot: .hat, name: "cosmetic.hat.chef", rarity: .epic,
-                     spriteModifier: SpriteModifier(hatLine: "   /===\\    "), unlockLevel: 4),
+                     spriteModifier: SpriteModifier(hatLine: "   /===\\    ",
+                        exclusiveQuips: ["*stirs something*", "bon appetit!", "needs more salt."],
+                        equipAnnouncement: "*puts on chef hat* now we're cooking."), unlockLevel: 4),
         CosmeticItem(id: "hat_party", slot: .hat, name: "cosmetic.hat.party", rarity: .rare,
                      spriteModifier: SpriteModifier(hatLine: "    /\\*     "), unlockLevel: 3),
         CosmeticItem(id: "hat_ninja", slot: .hat, name: "cosmetic.hat.ninja", rarity: .legendary,
-                     spriteModifier: SpriteModifier(hatLine: "   =====    "), unlockLevel: 6),
+                     spriteModifier: SpriteModifier(hatLine: "   =====    ",
+                        exclusiveQuips: ["*vanishes*", "…", "*appears behind you*", "silent and deadly."],
+                        equipAnnouncement: "*ties ninja band* I am shadow.",
+                        idleSequenceOverride: [0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, -1, 0, 2, 0, 0, 0, 0, 0]), unlockLevel: 6),
     ]
 
     // MARK: - Eye Items
