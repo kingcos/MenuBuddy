@@ -508,6 +508,8 @@
 
 /* 设置 — 成长 */
 "settings.section.progression" = "成长";
+"settings.progression.enable" = "启用成长与装扮系统";
+"settings.progression.enable.desc" = "升级、获得属性点、收集装扮物品，自定义伙伴外观。";
 "settings.progression.points" = "可用点数";
 "settings.progression.slots" = "装扮槽位";
 

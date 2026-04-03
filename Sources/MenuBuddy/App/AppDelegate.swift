@@ -109,8 +109,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let seqIdx = barTickIndex % idleSequence.count
         let isBlink = idleSequence[seqIdx] < 0
 
-        // Trigger eye override takes priority, then cosmetic eye, then default
-        let cosmeticEye = store.cosmetics.allEquippedModifiers().eyeChar
+        // Trigger eye override takes priority, then cosmetic eye (if enabled), then default
+        let cosmeticEye = store.progressionEnabled ? store.cosmetics.allEquippedModifiers().eyeChar : nil
         let effectiveEyeOverride = store.triggerEyeOverride ?? cosmeticEye
         let face = renderFace(bones: store.companion.bones, blink: isBlink, eyeOverride: effectiveEyeOverride)
         let shinyPrefix = store.companion.shiny ? "✨" : ""
@@ -180,7 +180,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.length = NSStatusItem.variableLength
         }
 
-        button.toolTip = Strings.tooltipWithLevel(store.companion.name, store.companion.species.localizedName, store.level)
+        if store.progressionEnabled {
+            button.toolTip = Strings.tooltipWithLevel(store.companion.name, store.companion.species.localizedName, store.level)
+        } else {
+            button.toolTip = Strings.tooltip(store.companion.name, store.companion.species.localizedName)
+        }
     }
 
     // MARK: - Popover
@@ -231,9 +235,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let name = store.companion.name
         let speciesName = store.companion.species.localizedName
 
-        // Companion identity header with level
+        // Companion identity header (with level if progression enabled)
+        let levelSuffix = store.progressionEnabled ? " · Lv.\(store.level)" : ""
         let headerItem = NSMenuItem(
-            title: "\(store.companion.rarity.stars) \(name)（\(speciesName)）· Lv.\(store.level)",
+            title: "\(store.companion.rarity.stars) \(name)（\(speciesName)）\(levelSuffix)",
             action: nil,
             keyEquivalent: ""
         )

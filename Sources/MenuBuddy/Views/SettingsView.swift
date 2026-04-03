@@ -84,6 +84,18 @@ struct SettingsView: View {
             sectionLabel(Strings.settingsSectionProgression)
             card {
                 row {
+                    Toggle(isOn: $store.progressionEnabled) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(Strings.settingsProgressionEnable)
+                            Text(Strings.settingsProgressionEnableDesc)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                if store.progressionEnabled {
+                divider
+                row {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 6) {
@@ -140,6 +152,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                } // end if progressionEnabled
             }
         }
     }

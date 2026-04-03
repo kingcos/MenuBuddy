@@ -350,6 +350,8 @@ enum Strings {
 
     // Settings — Progression
     static var settingsSectionProgression: String { L("settings.section.progression") }
+    static var settingsProgressionEnable: String { L("settings.progression.enable") }
+    static var settingsProgressionEnableDesc: String { L("settings.progression.enable.desc") }
     static var settingsProgressionPoints: String { L("settings.progression.points") }
     static var settingsProgressionSlots: String { L("settings.progression.slots") }
 }

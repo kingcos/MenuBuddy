@@ -508,6 +508,8 @@
 
 /* Settings — Progression */
 "settings.section.progression" = "Progression";
+"settings.progression.enable" = "Enable Progression & Cosmetics";
+"settings.progression.enable.desc" = "Level up, earn attribute points, collect cosmetic items, and customize your buddy's appearance.";
 "settings.progression.points" = "points";
 "settings.progression.slots" = "Cosmetic Slots";
 

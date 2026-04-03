@@ -32,7 +32,7 @@ struct PopoverView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 4)
             Divider()
-            StatsView(stats: companion.stats, store: store)
+            StatsView(stats: companion.stats, store: store.progressionEnabled ? store : nil)
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
@@ -173,11 +173,13 @@ struct PopoverView: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    // Level badge
                     HStack(spacing: 3) {
-                        Text("Lv.\(store.level)")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(hex: companion.rarity.color))
+                        // Level badge (only when progression enabled)
+                        if store.progressionEnabled {
+                            Text("Lv.\(store.level)")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(hex: companion.rarity.color))
+                        }
                         Text(companion.rarity.stars)
                             .font(.system(size: 10))
                             .foregroundColor(Color(hex: companion.rarity.color))
@@ -191,8 +193,10 @@ struct PopoverView: View {
                     .help(Strings.menuRename(companion.name))
                 }
             }
-            // XP progress bar
-            xpProgressBar
+            // XP progress bar (only when progression enabled)
+            if store.progressionEnabled {
+                xpProgressBar
+            }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -245,7 +249,7 @@ struct PopoverView: View {
                 bones: companion.bones,
                 frame: engine.currentFrame,
                 blink: engine.isBlink,
-                cosmeticModifier: store.cosmetics.allEquippedModifiers()
+                cosmeticModifier: store.progressionEnabled ? store.cosmetics.allEquippedModifiers() : nil
             )
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
@@ -293,13 +297,15 @@ struct PopoverView: View {
             .buttonStyle(.plain)
             .help(Strings.menuSettings)
 
-            Button(action: { showingCosmetics = true }) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+            if store.progressionEnabled {
+                Button(action: { showingCosmetics = true }) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help(Strings.cosmeticsTitle)
             }
-            .buttonStyle(.plain)
-            .help(Strings.cosmeticsTitle)
 
             Button(action: { showingAtlas = true }) {
                 Image(systemName: "square.grid.2x2")

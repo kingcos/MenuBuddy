@@ -18,6 +18,11 @@ class CompanionStore: ObservableObject {
     /// Cosmetic system — manages inventory and equipped items.
     let cosmetics = CosmeticSystem.shared
 
+    /// Master toggle for v2 progression + cosmetics systems. Default OFF.
+    @Published var progressionEnabled: Bool {
+        didSet { UserDefaults.standard.set(progressionEnabled, forKey: "companion.progressionEnabled") }
+    }
+
     /// Published so UI can react to progression changes.
     @Published private(set) var level: Int = 0
     @Published private(set) var levelProgress: Double = 0
@@ -197,6 +202,7 @@ class CompanionStore: ObservableObject {
         menuBarTwoLine = UserDefaults.standard.object(forKey: "companion.menuBarTwoLine") as? Bool ?? true
         chattyMode = UserDefaults.standard.bool(forKey: "companion.chattyMode")
         repeatTriggers = UserDefaults.standard.object(forKey: "companion.repeatTriggers") as? Bool ?? true
+        progressionEnabled = UserDefaults.standard.bool(forKey: "companion.progressionEnabled")
         loggingEnabled = UserDefaults.standard.bool(forKey: "companion.loggingEnabled")
         dndEnabled = UserDefaults.standard.bool(forKey: "companion.dndEnabled")
         dndFrom = UserDefaults.standard.object(forKey: "companion.dndFrom") as? Int ?? 22
@@ -252,8 +258,8 @@ class CompanionStore: ObservableObject {
         // Sync progression state to published properties
         refreshProgressionState()
 
-        // Claim daily XP on launch
-        if let info = progression.claimDailyXP() {
+        // Claim daily XP on launch (only if progression enabled)
+        if progressionEnabled, let info = progression.claimDailyXP() {
             pendingLevelUp = info
         }
     }
@@ -366,24 +372,27 @@ class CompanionStore: ObservableObject {
         petCount += 1
         UserDefaults.standard.set(petCount, forKey: petCountKey)
 
-        // Grant petting XP
-        let levelUp = progression.grantXP(.pet, source: "pet")
-        if let levelUp { handleLevelUp(levelUp) }
-        refreshProgressionState()
+        if progressionEnabled {
+            // Grant petting XP
+            let levelUp = progression.grantXP(.pet, source: "pet")
+            if let levelUp { handleLevelUp(levelUp) }
+            refreshProgressionState()
 
-        // Check for random cosmetic drop (5% chance per pet)
-        if Double.random(in: 0...1) < 0.05 {
-            if let drop = cosmetics.rollRandomDrop(level: progression.level) {
-                cosmetics.addItem(drop)
-                pendingCosmeticDrops.append(drop)
+            // Check for random cosmetic drop (5% chance per pet)
+            if Double.random(in: 0...1) < 0.05 {
+                if let drop = cosmetics.rollRandomDrop(level: progression.level) {
+                    cosmetics.addItem(drop)
+                    pendingCosmeticDrops.append(drop)
+                }
             }
         }
 
         if let milestone = milestoneMessage(for: petCount) {
-            // Bonus XP for milestones
-            let mlUp = progression.grantXP(.milestone, source: "milestone.\(petCount)")
-            if let mlUp { handleLevelUp(mlUp) }
-            refreshProgressionState()
+            if progressionEnabled {
+                let mlUp = progression.grantXP(.milestone, source: "milestone.\(petCount)")
+                if let mlUp { handleLevelUp(mlUp) }
+                refreshProgressionState()
+            }
             return milestone
         }
         return nil
@@ -423,6 +432,7 @@ class CompanionStore: ObservableObject {
 
     /// Grant XP for trigger events.
     func grantTriggerXP() {
+        guard progressionEnabled else { return }
         let levelUp = progression.grantXP(.triggerEvent, source: "trigger")
         if let levelUp { handleLevelUp(levelUp) }
         refreshProgressionState()
@@ -430,6 +440,7 @@ class CompanionStore: ObservableObject {
 
     /// Grant XP for LLM reactions.
     func grantLLMXP() {
+        guard progressionEnabled else { return }
         let levelUp = progression.grantXP(.llmReaction, source: "llm")
         if let levelUp { handleLevelUp(levelUp) }
         refreshProgressionState()
@@ -437,6 +448,7 @@ class CompanionStore: ObservableObject {
 
     /// Grant XP for app context switches.
     func grantAppContextXP() {
+        guard progressionEnabled else { return }
         let levelUp = progression.grantXP(.appContext, source: "appContext")
         if let levelUp { handleLevelUp(levelUp) }
         refreshProgressionState()
