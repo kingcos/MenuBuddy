@@ -72,6 +72,9 @@ final class AnimationEngine: ObservableObject {
     private var workspaceObserver: NSObjectProtocol?
     private var lastContextBundleId: String = ""
 
+    /// Active idle sequence — default or overridden by cosmetic items.
+    private var activeIdleSequence: [Int] = idleSequence
+
     /// Called when a pet is triggered; returns optional milestone message.
     var onPet: (() -> String?)? = nil
     /// Called after pet to request an AI reaction (async, replaces speech when ready).
@@ -79,19 +82,23 @@ final class AnimationEngine: ObservableObject {
     /// Called when user switches to a recognized app (grants XP).
     var onAppContextSwitch: (() -> Void)? = nil
 
-    var currentSequenceIndex: Int { tickIndex % idleSequence.count }
+    var currentSequenceIndex: Int { tickIndex % activeIdleSequence.count }
     var currentFrame: Int {
-        let f = idleSequence[currentSequenceIndex]
+        let f = activeIdleSequence[currentSequenceIndex]
         return f < 0 ? 0 : f
     }
-    var isBlink: Bool { idleSequence[currentSequenceIndex] < 0 }
+    var isBlink: Bool { activeIdleSequence[currentSequenceIndex] < 0 }
     var speechFading: Bool { (bubbleShowTicks - speechTick) <= fadeWindowTicks }
 
-    func start(muted: Bool, chattyMode: Bool, species: Species, isFirstLaunch: Bool, companionName: String) {
+    func start(muted: Bool, chattyMode: Bool, species: Species, isFirstLaunch: Bool, companionName: String,
+               cosmeticQuips: [String] = [], cosmeticIdleSequence: [Int]? = nil) {
         isMuted = muted
         chatty = chattyMode
         self.species = species
-        quipDeck = QuipDeck(source: { quipsFor(species: species) })
+        activeIdleSequence = cosmeticIdleSequence ?? idleSequence
+        // Mix cosmetic exclusive quips into the regular quip pool
+        let extraQuips = cosmeticQuips
+        quipDeck = QuipDeck(source: { quipsFor(species: species) + extraQuips })
         guard mainTimer == nil else { return } // already running
         mainTimer = Timer.scheduledTimer(withTimeInterval: tickInterval, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.tick() }

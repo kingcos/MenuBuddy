@@ -55,12 +55,17 @@ struct PopoverView: View {
                 guard let quip = event.quips.randomElement() else { return }
                 engine?.showSpeech(quip)
             }
+            // Gather cosmetic behavioral modifiers (only if progression enabled)
+            let cosmeticQuips = store.progressionEnabled ? store.cosmetics.equippedExclusiveQuips() : []
+            let cosmeticIdle = store.progressionEnabled ? store.cosmetics.equippedIdleSequence() : nil
             engine.start(
                 muted: store.muted,
                 chattyMode: store.chattyMode,
                 species: companion.species,
                 isFirstLaunch: store.isFirstLaunch,
-                companionName: companion.name
+                companionName: companion.name,
+                cosmeticQuips: cosmeticQuips,
+                cosmeticIdleSequence: cosmeticIdle
             )
             // Check for pending level-up
             if let info = store.consumeLevelUp() {

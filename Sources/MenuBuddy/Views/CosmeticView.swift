@@ -11,6 +11,7 @@ struct CosmeticView: View {
     @State private var showingCreator = false
     @State private var importResult: String?
     @State private var onboardingMessage: String?
+    @State private var equipMessage: String?
     @State private var customHatName = ""
     @State private var customHatLine = ""
 
@@ -102,6 +103,15 @@ struct CosmeticView: View {
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundColor(companion.shiny ? Color(hex: "#f59e0b") : Color(hex: companion.rarity.color))
                 }
+            }
+            // Equip announcement speech bubble
+            if let msg = equipMessage {
+                Text(msg)
+                    .font(.system(size: 10, design: .monospaced))
+                    .italic()
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity)
@@ -197,8 +207,13 @@ struct CosmeticView: View {
         return Button(action: {
             if isEquipped {
                 cosmetics.unequip(item.slot)
+                equipMessage = nil
             } else {
                 cosmetics.equip(item)
+                // Show equip announcement if the item has one
+                if let announcement = cosmetics.equipAnnouncement(for: item) {
+                    equipMessage = announcement
+                }
             }
             store.objectWillChange.send()
         }) {
