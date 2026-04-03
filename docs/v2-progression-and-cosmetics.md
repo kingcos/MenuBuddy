@@ -49,6 +49,7 @@ v2 adds two interconnected systems that reward continued use of MenuBuddy:
 - Progressive disclosure — features unlock gradually as the user levels up
 - Pluggable — cosmetic items are data-driven, easy to extend
 - Reversible — full reset returns everything to initial state
+- **Opt-in** — master toggle in Settings, **default OFF**. Users who prefer the classic experience are unaffected
 
 ---
 
@@ -137,6 +138,31 @@ Cosmetic slots unlock at specific levels:
 | 8 | Frame |
 
 Locked slots appear greyed out with a lock icon and "Lv.N" label in the dress-up UI.
+
+### Anti-Cheat
+
+| Mechanism | Value | Notes |
+|-----------|-------|-------|
+| **Daily XP cap** | 200 XP/day | Daily login bonus (20 XP) is exempt |
+| **Pet cooldown** | 2 seconds | Prevents spam-clicking |
+| **Trigger cooldown** | 10 seconds | Matches system monitor poll rate |
+| **App switch cooldown** | 30 seconds | Prevents rapid alt-tab farming |
+| **LLM cooldown** | 15 seconds | Prevents API spam |
+
+- XP grants during cooldown are **silently rejected** (no XP, no event)
+- XP that would exceed the daily cap is **clamped** to remaining allowance
+- Daily tracking resets automatically at midnight (calendar day boundary)
+- Cooldowns are in-memory only (reset on app relaunch — intentional leniency)
+
+### Global Toggle
+
+The entire progression + cosmetics system is behind a master switch:
+
+- **Settings → Progression → "Enable Progression & Cosmetics"**
+- **Default: OFF** — new users get the classic experience
+- When OFF: no XP granted, level/XP bar hidden, cosmetics button hidden, stats show base values only, sprites render without cosmetic modifiers
+- When ON: full v2 experience
+- Toggle persisted in UserDefaults (`companion.progressionEnabled`)
 
 ---
 
@@ -248,6 +274,45 @@ The **menu bar face** (`renderFace()`) also respects cosmetic eyes:
 - Cosmetic eyes suppress blink flicker
 
 **Performance:** The combined `SpriteModifier` is cached and rebuilt only on equip/unequip, not every render frame.
+
+### Behavioral Modifiers (Enriched Cosmetics)
+
+Beyond visual changes, Epic and Legendary items carry **behavioral modifiers** that affect how the companion acts:
+
+| Field | Type | Effect |
+|-------|------|--------|
+| `exclusiveQuips` | `[String]?` | Item-specific speech lines mixed into the quip rotation |
+| `equipAnnouncement` | `String?` | One-time speech shown when the item is first equipped |
+| `idleSequenceOverride` | `[Int]?` | Custom animation pattern replacing the default idle loop |
+
+**Items with behavioral modifiers:**
+
+| Item | Rarity | Quips | Announcement | Idle Override |
+|------|--------|-------|--------------|---------------|
+| Wizard Hat | Epic | 3 magic quips | "I feel powerful" | — |
+| Tiny Duck | Legendary | 4 duck quips | "we are one" | Faster, more active |
+| Pirate Hat | Epic | 3 pirate quips | "pirate mode activated" | — |
+| Chef Hat | Epic | 3 cooking quips | "now we're cooking" | — |
+| Ninja Band | Legendary | 4 stealth quips | "I am shadow" | Slower, stealthy |
+
+Behavioral modifiers are wired into `AnimationEngine`:
+- Exclusive quips are appended to the shuffled quip deck source
+- Idle sequence overrides replace `idleSequence` for frame/blink calculations
+- Equip announcements appear as speech bubbles in the CosmeticView preview
+
+---
+
+## Update Checker
+
+**File:** `Sources/MenuBuddy/System/UpdateChecker.swift`
+
+Checks GitHub Releases API for new versions:
+
+- **Two channels:** stable (releases only) and beta (includes pre-releases)
+- **Semantic version comparison:** major.minor.patch
+- **Download & install:** downloads DMG to `~/Downloads`, opens it for drag-to-install
+- **UI in Settings:** "Updates" section with beta toggle, check button, progress bar
+- **Context menu:** "Check for Updates…" item with alert-based flow
 
 ---
 
